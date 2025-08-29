@@ -1,18 +1,13 @@
-diff --git a//dev/null b/vercel.json
-index 0000000000000000000000000000000000000000..8a5f354cf97030865427898570eac6b7af75306d 100644
---- a//dev/null
-+++ b/vercel.json
-@@ -0,0 +1,13 @@
-+{
-+  "headers": [
-+    {
-+      "source": "/(.*)",
-+      "headers": [
-+        {
-+          "key": "Content-Security-Policy",
-+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval';"
-+        }
-+      ]
-+    }
-+  ]
-+}
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval';"
+        }
+      ]
+    }
+  ]
+}
