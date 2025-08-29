@@ -1,6 +1,7 @@
 {
-  "name": "xr-home-chat",
+  "name": "xr-codelabs",
   "version": "1.0.0",
-  "private": true,
-  "type": "module"
+  "scripts": {
+    "test": "node your-test-runner.js"
+  }
 }
