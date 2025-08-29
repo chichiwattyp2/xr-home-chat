@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/chat.js": {
+      "runtime": "edge"
+    },
+    "api/realtime-token.js": {
+      "runtime": "edge"
+    }
+  }
+}
