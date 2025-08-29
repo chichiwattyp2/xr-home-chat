@@ -15,14 +15,15 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'POST required' }), { status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
   }
 
-  let body; try { body = await req.json(); } catch {}
+  let body = {};
+  try { body = await req.json(); } catch {}
   const prompt = body?.prompt;
   const system = body?.system;
   if (!prompt) return new Response(JSON.stringify({ error: 'Missing prompt' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
 
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL_TEXT || 'gpt-4o-mini';
-  if (!apiKey) return new Response('Missing OPENAI_API_KEY', { status: 500, headers: corsHeaders(origin) });
+  if (!apiKey) return new Response(JSON.stringify({ error: 'Missing OPENAI_API_KEY' }), { status: 500, headers: corsHeaders(origin) });
 
   const inputString = (system ? `System: ${system}\n\n` : '') + `User: ${prompt}`;
 
@@ -32,10 +33,18 @@ export default async function handler(req) {
     body: JSON.stringify({ model, input: inputString, stream: true })
   });
 
-  const status = upstream.status;
-  if (!upstream.body) {
+  // If upstream failed, read its body as text and return that (so you see the JSON error)
+  if (!upstream.ok) {
     const txt = await upstream.text();
-    return new Response(txt || 'No body from upstream', { status, headers: corsHeaders(origin) });
+    return new Response(txt || JSON.stringify({ error: 'Upstream error', status: upstream.status }), {
+      status: upstream.status,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
+    });
   }
-  return new Response(upstream.body, { status, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', ...corsHeaders(origin) } });
+
+  // OK: pass through the stream
+  return new Response(upstream.body, {
+    status: upstream.status,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', ...corsHeaders(origin) }
+  });
 }
