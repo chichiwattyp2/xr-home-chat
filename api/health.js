@@ -1,3 +1,4 @@
+// /api/health.js
 export const config = { runtime: 'edge' };
 
 export default async function handler() {
@@ -14,4 +15,3 @@ export default async function handler() {
     }
   }), { headers: { 'Content-Type': 'application/json' } });
 }
-
