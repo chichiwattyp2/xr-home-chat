@@ -2,6 +2,6 @@
   "name": "xr-codelabs",
   "version": "1.0.0",
   "scripts": {
-    "test": "node your-test-runner.js"
+    "test": "node tests/your-test-runner.js"
   }
 }

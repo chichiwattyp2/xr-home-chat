@@ -93,7 +93,12 @@ async function startVoice() {
   const ws = new WebSocket(baseUrl, [
     'realtime',
     'openai-insecure-api-key.' + EPHEMERAL_KEY,
+    // WebSocket subprotocol tokens must be valid HTTP tokens, so
+    // base64url-encode the SDP to avoid `+`, `/`, or `=` characters.
     'openai-sdp.' + btoa(pc.localDescription.sdp)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')
   ]);
 
   ws.onmessage = async (event) => {

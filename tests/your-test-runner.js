@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const testsDir = path.join(__dirname, 'tests');
-const testFiles = fs.readdirSync(testsDir).filter(file => file.endsWith('.js'));
+const testsDir = __dirname;
+const testFiles = fs.readdirSync(testsDir)
+  .filter(file => file.endsWith('.js') && file !== 'your-test-runner.js');
 
 let passed = 0;
 
