@@ -1,4 +1,3 @@
-Absolutely — here’s a **cool, polished README.md** you can drop into your repo. It explains what your project is, how to run it, and adds a little flair:
 
 ---
 
@@ -85,5 +84,3 @@ Built as a **sandbox** to explore conversational XR experiences. 🚀
 💡 *Imagine a future where VR spaces have native AI companions floating right beside you — this is a first step.*
 
 ---
-
-Would you like me to also add some **badges** (like “Deploy to Vercel” or “Made with A-Frame”) at the top to give it that GitHub shine?
