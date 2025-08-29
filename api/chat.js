@@ -33,7 +33,6 @@ export default async function handler(req) {
     body: JSON.stringify({ model, input: inputString, stream: true })
   });
 
-  // If upstream failed, read its body as text and return that (so you see the JSON error)
   if (!upstream.ok) {
     const txt = await upstream.text();
     return new Response(txt || JSON.stringify({ error: 'Upstream error', status: upstream.status }), {
@@ -42,7 +41,6 @@ export default async function handler(req) {
     });
   }
 
-  // OK: pass through the stream
   return new Response(upstream.body, {
     status: upstream.status,
     headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', ...corsHeaders(origin) }
