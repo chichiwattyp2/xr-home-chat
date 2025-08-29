@@ -23,30 +23,16 @@ export default async function handler(req) {
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL_REALTIME || 'gpt-4o-realtime-preview';
   if (!apiKey) {
-    return new Response('Missing OPENAI_API_KEY', { status: 500, headers: corsHeaders(origin) });
+    return new Response(JSON.stringify({ error: 'Missing OPENAI_API_KEY' }), { status: 500, headers: corsHeaders(origin) });
   }
 
   const r = await fetch('https://api.openai.com/v1/realtime/sessions', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model,
-      voice: 'alloy',
-      input_audio_format: 'pcm16',
-      output_audio_format: 'pcm16'
-    })
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, voice: 'alloy', input_audio_format: 'pcm16', output_audio_format: 'pcm16' })
   });
 
-  if (!r.ok) {
-    const txt = await r.text();
-    return new Response(txt, { status: 500, headers: corsHeaders(origin) });
-  }
-
-  const data = await r.text();
-  return new Response(data, {
-    headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
-  });
+  const status = r.status;
+  const txt = await r.text();
+  return new Response(txt, { status, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
 }

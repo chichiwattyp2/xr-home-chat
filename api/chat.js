@@ -20,9 +20,8 @@ export default async function handler(req) {
     });
   }
 
-  let bodyText = await req.text();
   let body;
-  try { body = JSON.parse(bodyText || '{}'); } catch {}
+  try { body = await req.json(); } catch {}
   const prompt = body?.prompt;
   const system = body?.system;
   if (!prompt) {
@@ -35,35 +34,25 @@ export default async function handler(req) {
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL_TEXT || 'gpt-4o-mini';
   if (!apiKey) {
-    return new Response('Missing OPENAI_API_KEY', { status: 500, headers: corsHeaders(origin) });
+    return new Response(JSON.stringify({ error: 'Missing OPENAI_API_KEY' }), { status: 500, headers: corsHeaders(origin) });
   }
 
-  // Build a simple single-string input for Responses API to avoid role formatting mismatches.
   const inputString = (system ? `System: ${system}\n\n` : '') + `User: ${prompt}`;
 
   const upstream = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model,
-      input: inputString,
-      stream: true
-    })
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, input: inputString, stream: true })
   });
 
-  if (!upstream.ok || !upstream.body) {
+  // Pass through upstream status code and body to make debugging easier
+  const status = upstream.status;
+  if (!upstream.body) {
     const txt = await upstream.text();
-    return new Response(txt, { status: 500, headers: corsHeaders(origin) });
+    return new Response(txt || 'No body from upstream', { status, headers: corsHeaders(origin) });
   }
-
   return new Response(upstream.body, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-store',
-      ...corsHeaders(origin)
-    }
+    status,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', ...corsHeaders(origin) }
   });
 }
