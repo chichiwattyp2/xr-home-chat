@@ -3,6 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy"
+  content="default-src 'self' https: data: blob:;
+           img-src 'self' https: data: blob:;
+           media-src 'self' https: blob:;
+           connect-src 'self' https: wss:;
+           script-src 'self' https: 'unsafe-eval' 'wasm-unsafe-eval';
+           style-src 'self' 'unsafe-inline' https:;
+           worker-src 'self' blob:">
   <title>XR Home Chat</title>
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <style>
