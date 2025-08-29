@@ -1,6 +1,7 @@
 {
   "name": "xr-codelabs",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "test": "node tests/your-test-runner.js"
   }
