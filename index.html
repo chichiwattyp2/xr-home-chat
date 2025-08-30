@@ -9,6 +9,52 @@
   <title>XR Home Chat</title>
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <link rel="icon" href="data:," />
+
+  <script>
+      // --- Curved panel ---
+      AFRAME.registerComponent('curved-panel',{
+        schema:{ radius:{default:2}, height:{default:1.2}, thetaLength:{default:100}, thetaStart:{default:-50}},
+        init(){
+          const d=this.data;
+          this.el.setAttribute('geometry', `primitive: cylinder; radius:${d.radius}; height:${d.height}; openEnded:true; thetaLength:${d.thetaLength}; thetaStart:${d.thetaStart}; thetaSegments:64`);
+          this.el.setAttribute('material','color:#1e293b; side:double; roughness:1; opacity:0.98');
+          const r=this.el.getAttribute('rotation')||{x:0,y:0,z:0};
+          this.el.setAttribute('rotation', `${r.x||0} ${(r.y||0)+180} ${r.z||0}`);
+        }
+      });
+
+      // --- Arc layout for children ---
+      AFRAME.registerComponent('curved-layout',{
+        schema:{ radius:{default:1.8}, thetaStart:{default:-40}, thetaLength:{default:80}, y:{default:1.1}, spacingY:{default:0} },
+        update(){ this.layout(); }, init(){ this.layout(); },
+        layout(){
+          const kids=[...this.el.children]; if(!kids.length) return;
+          const step = kids.length>1 ? this.data.thetaLength/(kids.length-1) : 0;
+          kids.forEach((k,i)=>{
+            const a = AFRAME.THREE.MathUtils.degToRad(this.data.thetaStart + i*step);
+            const x = this.data.radius * Math.sin(a);
+            const z = -this.data.radius * Math.cos(a);
+            const y = this.data.y + (i*this.data.spacingY);
+            k.setAttribute('position', `${x} ${y} ${z}`);
+            k.object3D.lookAt(new AFRAME.THREE.Vector3(0,y,0));
+          });
+        }
+      });
+
+      // --- Simple button ---
+      AFRAME.registerComponent('ui-button',{
+        schema:{ label:{default:'Button'}, color:{default:'#60a5fa'} },
+        init(){
+          const el=this.el, d=this.data;
+          el.classList.add('clickable');
+          el.setAttribute('geometry','primitive: box; width:0.34; height:0.12; depth:0.04');
+          el.setAttribute('material',`color:${d.color}; roughness:0.85`);
+          const t=document.createElement('a-text');
+          t.setAttribute('value', d.label); t.setAttribute('align','center'); t.setAttribute('width','1.2'); t.setAttribute('position','0 0 0.03');
+          el.appendChild(t);
+        }
+      });
+    </script>
   <style>
     html, body { margin:0; height:100%; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
     #ui { position:fixed; left:12px; right:12px; bottom:12px; display:flex; gap:8px; z-index: 2; background: rgba(16,18,24,.7); padding:10px; border-radius:12px; backdrop-filter: blur(6px); }
@@ -27,20 +73,34 @@
 
   <a-scene renderer="antialias: true">
     <a-entity position="0 1.6 -1.25" id="chatPanel">
-      <a-plane width="1.35" height="0.8" color="#111" material="opacity:0.9"></a-plane>
+     <a-entity id="curved-screen"
+                position="0 0 -2"
+                curved-panel="radius:2; height:1.2; thetaLength:100; thetaStart:-50">
+      </a-entity>
       <a-entity id="chatText"
                 text="value: Hello!; wrapCount: 40; color: #fff"
                 position="-0.62 0.28 0.01" scale="0.8 0.8 0.8"></a-entity>
       <a-entity id="hint"
                 text="value: Type below or press 🎤; wrapCount: 36; color: #9ad"
                 position="-0.62 -0.28 0.01" scale="0.6 0.6 0.6"></a-entity>
+
+       <a-entity id="arc-row" curved-layout="radius:1.7; thetaStart:-36; thetaLength:72; y:1.0">
+        <a-entity ui-button="label:Save; color:#3b82f6"></a-entity>
+        <a-entity ui-button="label:Alert; color:#f59e0b"></a-entity>
+        <a-entity ui-button="label:Theme; color:#10b981"></a-entity>
+      </a-entity>
     </a-entity>
 
     <a-entity>
-     <a-camera position="0 0.61552 3.03645" rotation="-2.9793805346802835 0.45836623610465876 0"></a-camera>
+     <a-camera position= "0 1 -3" rotation= "2.9793805346802835 0.45836623610465876 0"></a-camera>
+      <a-cursor></a-cursor>
     </a-entity>
 
     <a-sky color="#202531"></a-sky>
+   
+
+      <!-- Nicely spaced curved row of elements -->
+     
   </a-scene>
 
   <audio id="assistantAudio" autoplay></audio>
