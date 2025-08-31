@@ -1,8 +1,22 @@
 {
   "name": "xr-codelabs",
   "version": "1.0.0",
+  "description": "XR Home Chat – A-Frame + WebXR demo with AR chat overlay",
   "type": "module",
   "scripts": {
+    "dev": "vercel dev",
+    "build": "vercel build",
+    "start": "vercel dev",
     "test": "node tests/your-test-runner.js"
-  }
+  },
+  "keywords": [
+    "aframe",
+    "webxr",
+    "ar",
+    "vr",
+    "vercel",
+    "chat"
+  ],
+  "author": "Chris Watt-Pringle",
+  "license": "MIT"
 }
