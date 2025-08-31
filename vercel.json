@@ -1,10 +1,4 @@
 {
-  "name": "xr-codelabs",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "test": "node tests/your-test-runner.js"
-  },
   "headers": [
     {
       "source": "/(.*)",
@@ -13,10 +7,7 @@
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' 'unsafe-eval' https://aframe.io; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.openai.com wss://api.openai.com https://cdn.aframe.io; img-src 'self' data: https://cdn.aframe.io; font-src 'self' https://cdn.aframe.io;"
         },
-        {
-          "key": "Permissions-Policy",
-          "value": "xr-spatial-tracking=(self)"
-        }
+        { "key": "Permissions-Policy", "value": "xr-spatial-tracking=(self)" }
       ]
     }
   ]
