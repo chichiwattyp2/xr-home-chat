@@ -1,4 +1,3 @@
-// Hide the attached A-Frame entity while in AR; restore visibility on exit.
 if (window.AFRAME) {
   AFRAME.registerComponent('hide-on-ar', {
     init() {
