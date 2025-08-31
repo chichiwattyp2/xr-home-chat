@@ -26,6 +26,8 @@
 <!-- keep only if you use them -->
 <script src="/js/typer-component.js"></script>
 <script src="/js/mobile-naf-setup.js"></script>
+<script src="/js/init.js"></script>
+ 
 
 <!-- Chat / Realtime -->
 <script type="module" src="/js/client.js?v=5"></script>
@@ -110,12 +112,9 @@
 <a-scene xr-mode-ui="enabled: true">
   <!-- content -->
 
-
-
-    <a-assets>
-     <audio id="click-sound" crossorigin="anonymous">
-  <source src="/click.wav" type="audio/wav">
-</audio>
+  <!-- Use one that actually exists in /public -->
+  <audio id="click-sound" src="/click.mp3" crossorigin="anonymous"></audio>
+</a-assets>
 
       <template id="avatar-template">
         <a-entity class="avatar" networked-audio-source>
