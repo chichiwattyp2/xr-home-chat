@@ -5,91 +5,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>XR Home Chat</title>
 
+  <!-- Favicon to avoid 404s -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>" />
+
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
 
-  <link rel="icon" href="data:," />
+  <!-- Your scripts (place these files next to this HTML) -->
+  <script src="./hide-on-ar.js"></script>
+  <script src="./xr-probe.js"></script>
+
   <style>
-    html, body { margin:0; height:100%; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: #000; /* hidden by canvas */
+    }
 
-/* Fullscreen overlay root that WebXR will promote */
-#overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;           /* let A-Frame pass through by default */
-}
+    /* Fullscreen overlay root that WebXR will promote */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none; /* let the scene pass through by default */
+    }
 
-/* The actual chat bar */
-#ui {
-  position: absolute;
-  left: 12px; right: 12px;
-  bottom: calc(12px + env(safe-area-inset-bottom));
-  display: flex; gap: 8px;
-  background: rgba(16,18,24,.7);
-  padding: 10px;
-  border-radius: 12px;
-  backdrop-filter: blur(6px);
-  pointer-events: auto;           /* clickable */
-  max-width: 720px;               /* keep it sane on tablets */
-  margin: 0 auto;                 /* center when we remove left/right in mobile */
-}
+    /* Bottom chat bar */
+    #ui {
+      position: absolute;
+      left: 12px; right: 12px;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      display: flex; gap: 8px;
+      background: rgba(16,18,24,.7);
+      padding: 10px;
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+      pointer-events: auto; /* clickable */
+      max-width: 720px;
+      margin: 0 auto;
+    }
 
-/* Inputs/buttons */
-#prompt {
-  flex: 1;
-  min-width: 0;                   /* prevent flex overflow on small screens */
-  padding: 10px 12px;
-  font-size: 16px;                /* avoids iOS zoom-on-focus */
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.15);
-  background: #0f1218; color: #fff;
-}
-button {
-  padding: 10px 14px;
-  font-size: 15px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.15);
-  background: #1b2333; color: #fff;
-}
-button:active { transform: translateY(1px); }
+    #prompt {
+      flex: 1;
+      min-width: 0; /* prevent overflow on small screens */
+      padding: 10px 12px;
+      font-size: 16px; /* avoids iOS zoom-on-focus */
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: #0f1218; color: #fff;
+    }
+    button {
+      padding: 10px 14px;
+      font-size: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: #1b2333; color: #fff;
+    }
+    button:active { transform: translateY(1px); }
 
-/* Stack nicely on narrow screens */
-@media (max-width: 480px) {
-  #ui {
-    left: 0; right: 0;            /* let margin center it */
-    margin: 0 12px;
-    flex-direction: column;
-    max-width: none;
-  }
-  button { width: 100%; }
-}
-
+    @media (max-width: 480px) {
+      #ui { left: 0; right: 0; margin: 0 12px; flex-direction: column; max-width: none; }
+      button { width: 100%; }
+    }
   </style>
-
-
-
-<!-- Your scripts (served from same origin; allowed by CSP) -->
-<script src="hide-on-ar.js"></script>
-<script src="xr-probe.js"></script>
-
 </head>
 <body>
-  <!-- Your chat overlay (used as DOM overlay in AR) -->
- <div id="overlay">
-  <!-- Your bottom chat bar -->
-  <div id="ui">
-    <input id="prompt" placeholder="Ask something…" />
-    <button id="send">Send</button>
-    <button id="voice">🎤 Voice</button>
+  <!-- DOM overlay promoted by WebXR -->
+  <div id="overlay">
+    <div id="ui">
+      <input id="prompt" placeholder="Ask something…" />
+      <button id="send">Send</button>
+      <button id="voice">🎤 Voice</button>
+    </div>
   </div>
-</div>
 
-  
-  <a-scene webxr="optionalFeatures: dom-overlay, hit-test; overlayElement: #overlay">
+  <a-scene
+    renderer="alpha:true; physicallyCorrectLights:true; colorManagement:true"
+    webxr="optionalFeatures: dom-overlay, hit-test; overlayElement: #overlay"
+    xr-mode-ui="enabled: true; arEnabled: true; vrEnabled: false">
 
-
-    <!-- Chat panel in 3D (optional; your DOM chat stays on top via DOM overlay) -->
+    <!-- Optional 3D chat panel (your HTML chat stays on top via DOM overlay) -->
     <a-entity position="0 1.6 -1.25" id="chatPanel">
       <a-plane width="1.35" height="0.8" color="#111" material="opacity:0.9"></a-plane>
       <a-entity id="chatText"
@@ -101,17 +97,17 @@ button:active { transform: translateY(1px); }
     </a-entity>
 
     <a-entity>
-      <a-camera position="0 0.61552 3.03645" rotation="-2.9793805346802835 0.45836623610465876 0"></a-camera>
+      <a-camera position="0 0.61552 3.03645"
+                rotation="-2.9793805346802835 0.45836623610465876 0"></a-camera>
     </a-entity>
 
     <!-- Sky disappears in AR -->
     <a-sky color="#0b0d12" hide-on-ar></a-sky>
-
   </a-scene>
 
-  <audio id="assistantAudio" autoplay></audio>
+  <audio id="assistantAudio" autoplay playsinline></audio>
 
-  <!-- Make sure this path exists; if you were seeing a 404, fix or comment out for testing -->
-  <script src="./client.js" type="module"></script>
+  <!-- Your app logic (ensure this file exists beside index.html) -->
+  <script type="module" src="client.js"></script>
 </body>
 </html>
