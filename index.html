@@ -14,6 +14,7 @@
 
   <!-- Networking (modern NAF) -->
   <script src="https://unpkg.com/networked-aframe@0.14.0/dist/networked-aframe.min.js"></script>
+  
 
   <!-- Your custom scripts -->
   <script src="hide-on-ar.js"></script>
@@ -93,7 +94,7 @@
   <a-scene webxr="optionalFeatures: dom-overlay, hit-test; overlayElement: #overlay">
 
     <a-assets>
-      <audio id="click-sound" crossorigin="anonymous" src="click.mp3"></audio>
+      <audio id="click-sound" crossorigin="anonymous" src="click.wav"></audio>
       <template id="avatar-template">
         <a-entity class="avatar" networked-audio-source>
           <a-sphere class="head" color="#5985ff" scale="0.45 0.5 0.4" random-color></a-sphere>
