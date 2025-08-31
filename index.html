@@ -3,107 +3,98 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
- 
-
-
   <title>XR Home Chat</title>
+
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+
   <link rel="icon" href="data:," />
   <style>
     html, body { margin:0; height:100%; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-    #ui { position:fixed; left:12px; right:12px; bottom:12px; display:flex; gap:8px; z-index: 2; background: rgba(16,18,24,.7); padding:10px; border-radius:12px; backdrop-filter: blur(6px); }
-    #prompt { flex:1; padding:10px 12px; font-size:16px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:#0f1218; color:#fff; }
-    button { padding:10px 14px; font-size:15px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:#1b2333; color:#fff; }
+    #ui {
+      position:fixed; left:12px; right:12px; bottom:12px;
+      display:flex; gap:8px; z-index: 2;
+      background: rgba(16,18,24,.7); padding:10px; border-radius:12px; backdrop-filter: blur(6px);
+    }
+    #prompt {
+      flex:1; padding:10px 12px; font-size:16px; border-radius:10px;
+      border:1px solid rgba(255,255,255,.15); background:#0f1218; color:#fff;
+    }
+    button {
+      padding:10px 14px; font-size:15px; border-radius:10px;
+      border:1px solid rgba(255,255,255,.15); background:#1b2333; color:#fff;
+    }
     button:active { transform: translateY(1px); }
-    @media (max-width: 480px) { #ui { flex-direction: column; } button { width: 100%; } }
-    
-    .a-enter-ar, .a-enter-ar-button, .a-dialog__confirm {
-  display: none !important; /* <- remove anything like this */
-}
+
+    @media (max-width: 480px) {
+      #ui { flex-direction: column; }
+      button { width: 100%; }
+    }
+
+    /* IMPORTANT: do NOT hide the AR button */
+    /* (Removed your .a-enter-ar / .a-enter-ar-button rule) */
   </style>
+
   <script>
-  AFRAME.registerComponent('hide-on-ar', {
-    init() {
-      this.wasVisible = this.el.getAttribute('visible') !== false;
-      this.onEnterVR = this.onEnterVR.bind(this);
-      this.onExitVR  = this.onExitVR.bind(this);
-      this.el.sceneEl.addEventListener('enter-vr', this.onEnterVR);
-      this.el.sceneEl.addEventListener('exit-vr',  this.onExitVR);
-    },
-    onEnterVR() {
-      const scene = this.el.sceneEl;
-      if (scene.is('ar-mode')) {
-        this.prevVisible = this.el.getAttribute('visible');
-        this.el.setAttribute('visible', false);
+    // Hide any entity while in AR; restore after.
+    AFRAME.registerComponent('hide-on-ar', {
+      init() {
+        this.wasVisible = this.el.getAttribute('visible') !== false;
+        this.onEnterVR = this.onEnterVR.bind(this);
+        this.onExitVR  = this.onExitVR.bind(this);
+        this.el.sceneEl.addEventListener('enter-vr', this.onEnterVR);
+        this.el.sceneEl.addEventListener('exit-vr',  this.onExitVR);
+      },
+      onEnterVR() {
+        const scene = this.el.sceneEl;
+        if (scene.is('ar-mode')) {
+          this.prevVisible = this.el.getAttribute('visible');
+          this.el.setAttribute('visible', false);
+        }
+      },
+      onExitVR() {
+        this.el.setAttribute('visible',
+          this.prevVisible !== undefined ? this.prevVisible : this.wasVisible);
+      },
+      remove() {
+        const scene = this.el.sceneEl;
+        scene.removeEventListener('enter-vr', this.onEnterVR);
+        scene.removeEventListener('exit-vr',  this.onExitVR);
       }
-    },
-    onExitVR() {
-      this.el.setAttribute('visible',
-        this.prevVisible !== undefined ? this.prevVisible : this.wasVisible);
-    },
-    remove() {
-      const scene = this.el.sceneEl;
-      scene.removeEventListener('enter-vr', this.onEnterVR);
-      scene.removeEventListener('exit-vr',  this.onExitVR);
-    }
-  });
-</script>
-<script>
-(async () => {
-  if (!('xr' in navigator)) {
-    console.warn('[XR] navigator.xr not available. On iOS: need iOS 16.4+ Safari (not PWA).');
-    return;
-  }
-  try {
-    const ar = await navigator.xr.isSessionSupported('immersive-ar');
-    const vr = await navigator.xr.isSessionSupported('immersive-vr');
-    console.log('[XR] immersive-ar supported:', ar, ' / immersive-vr:', vr);
-    if (!ar) {
-      console.warn('[XR] No immersive-ar. Common causes:',
-        '\n- iOS < 16.4, or using a third-party browser without WebXR',
-        '\n- Running as Home-screen app (PWA) on iOS — WebXR is disabled there',
-        '\n- Inside an iframe without allow=\"xr-spatial-tracking\"',
-        '\n- Device/flags disabled AR');
-    }
-  } catch (e) {
-    console.error('[XR] isSessionSupported failed:', e);
-  }
-})();
-</script>
+    });
+  </script>
 
-
+  <!-- AR/VR support probe -->
+  <script>
+    (async () => {
+      if (!('xr' in navigator)) {
+        console.warn('[XR] navigator.xr not available. On iOS: need iOS 16.4+ Safari (not PWA).');
+        return;
+      }
+      try {
+        const ar = await navigator.xr.isSessionSupported('immersive-ar');
+        const vr = await navigator.xr.isSessionSupported('immersive-vr');
+        console.log('[XR] immersive-ar supported:', ar, ' / immersive-vr:', vr);
+        if (!ar) {
+          console.warn('[XR] No immersive-ar. Common causes:',
+            '\n- iOS < 16.4, or using a third-party browser without WebXR',
+            '\n- Running as Home-screen app (PWA) on iOS — WebXR is disabled there',
+            '\n- Inside an iframe without allow="xr-spatial-tracking"',
+            '\n- Device/flags disabled AR');
+        }
+      } catch (e) {
+        console.error('[XR] isSessionSupported failed:', e);
+      }
+    })();
+  </script>
 </head>
 <body>
+  <!-- Your chat overlay (used as DOM overlay in AR) -->
   <div id="ui">
     <input id="prompt" placeholder="Ask something…" />
     <button id="send">Send</button>
     <button id="voice">🎤 Voice</button>
   </div>
 
-<a-scene
-  webxr="optionalFeatures: dom-overlay, hit-test; overlayElement: #chatOverlay"
-  xr-mode-ui="enabled: true; arEnabled: true; vrEnabled: false">
-
-    <a-entity position="0 1.6 -1.25" id="chatPanel">
-      <a-plane width="1.35" height="0.8" color="#111" material="opacity:0.9"></a-plane>
-      <a-entity id="chatText"
-                text="value: Hello!; wrapCount: 40; color: #fff"
-                position="-0.62 0.28 0.01" scale="0.8 0.8 0.8"></a-entity>
-      <a-entity id="hint"
-                text="value: Type below or press 🎤; wrapCount: 36; color: #9ad"
-                position="-0.62 -0.28 0.01" scale="0.6 0.6 0.6"></a-entity>
-    </a-entity>
-
-    <a-entity>
-     <a-camera position="0 0.61552 3.03645" rotation="-2.9793805346802835 0.45836623610465876 0"></a-camera>
-    </a-entity>
-
-<a-sky color="#0b0d12" hide-on-ar></a-sky>
-
-  </a-scene>
-
-  <audio id="assistantAudio" autoplay></audio>
-  <script src="./client.js" type="module"></script>
-</body>
-</html>
-
+  <a-scene
+    renderer="alpha:true; physicallyCorrectLig
