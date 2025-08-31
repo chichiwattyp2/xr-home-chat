@@ -11,28 +11,60 @@
   <link rel="icon" href="data:," />
   <style>
     html, body { margin:0; height:100%; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-    #ui {
-      position:fixed; left:12px; right:12px; bottom:12px;
-      display:flex; gap:8px; z-index: 2;
-      background: rgba(16,18,24,.7); padding:10px; border-radius:12px; backdrop-filter: blur(6px);
-    }
-    #prompt {
-      flex:1; padding:10px 12px; font-size:16px; border-radius:10px;
-      border:1px solid rgba(255,255,255,.15); background:#0f1218; color:#fff;
-    }
-    button {
-      padding:10px 14px; font-size:15px; border-radius:10px;
-      border:1px solid rgba(255,255,255,.15); background:#1b2333; color:#fff;
-    }
-    button:active { transform: translateY(1px); }
 
-    @media (max-width: 480px) {
-      #ui { flex-direction: column; }
-      button { width: 100%; }
-    }
+/* Fullscreen overlay root that WebXR will promote */
+#overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;           /* let A-Frame pass through by default */
+}
 
-    /* IMPORTANT: do NOT hide the AR button */
-    /* (Removed your .a-enter-ar / .a-enter-ar-button rule) */
+/* The actual chat bar */
+#ui {
+  position: absolute;
+  left: 12px; right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex; gap: 8px;
+  background: rgba(16,18,24,.7);
+  padding: 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  pointer-events: auto;           /* clickable */
+  max-width: 720px;               /* keep it sane on tablets */
+  margin: 0 auto;                 /* center when we remove left/right in mobile */
+}
+
+/* Inputs/buttons */
+#prompt {
+  flex: 1;
+  min-width: 0;                   /* prevent flex overflow on small screens */
+  padding: 10px 12px;
+  font-size: 16px;                /* avoids iOS zoom-on-focus */
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: #0f1218; color: #fff;
+}
+button {
+  padding: 10px 14px;
+  font-size: 15px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: #1b2333; color: #fff;
+}
+button:active { transform: translateY(1px); }
+
+/* Stack nicely on narrow screens */
+@media (max-width: 480px) {
+  #ui {
+    left: 0; right: 0;            /* let margin center it */
+    margin: 0 12px;
+    flex-direction: column;
+    max-width: none;
+  }
+  button { width: 100%; }
+}
+
   </style>
 
   <script>
@@ -90,16 +122,18 @@
 </head>
 <body>
   <!-- Your chat overlay (used as DOM overlay in AR) -->
+ <div id="overlay">
+  <!-- Your bottom chat bar -->
   <div id="ui">
     <input id="prompt" placeholder="Ask something…" />
     <button id="send">Send</button>
     <button id="voice">🎤 Voice</button>
   </div>
+</div>
 
-  <a-scene
-    renderer="alpha:true; physicallyCorrectLights:true; colorManagement:true"
-    webxr="optionalFeatures: dom-overlay, hit-test; overlayElement: #ui"
-    xr-mode-ui="enabled: true; arEnabled: true; vrEnabled: false">
+  
+  <a-scene webxr="optionalFeatures: dom-overlay, hit-test; overlayElement: #overlay">
+
 
     <!-- Chat panel in 3D (optional; your DOM chat stays on top via DOM overlay) -->
     <a-entity position="0 1.6 -1.25" id="chatPanel">
