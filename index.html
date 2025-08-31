@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>XR Home Chat</title>
-
- <!-- A-Frame 1.0.4 -->
+<!-- A-Frame 1.0.4 -->
 <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+
+<!-- jQuery (needed by sheet-listings.js) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
 <!-- Components known good with 1.0.x -->
@@ -15,18 +12,21 @@
 <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js"></script>
 <script src="https://unpkg.com/aframe-particle-system-component@1.0.5/dist/aframe-particle-system-component.min.js"></script>
 
-<!-- (Only if you still need networking; otherwise remove) -->
+<!-- (Optional) networking – keep this only if you actually use NAF -->
 <script src="https://unpkg.com/networked-aframe@0.6.0/dist/networked-aframe.min.js"></script>
 
-<!-- Your scripts (externalized) -->
+<!-- Your helpers (these files must exist under /js) -->
 <script src="/js/hide-on-ar.js"></script>
 <script src="/js/xr-probe.js"></script>
+<script src="/js/overlay-sync.js"></script>
+<script src="/js/make-clickable.js"></script>
 <script src="/js/sheet-listings.js"></script>
+<!-- keep only if you use them -->
 <script src="/js/typer-component.js"></script>
 <script src="/js/mobile-naf-setup.js"></script>
 
-<!-- Realtime/chat client still fine on 1.0.4 -->
-<script type="module" src="client.js?v=4"></script>
+<!-- Chat / Realtime -->
+<script type="module" src="/client.js?v=5"></script>
 
 
  <style>
