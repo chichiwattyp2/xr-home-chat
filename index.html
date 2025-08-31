@@ -95,6 +95,17 @@
     </div>
   </div>
 
+<!-- Add under your DOM chat bar or as an A-Frame UI element -->
+<button id="clearModel" style="position:fixed; top:12px; right:12px; z-index:3;">Clear model</button>
+
+<script>
+  document.getElementById('clearModel')?.addEventListener('click', () => {
+    const stage = document.getElementById('stageModel');
+    if (!stage) return;
+    stage.removeAttribute('gltf-model');
+    stage.setAttribute('visible', false);
+  });
+</script>
 
 <a-scene xr-mode-ui="enabled: true">
   <!-- content -->
