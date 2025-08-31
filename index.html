@@ -7,7 +7,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
 <!-- Components known good with 1.0.x -->
-<script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.0/dist/aframe-extras.min.js"></script>
 <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js"></script>
 <script src="https://unpkg.com/aframe-particle-system-component@1.0.5/dist/aframe-particle-system-component.min.js"></script>
@@ -16,18 +16,19 @@
 
 <!-- (Optional) networking – keep this only if you actually use NAF -->
 <script src="https://unpkg.com/networked-aframe@0.6.0/dist/networked-aframe.min.js"></script>
+<!-- your libs (keep as is) -->
+<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+<script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+<!-- … other CDN libs … -->
 
-<!-- Your helpers (these files must exist under /js) -->
-<script src="/js/hide-on-ar.js"></script>
-<script src="/js/xr-probe.js"></script>
-<script src="/js/overlay-sync.js"></script>
-<script src="/js/make-clickable.js"></script>
-<script src="/js/sheet-listings.js"></script>
-<!-- keep only if you use them -->
-<script src="/js/typer-component.js"></script>
-<script src="/js/mobile-naf-setup.js"></script>
-<script src="/js/init.js"></script>
- 
+<!-- your files (add defer) -->
+<script src="/js/hide-on-ar.js" defer></script>
+<script src="/js/xr-probe.js" defer></script>
+<script src="/js/sheet-listings.js" defer></script>
+<script src="/js/typer-component.js" defer></script>
+<script src="/js/mobile-naf-setup.js" defer></script>
+<script src="/js/init.js" defer></script>
+<script type="module" src="/client.js?v=4" defer></script>
 
 <!-- Chat / Realtime -->
 <script type="module" src="/js/client.js?v=5"></script>
