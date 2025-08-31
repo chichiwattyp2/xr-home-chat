@@ -1,18 +1,22 @@
 {
+  "name": "xr-codelabs",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "vercel build",
+    "start": "vercel dev",
+    "test": "node tests/your-test-runner.js"
+  },
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ajax.googleapis.com; connect-src 'self' https: wss:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; style-src 'self' 'unsafe-inline'; font-src 'self' https://cdn.aframe.io; frame-ancestors 'self';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ajax.googleapis.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.openai.com wss://api.openai.com https://cdn.aframe.io https://docs.google.com https://cdn.glitch.com https://cdn.glitch.global https://raw.githubusercontent.com https://raw.fastgit.org https://gist.githubusercontent.com https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: blob: https://cdn.aframe.io https://cdn.glitch.com https://cdn.glitch.global https://lh3.googleusercontent.com https://images.unsplash.com https://i.imgur.com; media-src 'self' data: blob: https://cdn.glitch.com https://cdn.glitch.global; font-src 'self' data:;"
         },
         { "key": "Permissions-Policy", "value": "xr-spatial-tracking=(self)" }
       ]
-    },
-    {
-      "source": "/client.js",
-      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     }
   ]
 }
