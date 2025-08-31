@@ -92,7 +92,11 @@
     </div>
   </div>
 
-  <a-scene webxr="optionalFeatures: dom-overlay, hit-test; overlayElement: #overlay">
+
+<a-scene xr-mode-ui="enabled: true">
+  <!-- content -->
+
+
 
     <a-assets>
       <audio id="click-sound" crossorigin="anonymous" src="click.wav"></audio>
@@ -120,7 +124,7 @@
       <a-entity id="chatText" text="value: Hello!; color: #fff" position="-0.62 0.28 0.01"></a-entity>
       <a-entity id="hint" text="value: Type below or press 🎤; wrapCount: 36; color:#9ad" position="-0.62 -0.28 0.01"></a-entity>
     </a-entity>
-
+  <a-sky color="#0b0d12" hide-on-ar></a-sky>
   </a-scene>
 </body>
 </html>
