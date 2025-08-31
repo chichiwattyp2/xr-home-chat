@@ -4,19 +4,13 @@
   "description": "XR Home Chat – A-Frame + WebXR demo with AR chat overlay",
   "type": "module",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "vercel build",
-    "start": "vercel dev",
+    "dev": "serve -p 3000 .",
     "test": "node tests/your-test-runner.js"
   },
-  "keywords": [
-    "aframe",
-    "webxr",
-    "ar",
-    "vr",
-    "vercel",
-    "chat"
-  ],
+  "keywords": ["aframe", "webxr", "ar", "vr", "vercel", "chat"],
   "author": "Chris Watt-Pringle",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.3"
+  }
 }
