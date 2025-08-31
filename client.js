@@ -84,7 +84,7 @@ async function sendPrompt() {
               setPanel(buf);
             }
           } catch {
-            // ignore incomplete JSON chunks until next piece arrives
+            // ignore incomplete JSON chunks
           }
         }
       }
@@ -167,11 +167,12 @@ async function startVoice() {
       ]
     );
 
+    // ✅ GA requires session.type in updates
     ws.onopen = () => {
-      // 5) Configure session AFTER connect (GA-style)
       ws.send(JSON.stringify({
         type: 'session.update',
         session: {
+          type: 'realtime',
           audio: {
             output: { voice: 'alloy' } // choose voice here
           }
