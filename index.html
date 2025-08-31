@@ -97,4 +97,33 @@
   </div>
 
   <a-scene
-    renderer="alpha:true; physicallyCorrectLig
+    renderer="alpha:true; physicallyCorrectLights:true; colorManagement:true"
+    webxr="optionalFeatures: dom-overlay, hit-test; overlayElement: #ui"
+    xr-mode-ui="enabled: true; arEnabled: true; vrEnabled: false">
+
+    <!-- Chat panel in 3D (optional; your DOM chat stays on top via DOM overlay) -->
+    <a-entity position="0 1.6 -1.25" id="chatPanel">
+      <a-plane width="1.35" height="0.8" color="#111" material="opacity:0.9"></a-plane>
+      <a-entity id="chatText"
+                text="value: Hello!; wrapCount: 40; color: #fff"
+                position="-0.62 0.28 0.01" scale="0.8 0.8 0.8"></a-entity>
+      <a-entity id="hint"
+                text="value: Type below or press 🎤; wrapCount: 36; color: #9ad"
+                position="-0.62 -0.28 0.01" scale="0.6 0.6 0.6"></a-entity>
+    </a-entity>
+
+    <a-entity>
+      <a-camera position="0 0.61552 3.03645" rotation="-2.9793805346802835 0.45836623610465876 0"></a-camera>
+    </a-entity>
+
+    <!-- Sky disappears in AR -->
+    <a-sky color="#0b0d12" hide-on-ar></a-sky>
+
+  </a-scene>
+
+  <audio id="assistantAudio" autoplay></audio>
+
+  <!-- Make sure this path exists; if you were seeing a 404, fix or comment out for testing -->
+  <script src="./client.js" type="module"></script>
+</body>
+</html>
