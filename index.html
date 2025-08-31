@@ -5,29 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>XR Home Chat</title>
 
-  <!-- Core libs -->
-  <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-  <script src="https://unpkg.com/aframe-environment-component@1.5.0/dist/aframe-environment-component.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
-  <script src="https://unpkg.com/aframe-randomizer-components@3.0.1/dist/aframe-randomizer-components.min.js"></script>
-  <script src="https://unpkg.com/aframe-particle-system-component@1.0.5/dist/aframe-particle-system-component.min.js"></script>
+ <!-- A-Frame 1.0.4 -->
+<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
 
-  <!-- Networking (modern NAF) -->
-  <script src="https://unpkg.com/networked-aframe@0.14.0/dist/networked-aframe.min.js"></script>
-  
+<!-- Components known good with 1.0.x -->
+<script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.0/dist/aframe-extras.min.js"></script>
+<script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js"></script>
+<script src="https://unpkg.com/aframe-particle-system-component@1.0.5/dist/aframe-particle-system-component.min.js"></script>
 
-  <!-- Your custom scripts -->
- <!-- <script src="hide-on-ar.js"></script> -->
-  <script src="xr-probe.js"></script>
-<script src="js/csp-debug.js"></script>
+<!-- (Only if you still need networking; otherwise remove) -->
+<script src="https://unpkg.com/networked-aframe@0.6.0/dist/networked-aframe.min.js"></script>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="js/sheet-listings.js"></script>
-  <script src="js/typer-component.js"></script>
-  <script src="js/mobile-naf-setup.js"></script>
-  <script type="module" src="client.js?v=3"></script>
+<!-- Your scripts (externalized) -->
+<script src="/js/hide-on-ar.js"></script>
+<script src="/js/xr-probe.js"></script>
+<script src="/js/sheet-listings.js"></script>
+<script src="/js/typer-component.js"></script>
+<script src="/js/mobile-naf-setup.js"></script>
 
-  <link rel="icon" href="data:," />
+<!-- Realtime/chat client still fine on 1.0.4 -->
+<script type="module" src="/client.js?v=4"></script>
+
+
  <style>
     html, body {
       margin: 0;
