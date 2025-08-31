@@ -9,6 +9,9 @@ const sendBtn = document.querySelector('#send');
 const voiceBtn = document.querySelector('#voice');
 const audioEl = document.querySelector('#assistantAudio');
 
+// GA realtime model (picked on the WS URL)
+const REALTIME_MODEL = 'gpt-realtime';
+
 // Make sure iOS will actually play audio
 if (audioEl) {
   audioEl.autoplay = true;
@@ -80,7 +83,9 @@ async function sendPrompt() {
               buf += evt.delta;
               setPanel(buf);
             }
-          } catch {}
+          } catch {
+            // ignore incomplete JSON chunks until next piece arrives
+          }
         }
       }
     }
@@ -110,18 +115,31 @@ voiceBtn?.addEventListener('click', async () => {
 async function startVoice() {
   voiceBtn.disabled = true;
   try {
-    // 1) Fetch ephemeral GA client_secret
-    const session = await fetch('/api/realtime-token').then(r => r.json()).catch(() => null);
-    const EPHEMERAL_KEY = session?.client_secret?.value;
-    const MODEL = session?.model || 'gpt-4o-realtime-preview';
+    // 1) Fetch ephemeral GA client secret (Edge: /api/realtime-token)
+    const tokenRes = await fetch('/api/realtime-token');
+    let tokenJson = null;
+    try { tokenJson = await tokenRes.json(); } catch {}
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text().catch(() => '');
+      setPanel(`Realtime token error ${tokenRes.status}: ${errText}`);
+      return;
+    }
+
+    // Accept BOTH shapes: {client_secret:{value}} (older) OR {value:"ek_..."} (GA)
+    const EPHEMERAL_KEY =
+      tokenJson?.client_secret?.value ||
+      tokenJson?.value;
     if (!EPHEMERAL_KEY) {
-      setPanel('Realtime error: failed to get client_secret');
+      setPanel('Realtime error: token missing "value"');
       return;
     }
 
     // 2) RTCPeerConnection + mic
     pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
     pc.ontrack = (e) => { audioEl.srcObject = e.streams[0]; };
+    pc.onconnectionstatechange = () => {
+      console.log('PeerConnection state:', pc.connectionState);
+    };
 
     try {
       localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -132,16 +150,16 @@ async function startVoice() {
       return;
     }
 
-    // 3) Offer + wait for full ICE gathering
+    // 3) Offer + wait for full ICE gathering (so SDP includes candidates)
     const offer = await pc.createOffer({ offerToReceiveAudio: true });
     await pc.setLocalDescription(offer);
     await waitForIceGatheringComplete(pc);
 
-    // 4) Open GA Realtime WS with SAME model
+    // 4) Open GA Realtime WS (pick model here)
     const sdpB64url = btoa(pc.localDescription.sdp)
       .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     ws = new WebSocket(
-      `wss://api.openai.com/v1/realtime?model=${encodeURIComponent(MODEL)}`,
+      `wss://api.openai.com/v1/realtime?model=${encodeURIComponent(REALTIME_MODEL)}`,
       [
         'realtime',
         'openai-insecure-api-key.' + EPHEMERAL_KEY,
@@ -150,13 +168,13 @@ async function startVoice() {
     );
 
     ws.onopen = () => {
-      // 5) Optional: set voice + audio formats (safe to omit if defaults suit you)
+      // 5) Configure session AFTER connect (GA-style)
       ws.send(JSON.stringify({
         type: 'session.update',
         session: {
-          voice: 'alloy',
-          input_audio_format: 'pcm16',
-          output_audio_format: 'pcm16'
+          audio: {
+            output: { voice: 'alloy' } // choose voice here
+          }
         }
       }));
     };
@@ -231,7 +249,11 @@ function waitForIceGatheringComplete(pc) {
       }
     };
     pc.addEventListener('icegatheringstatechange', check);
-    setTimeout(() => { pc.removeEventListener('icegatheringstatechange', check); resolve(); }, 4000);
+    // Failsafe in case some environments never reach 'complete'
+    setTimeout(() => {
+      pc.removeEventListener('icegatheringstatechange', check);
+      resolve();
+    }, 4000);
   });
 }
 
