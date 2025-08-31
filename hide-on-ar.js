@@ -7,8 +7,7 @@ AFRAME.registerComponent('hide-on-ar', {
     this.el.sceneEl.addEventListener('exit-vr',  this.onExitVR);
   },
   onEnterVR() {
-    const scene = this.el.sceneEl;
-    if (scene.is('ar-mode')) {
+    if (this.el.sceneEl.is('ar-mode')) {
       this.prevVisible = this.el.getAttribute('visible');
       this.el.setAttribute('visible', false);
     }
@@ -18,8 +17,8 @@ AFRAME.registerComponent('hide-on-ar', {
       this.prevVisible !== undefined ? this.prevVisible : this.wasVisible);
   },
   remove() {
-    const scene = this.el.sceneEl;
-    scene.removeEventListener('enter-vr', this.onEnterVR);
-    scene.removeEventListener('exit-vr',  this.onExitVR);
+    const s = this.el.sceneEl;
+    s.removeEventListener('enter-vr', this.onEnterVR);
+    s.removeEventListener('exit-vr',  this.onExitVR);
   }
 });
