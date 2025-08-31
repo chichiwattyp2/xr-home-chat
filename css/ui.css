@@ -1,0 +1,47 @@
+/* ========== Base ========== */
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;              /* hidden by canvas, but avoids white flash */
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Avoid iOS auto-zoom on focus by keeping >=16px */
+input, button, select, textarea {
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* ========== DOM Overlay Root (promoted in WebXR) ========== */
+#overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;                 /* stay above A-Frame canvas and UI */
+  pointer-events: none;          /* let scene pass through by default */
+}
+
+/* ========== Bottom Chat Bar ========== */
+#ui {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 8px;
+  background: rgba(16, 18, 24, 0.7);
+  padding: 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  pointer-events: auto;          /* clickable */
+  max-width: 720px;
+  margin: 0 auto;                /* center when width allows */
+}
+
+/* Inputs & Buttons */
+#prompt {
+  flex: 1;
+  min-width: 0;
