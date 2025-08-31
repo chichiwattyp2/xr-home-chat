@@ -5,10 +5,14 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' https://aframe.io; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.openai.com wss://api.openai.com https://cdn.aframe.io; img-src 'self' data: https://cdn.aframe.io; font-src 'self' https://cdn.aframe.io;"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ajax.googleapis.com; connect-src 'self' https://api.openai.com wss://api.openai.com https://cdn.aframe.io https://docs.google.com https://cdn.glitch.com; img-src 'self' data: blob: https://cdn.aframe.io https://cdn.glitch.com; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self' https://cdn.aframe.io; frame-ancestors 'self';"
         },
         { "key": "Permissions-Policy", "value": "xr-spatial-tracking=(self)" }
       ]
+    },
+    {
+      "source": "/client.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     }
   ]
 }
