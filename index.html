@@ -24,7 +24,60 @@
   <script type="module" src="client.js?v=3"></script>
 
   <link rel="icon" href="data:," />
-  <link rel="stylesheet" href="css/ui.css" />
+ <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: #000; /* hidden by canvas */
+    }
+
+    /* Fullscreen overlay root that WebXR will promote */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none; /* let the scene pass through by default */
+    }
+
+    /* Bottom chat bar */
+    #ui {
+      position: absolute;
+      left: 12px; right: 12px;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      display: flex; gap: 8px;
+      background: rgba(16,18,24,.7);
+      padding: 10px;
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+      pointer-events: auto; /* clickable */
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    #prompt {
+      flex: 1;
+      min-width: 0; /* prevent overflow on small screens */
+      padding: 10px 12px;
+      font-size: 16px; /* avoids iOS zoom-on-focus */
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: #0f1218; color: #fff;
+    }
+    button {
+      padding: 10px 14px;
+      font-size: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: #1b2333; color: #fff;
+    }
+    button:active { transform: translateY(1px); }
+
+    @media (max-width: 480px) {
+      #ui { left: 0; right: 0; margin: 0 12px; flex-direction: column; max-width: none; }
+      button { width: 100%; }
+    }
+  </style>
 </head>
 <body>
   <div id="overlay">
