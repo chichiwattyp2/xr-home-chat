@@ -1,96 +1,76 @@
-// public/js/sheet-listings.js
-(() => {
-  // ---- CONFIG ----
-  const SHEET_ID = "1fy-ZztZlhwgfz1wH8YGji2zuiiEfV88XyCRBDzLB1AA"; // <- your sheet
-  const GID = 9; // <- tab gid to read (images + optional model columns)
-  const GVIZ = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
-
-  const container = document.querySelector('#container');
-  if (!container) {
-    console.warn('[sheet-listings] #container not found, skipping.');
+// Build tiles from a public Google Sheet (optional). Requires jQuery.
+(function () {
+  if (typeof window.jQuery === 'undefined') {
+    console.warn('[sheet-listings] jQuery not found; skipping sheet render.');
     return;
   }
+  const $ = window.jQuery;
 
-  // tiny encoder (same as your old one)
-  const encodeHtml = (str) => String(str ?? '')
-    .replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  // ---- CONFIG ----
+  const SHEET_ID = "1fy-ZztZlhwgfz1wH8YGji2zuiiEfV88XyCRBDzLB1AA";
+  const GID = 9; // target tab gid
+  const gvizUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
-  fetch(GVIZ)
-    .then(r => r.text())
-    .then(txt => {
-      // strip GViz wrapper
-      const json = JSON.parse(txt.substring(txt.indexOf('{'), txt.lastIndexOf(')')));
-      const rows = json.table?.rows || [];
-      if (!rows.length) return;
+  function encodeHtml(str) {
+    var buf = [];
+    for (var i = str.length - 1; i >= 0; i--) {
+      buf.unshift(["&#", str[i].charCodeAt(), ";"].join(""));
+    }
+    return buf.join("");
+  }
 
-      // Assume header in first row
-      for (let i = 1; i < rows.length; i++) {
-        const c = (rows[i].c || []);
-        const title = encodeHtml(c[0]?.v ?? '');
-        const image = c[1]?.v ?? '';
-        const link  = c[2]?.v ?? '';
-        const model = c[3]?.v ?? ''; // optional
-        const scale = (c[4]?.v ?? '1 1 1');
-        const rot   = (c[5]?.v ?? '0 0 0');
-        const pos   = (c[6]?.v ?? '0 1 -1');
-
-        // Build a tile
-        const img = document.createElement('a-image');
-        img.setAttribute('width', '2');
-        img.setAttribute('height', '1');
-        img.setAttribute('class', 'clickable');
-        img.setAttribute('data-raycastable', ''); // so your raycaster sees it
-        if (image) img.setAttribute('src', image);
-        if (link)  img.setAttribute('link', `href: ${link}`);
-
-        // label
-        const label = document.createElement('a-entity');
-        label.setAttribute('geometry', 'primitive: plane; width: 2; height: 0.2');
-        label.setAttribute('material', 'color: #111');
-        label.setAttribute('text', `align: center; value: ${title}`);
-        label.setAttribute('position', '0 -0.6 0');
-        img.appendChild(label);
-
-        // highlight plane (hover)
-        const hi = document.createElement('a-plane');
-        hi.setAttribute('width', '2.05');
-        hi.setAttribute('height', '1.25');
-        hi.setAttribute('material', 'shader: flat; color: white; opacity: 0.0'); // start hidden
-        hi.setAttribute('position', '0 -0.1 -0.01');
-        img.appendChild(hi);
-
-        // simple hover feedback (works with mouse + cursor raycaster)
-        img.addEventListener('mouseenter', () => hi.setAttribute('material', 'shader: flat; color: white; opacity: 0.2'));
-        img.addEventListener('mouseleave', () => hi.setAttribute('material', 'shader: flat; color: white; opacity: 0.0'));
-
-        // If the row has a Model URL, clicking this tile loads it
-        if (model) {
-          img.addEventListener('click', () => {
-            const anchor = document.querySelector('#modelAnchor');
-            if (!anchor) return;
-            // Load/replace model
-            anchor.setAttribute('gltf-model', `url(${model})`);
-            anchor.setAttribute('scale', scale);
-            anchor.setAttribute('rotation', rot);
-            anchor.setAttribute('position', pos);
-            anchor.setAttribute('visible', 'true');
+  $.get(gvizUrl).done(function (text) {
+    try {
+      const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf(")")));
+      const rows = json.table.rows || [];
+      const listings = [];
+      for (let r = 1; r < rows.length; r++) {
+        const cells = rows[r].c || [];
+        const title = cells[0]?.v ?? "";
+        const image = cells[1]?.v ?? "";
+        const link  = cells[2]?.v ?? "";
+        if (title || image || link) {
+          listings.push({
+            title: encodeHtml(String(title)),
+            image: String(image),
+            link:  String(link)
           });
         }
-
-        container.appendChild(img);
-
-        // layout (similar to your previous grid)
-        // 4 per row, 3 rows per page → then jump downwards a bit
-        // compute based on number already present
-        const idx = container.children.length - 1;
-        const col = idx % 4;
-        const row = Math.floor(idx / 4) % 3;
-        const page = Math.floor(idx / 12);
-
-        const x = (col * 2.1);
-        const y = -(row * 1.3) + (page * 20); // Y goes down, page jumps up by 20
-        img.setAttribute('position', `${x} ${y} 0`);
       }
-    })
-    .catch(err => console.error('[sheet-listings] fetch error', err));
+
+      const $container = $('#container');
+      let r = 0, i = 0, p = 0, h = 0, pages = 0;
+
+      listings.forEach(listing => {
+        $container.append(`
+          <a-image class="clickable"
+                   position="${i * 2}.${i} ${r * 1.3} 0"
+                   width="2" height="1"
+                   src="${listing.image}"
+                   link="href: ${listing.link}">
+            <a-entity geometry="primitive: plane; width: 2; height: .2"
+                      material="color: #111"
+                      text="align:center; value: ${listing.title}"
+                      position="0 -.6 0"></a-entity>
+            <a-plane width="2.05" height="1.25"
+                     material="shader: flat; color: white;"
+                     position="0 -0.1 -0.01" visible="false"></a-plane>
+          </a-image>
+        `);
+        i++; h++;
+        if (i === 4) { r--; i = 0; p++; }
+        if (p === 3) { r += 20; p = 0; pages++; }
+      });
+
+      // ensure new tiles are raycastable for both mouse & VR cursor
+      document.querySelectorAll('#container [link]').forEach(el => {
+        el.classList.add('clickable');
+        el.setAttribute('data-raycastable', '');
+      });
+    } catch (e) {
+      console.warn('[sheet-listings] parse failed:', e);
+    }
+  }).fail(function (xhr, status) {
+    console.warn('[sheet-listings] request failed:', status);
+  });
 })();
