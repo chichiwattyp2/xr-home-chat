@@ -16,7 +16,62 @@
     button { padding:10px 14px; font-size:15px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:#1b2333; color:#fff; }
     button:active { transform: translateY(1px); }
     @media (max-width: 480px) { #ui { flex-direction: column; } button { width: 100%; } }
+    
+    .a-enter-ar, .a-enter-ar-button, .a-dialog__confirm {
+  display: none !important; /* <- remove anything like this */
+}
   </style>
+  <script>
+  AFRAME.registerComponent('hide-on-ar', {
+    init() {
+      this.wasVisible = this.el.getAttribute('visible') !== false;
+      this.onEnterVR = this.onEnterVR.bind(this);
+      this.onExitVR  = this.onExitVR.bind(this);
+      this.el.sceneEl.addEventListener('enter-vr', this.onEnterVR);
+      this.el.sceneEl.addEventListener('exit-vr',  this.onExitVR);
+    },
+    onEnterVR() {
+      const scene = this.el.sceneEl;
+      if (scene.is('ar-mode')) {
+        this.prevVisible = this.el.getAttribute('visible');
+        this.el.setAttribute('visible', false);
+      }
+    },
+    onExitVR() {
+      this.el.setAttribute('visible',
+        this.prevVisible !== undefined ? this.prevVisible : this.wasVisible);
+    },
+    remove() {
+      const scene = this.el.sceneEl;
+      scene.removeEventListener('enter-vr', this.onEnterVR);
+      scene.removeEventListener('exit-vr',  this.onExitVR);
+    }
+  });
+</script>
+<script>
+(async () => {
+  if (!('xr' in navigator)) {
+    console.warn('[XR] navigator.xr not available. On iOS: need iOS 16.4+ Safari (not PWA).');
+    return;
+  }
+  try {
+    const ar = await navigator.xr.isSessionSupported('immersive-ar');
+    const vr = await navigator.xr.isSessionSupported('immersive-vr');
+    console.log('[XR] immersive-ar supported:', ar, ' / immersive-vr:', vr);
+    if (!ar) {
+      console.warn('[XR] No immersive-ar. Common causes:',
+        '\n- iOS < 16.4, or using a third-party browser without WebXR',
+        '\n- Running as Home-screen app (PWA) on iOS — WebXR is disabled there',
+        '\n- Inside an iframe without allow=\"xr-spatial-tracking\"',
+        '\n- Device/flags disabled AR');
+    }
+  } catch (e) {
+    console.error('[XR] isSessionSupported failed:', e);
+  }
+})();
+</script>
+
+
 </head>
 <body>
   <div id="ui">
@@ -25,7 +80,10 @@
     <button id="voice">🎤 Voice</button>
   </div>
 
-  <a-scene renderer="antialias: true">
+<a-scene
+  webxr="optionalFeatures: dom-overlay, hit-test; overlayElement: #chatOverlay"
+  xr-mode-ui="enabled: true; arEnabled: true; vrEnabled: false">
+
     <a-entity position="0 1.6 -1.25" id="chatPanel">
       <a-plane width="1.35" height="0.8" color="#111" material="opacity:0.9"></a-plane>
       <a-entity id="chatText"
@@ -40,7 +98,8 @@
      <a-camera position="0 0.61552 3.03645" rotation="-2.9793805346802835 0.45836623610465876 0"></a-camera>
     </a-entity>
 
-    <a-sky color="#202531"></a-sky>
+<a-sky color="#0b0d12" hide-on-ar></a-sky>
+
   </a-scene>
 
   <audio id="assistantAudio" autoplay></audio>
