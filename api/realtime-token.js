@@ -12,31 +12,22 @@ export default async function handler(req) {
   const origin = req.headers.get('origin') || '*';
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders(origin) });
   if (req.method !== 'GET') {
-    return new Response(JSON.stringify({ error: 'GET required' }), {
-      status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
-    });
+    return new Response(JSON.stringify({ error: 'GET required' }), { status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'Missing OPENAI_API_KEY' }), {
-      status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
-    });
-  }
+  const model = process.env.OPENAI_MODEL_REALTIME || 'gpt-4o-realtime-preview';
+  if (!apiKey) return new Response(JSON.stringify({ error: 'Missing OPENAI_API_KEY' }), { status: 500, headers: corsHeaders(origin) });
 
-  // GA: do NOT include `model` here. You can optionally include session config.
-  const upstream = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
+  const r = await fetch('https://api.openai.com/v1/realtime/sessions', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ session: { type: 'realtime' } })
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, voice: 'alloy', input_audio_format: 'pcm16', output_audio_format: 'pcm16' })
   });
 
-  const bodyText = await upstream.text();
-  return new Response(bodyText || JSON.stringify({ error: 'Upstream error' }), {
-    status: upstream.status,
+  const txt = await r.text();
+  return new Response(txt || JSON.stringify({ error: 'Upstream error', status: r.status }), {
+    status: r.status,
     headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
   });
 }
