@@ -4,8 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>XR Home Chat</title>
-<!-- FIRST, no defer -->
-<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+
+  <!-- A-Frame: upgrade -->
+<script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+
+<!-- REMOVE any old bmfont text component scripts if you had them -->
+<!-- e.g., aframe-bmfont-text-component, text-geometry using bmfont, etc. -->
+
+<!-- Keep other components that don’t rely on bmfont. -->
+
 
 <!-- Then deferred plugins/components -->
 <script src="https://unpkg.com/networked-aframe/dist/networked-aframe.min.js" defer></script>
