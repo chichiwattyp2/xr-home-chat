@@ -4,33 +4,30 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>XR Home Chat</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
-    <script src="https://rawgit.com/mayognaise/aframe-mouse-cursor-component/master/dist/aframe-mouse-cursor-component.min.js"></script>
-    <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js"></script>
-    <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js"></script>
+<!-- FIRST, no defer -->
+<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
 
-    <script src="https://unpkg.com/networked-aframe@^0.6.0/dist/networked-aframe.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
- 
+<!-- Then deferred plugins/components -->
+<script src="https://unpkg.com/networked-aframe/dist/networked-aframe.min.js" defer></script>
+<script src="https://unpkg.com/networked-aframe/dist/adapters/easyrtc.js" defer></script>
+<script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-mouse-cursor-component/dist/aframe-mouse-cursor-component.min.js" defer></script>
+<script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
+<script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js" defer></script>
+<script src="https://unpkg.com/aframe-randomizer-components@3.0.1/dist/aframe-randomizer-components.min.js" defer></script>
+<script src="https://unpkg.com/aframe-particle-system-component@1.0.5/dist/aframe-particle-system-component.min.js" defer></script>
 
-    <script src="https://unpkg.com/aframe-play-sound-on-event@1.0.2/dist/aframe-play-sound-on-event.min.js"></script>
+<!-- Your code -->
+<script src="/js/travel-node-component.js" defer></script>
+<script src="/js/nav.js" defer></script>
+<script src="/js/hide-on-ar.js" defer></script>
+<script src="/js/xr-probe.js" defer></script>
+<script src="/js/sheets.js" defer></script>
 
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
+<!-- Module last -->
+<script type="module" src="/js/client.js"></script>
 
-    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
-    <script src="https://unpkg.com/aframe-particle-system-component@1.0.5/dist/aframe-particle-system-component.min.js"></script>
-
-  <!-- Your scripts (after libs) -->
-  <script src="/js/travel-node-component.js" defer></script>
-  <script src="/js/nav.js" defer></script>
-  <script src="/js/hide-on-ar.js" defer></script>
-  <script src="/js/xr-probe.js" defer></script>
-  <script src="/js/sheets.js" defer></script>
-
-  <!-- ES module bundle last (modules are already deferred) -->
-  <script type="module" src="/client.js"></script>
 
   <style>
     html, body { margin:0; height:100%; background:#0b0d12; color:#fff;
