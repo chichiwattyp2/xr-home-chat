@@ -4,6 +4,36 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>XR Chat</title>
+<script>
+/* Detect and block unsafe-eval usages early (no eval used here) */
+(function () {
+  const origEval = window.eval;
+  const origFunction = window.Function;
+  const origST = window.setTimeout;
+  const origSI = window.setInterval;
+
+  function warn(tag, payload) {
+    const err = new Error('[CSP] ' + tag + ' blocked');
+    console.error('[CSP DETECTOR]', tag, payload, '\nSTACK:\n' + err.stack);
+    // Throw to keep behavior consistent with CSP blocking
+    throw err;
+  }
+
+  // Block string-based timers (also disallowed by good CSP)
+  window.setTimeout = function (fn, delay, ...args) {
+    if (typeof fn === 'string') return warn('setTimeout(string)', fn);
+    return origST(fn, delay, ...args);
+  };
+  window.setInterval = function (fn, delay, ...args) {
+    if (typeof fn === 'string') return warn('setInterval(string)', fn);
+    return origSI(fn, delay, ...args);
+  };
+
+  // Block eval & new Function
+  window.eval = function () { return warn('eval()', arguments[0]); };
+  window.Function = function (...args) { return warn('new Function()', args.join(', ')); };
+})();
+</script>
 
   <!-- A-Frame: upgrade -->
 <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
