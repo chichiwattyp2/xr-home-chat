@@ -4,13 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>XR Home Chat</title>
+<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script> <!-- no defer -->
+<script src="https://unpkg.com/networked-aframe/dist/networked-aframe.min.js" defer></script>
+<script src="https://unpkg.com/networked-aframe/dist/adapters/easyrtc.js" defer></script>
+<!-- the rest of your components ... all defer -->
 
-  <!-- Core (load A-Frame before anything that depends on it) -->
-  <script src="https://aframe.io/releases/1.0.4/aframe.min.js" defer></script>
-
-  <!-- Networking (networked-aframe before its adapter) -->
-  <script src="https://unpkg.com/networked-aframe/dist/networked-aframe.min.js" defer></script>
-  <script src="https://unpkg.com/networked-aframe/dist/adapters/easyrtc.js" defer></script>
 
   <!-- A-Frame components / addons -->
   <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js" defer></script>
