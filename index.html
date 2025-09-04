@@ -59,11 +59,11 @@
     <!-- Assets (including NAF template) -->
     <a-assets timeout="60000">
       <!-- Simple avatar template for networked-aframe -->
-      <script id="avatar-template" type="text/html">
+
         <a-entity>
           <a-sphere class="head" radius="0.2" position="0 1.6 0" color="#bb8f9c"></a-sphere>
         </a-entity>
-      </script>
+     
 
       <!-- Images used in the catalog; preloading helps -->
       <img id="img-2"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F2.png"  crossorigin="anonymous">
@@ -86,8 +86,7 @@
 
     <!-- Player / camera rig -->
     <a-entity id="player"
-              networked="template: #avatar-template; attachTemplateToLocal: false; networkId: player-1"
-              position="0 1.6 2.05"
+               position="0 1.6 2.05"
               wasd-controls
               look-controls>
       <!-- Mouse/touch cursor; whitelist interactive items only -->
