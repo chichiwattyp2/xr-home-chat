@@ -1,72 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>XR ChatGPT</title>
-
-<link rel="icon" src="/favicon.ico">
-<script>
-/* Detect and block unsafe-eval usages early (no eval used here) */
-(function () {
-  const origEval = window.eval;
-  const origFunction = window.Function;
-  const origST = window.setTimeout;
-  const origSI = window.setInterval;
-
-  function warn(tag, payload) {
-    const err = new Error('[CSP] ' + tag + ' blocked');
-    console.error('[CSP DETECTOR]', tag, payload, '\nSTACK:\n' + err.stack);
-    // Throw to keep behavior consistent with CSP blocking
-    throw err;
-  }
-
-  // Block string-based timers (also disallowed by good CSP)
-  window.setTimeout = function (fn, delay, ...args) {
-    if (typeof fn === 'string') return warn('setTimeout(string)', fn);
-    return origST(fn, delay, ...args);
-  };
-  window.setInterval = function (fn, delay, ...args) {
-    if (typeof fn === 'string') return warn('setInterval(string)', fn);
-    return origSI(fn, delay, ...args);
-  };
-
-  // Block eval & new Function
-  window.eval = function () { return warn('eval()', arguments[0]); };
-  window.Function = function (...args) { return warn('new Function()', args.join(', ')); };
-})();
-</script>
-
-  <!-- A-Frame: upgrade -->
-<script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
-
-
-<!-- REMOVE any old bmfont text component scripts if you had them -->
-<!-- e.g., aframe-bmfont-text-component, text-geometry using bmfont, etc. -->
-
-<!-- Keep other components that don’t rely on bmfont. -->
-
-
-<!-- Then deferred plugins/components -->
-
-<script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js" defer></script>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>A‑Frame + Google + Chat GPT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+    <script src="sheets.js" defer></script>
+    <script type="module" src="/js/client.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-mouse-cursor-component/dist/aframe-mouse-cursor-component.min.js" defer></script>
 <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
 <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js" defer></script>
 
-<!-- Your code -->
-<script src="/js/travel-node-component.js" defer></script>
-<script src="/js/nav.js" defer></script>
-<script src="/js/hide-on-ar.js" defer></script>
-<!--<script src="/js/xr-probe.js" defer></script> -->
-<script src="/js/sheets.js" defer></script>
-
-<!-- Module last -->
-<script type="module" src="/js/client.js"></script>
-
-
-  <style>
+     <style>
     html, body { margin:0; height:100%; background:#0b0d12; color:#fff;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
     #ui { position:fixed; left:12px; right:12px; bottom:12px; display:flex; gap:8px; z-index: 2;
@@ -78,142 +25,54 @@
     button:active { transform: translateY(1px); }
     @media (max-width: 480px) { #ui { flex-direction: column; } button { width: 100%; } }
   </style>
-</head>
-<body>
-  <!-- Minimal top UI (wired by /client.js) -->
-  <div id="ui">
+  </head>
+  <body>
+     <div id="ui">
     <input id="prompt" placeholder="Ask something…" />
     <button id="send">Send</button>
     <button id="voice">🎤 Voice</button>
   </div>
+    <a-scene>
+      <!-- Where rows spawn -->
+      <a-entity id="csv-root"></a-entity>
 
-  <!-- Scene -->
-  <a-scene renderer="antialias: true" vr-mode-ui="enabled: true">
-    <!-- Assets (including NAF template) -->
-    <a-assets timeout="60000">
-      <!-- Simple avatar template for networked-aframe -->
-
-        <a-entity>
-          <a-sphere class="head" radius="0.2" position="0 1.6 0" color="#bb8f9c"></a-sphere>
-        </a-entity>
-     
-
-      <!-- Images used in the catalog; preloading helps -->
-      <img id="img-2"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F2.png"  crossorigin="anonymous">
-      <img id="img-3"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F3.png"  crossorigin="anonymous">
-      <img id="img-4"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F4.png"  crossorigin="anonymous">
-      <img id="img-5"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F5.png"  crossorigin="anonymous">
-      <img id="img-6"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F6.png"  crossorigin="anonymous">
-      <img id="img-7"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F7.png"  crossorigin="anonymous">
-      <img id="img-8"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F8.png"  crossorigin="anonymous">
-      <img id="img-9"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F9.png"  crossorigin="anonymous">
-      <img id="img-10" src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F10.png" crossorigin="anonymous">
-      <img id="img-11" src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F11.png" crossorigin="anonymous">
-      <img id="img-12" src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F12.png" crossorigin="anonymous">
-      <img id="img-1"  src="https://cdn.glitch.com/a1f36298-9f74-4b84-b0cd-fb96b98893cc%2F1.png"  crossorigin="anonymous">
-      <img id="logo"   src="https://cdn.glitch.com/a0f896a4-4e28-47a9-b792-0307f9c0c167%2Fchris-menu.png" crossorigin="anonymous">
-    </a-assets>
-
-    <!-- Simple environment (optional) -->
-    <a-entity environment="preset: forest; groundTexture: walkernoise; groundColor: #0b0d12; skyColor: #0b0d12"></a-entity>
-
-    <!-- Player / camera rig -->
-    <a-entity id="player"
-               position="0 1.6 2.05"
-              wasd-controls
-              look-controls>
-      <!-- Mouse/touch cursor; whitelist interactive items only -->
-      <a-entity cursor="rayOrigin: mouse"
-                raycaster="objects: [data-raycastable]"></a-entity>
-      <a-camera></a-camera>
-    </a-entity>
-
-    <!-- Catalog (mark items as data-raycastable for performance) -->
-    <a-entity id="catalog" data-raycastable scale="0.2 0.2 0.2" position="-2 1.1 -1.05" rotation="0 45 0">
-      <a-entity class="container" id="container" position="-3.15 4 0">
-
-        <!-- Example tile (use preloaded assets) -->
-        <a-image data-raycastable width="2" height="1"
-                 src="#img-2"
-                 link="href: /public/webar.html">
-          <a-entity geometry="primitive: plane; width: 2; height: 0.2"
-                    material="color: #111"
-                    text="align: center; value: WebAR"
-                    position="0 -0.6 0"></a-entity>
-          <a-plane id="highlight-0" width="2.05" height="1.25" material="shader: flat; color: white"
-                   position="0 -0.1 -0.01" visible="false"></a-plane>
-        </a-image>
-
-        <a-image data-raycastable position="2.1 0 0" width="2" height="1"
-                 src="#img-3" link="href: /public/models.html">
-          <a-entity geometry="primitive: plane; width: 2; height: 0.2" material="color: #111"
-                    text="align: center; value: Model-Viewer" position="0 -0.6 0"></a-entity>
-          <a-plane id="highlight-1" width="2.05" height="1.25" material="shader: flat; color: white"
-                   position="0 -0.1 -0.01" visible="false"></a-plane>
-        </a-image>
-
-        <a-image data-raycastable position="4.2 0 0" width="2" height="1"
-                 src="#img-4" link="href: /public/xr-broadcaster.html">
-          <a-entity geometry="primitive: plane; width: 2; height: 0.2" material="color: #111"
-                    text="align: center; value: XR Broadcaster" position="0 -0.6 0"></a-entity>
-          <a-plane id="highlight-2" width="2.05" height="1.25" material="shader: flat; color: white"
-                   position="0 -0.1 -0.01" visible="false"></a-plane>
-        </a-image>
-
-        <a-image data-raycastable position="6.3 0 0" width="2" height="1"
-                 src="#img-5" link="href: /public/virtual-con.html">
-          <a-entity geometry="primitive: plane; width: 2; height: 0.2" material="color: #111"
-                    text="align: center; value: VR Conference" position="0 -0.6 0"></a-entity>
-          <a-plane id="highlight-3" width="2.05" height="1.25" material="shader: flat; color: white"
-                   position="0 -0.1 -0.01" visible="false"></a-plane>
-        </a-image>
-
-        <!-- (The rest of your tiles, converted to use #img-* IDs and data-raycastable) -->
-        <!-- ... replicate as needed with src="#img-6" .. "#img-12" and proper link hrefs ... -->
-
-      </a-entity>
-
-      <a-entity id="arrows" position="0 0.3 0.2">
-        <a-image id="mainLogo" src="#logo" position="0 5.8 0" width="4" height="2"></a-image>
-      </a-entity>
-
-      <a-entity id="menu" position="-3.06 4.98 0" scale="0.35 0.35 0.35">
-        <a-entity data-raycastable link="href: index.html"
-                  geometry="primitive: plane; width: 3.4"
-                  material="color: #606060"
-                  text="align: center; value: Portfolio; width: 10"></a-entity>
-        <a-entity data-raycastable link="href: resume.html"
-                  geometry="primitive: plane; width: 3.4"
-                  material="color: #111"
-                  text="align: center; value: XR Resume; width: 10" position="3.5 0 0"></a-entity>
-        <a-entity data-raycastable link="href: contact.html"
-                  geometry="primitive: plane; width: 3.4"
-                  material="color: #111"
-                  text="align: center; value: Contact; width: 10" position="7 0 0"></a-entity>
-        <a-entity data-raycastable link="href: scenes.html"
-                  geometry="primitive: plane; width: 3.4"
-                  material="color: #111"
-                  text="align: center; value: Scenes; width: 10" position="10.5 0 0"></a-entity>
-        <a-entity data-raycastable link="href: browse.html"
-                  geometry="primitive: plane; width: 3.4"
-                  material="color: #111"
-                  text="align: center; value: Browser; width: 10" position="14 0 0"></a-entity>
-        <a-entity data-raycastable link="href: broadcasting.html"
-                  geometry="primitive: plane; width: 3.4"
-                  material="color: #111"
-                  text="align: center; value: tab 6; width: 10" position="17.5 0 0"></a-entity>
-      </a-entity>
-    </a-entity>
-
-    <!-- Chat panel -->
-    <a-entity id="chatPanel" data-raycastable position="2.637 2.081 -1.25" rotation="0 -45 0">
+      <!-- Camera with mouse cursor + raycaster for clicking -->
+      <a-entity
+        id="player"
+       
+        camera
+        spawn-in-circle="radius:3;"
+        position="0 1.9 0"
+        wasd-controls
+        look-controls
+      >
+        <a-cursor></a-cursor>
+         </a-entity>
+      <a-entity id="chatPanel" data-raycastable position="2.637 2.081 -1.25" rotation="0 -45 0">
       <a-plane width="1.35" height="0.8" color="#111" material="opacity: 0.9"></a-plane>
       <a-entity id="chatText" text="value: Hello!; color: #fff" position="-0.62 0.28 0.01" scale="0.8 0.8 0.8"></a-entity>
       <a-entity id="hint" text="value: Type below or press mic; wrapCount: 36; color: #9ad"
                 position="-0.62 -0.28 0.01" scale="0.6 0.6 0.6"></a-entity>
     </a-entity>
-  </a-scene>
+ <a-entity environment="preset: forest; groundTexture: walkernoise; groundColor: #0b0d12; skyColor: #0b0d12"></a-entity>
 
-  <audio id="assistantAudio" autoplay></audio>
-</body>
+    
+    </a-scene>
+
+    <div id="status">Loading CSV…</div>
+    <script>
+      // Show Spawned N / errors without opening DevTools
+      (function(){
+        const status = document.getElementById('status');
+        const _log = console.log, _err = console.error;
+        console.log = function(...args){ _log.apply(console,args);
+          args.forEach(a => { if (typeof a === 'string' && a.startsWith('Spawned')) status.textContent = a; });
+        };
+        console.error = function(...args){ _err.apply(console,args);
+          status.textContent = 'Error: ' + args.map(String).join(' ');
+        };
+      })();
+    </script>
+     <audio id="assistantAudio" autoplay></audio>
+  </body>
 </html>
