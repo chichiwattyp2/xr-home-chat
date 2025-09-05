@@ -4,13 +4,17 @@
     <meta charset="utf-8" />
     <title>A‑Frame + Google + Chat GPT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Asimovian&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Rampart+One&display=swap" rel="stylesheet">
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   script-src 'self' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval';
   connect-src 'self' https://cdn.aframe.io https://docs.google.com https://www.googleapis.com;
   img-src 'self' data: blob: https://cdn.aframe.io https://i.ytimg.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.gstatic.com https://*.ggpht.com;
-  style-src 'self' 'unsafe-inline';
-  font-src 'self' data: https://cdn.aframe.io;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' data: https://cdn.aframe.io https://fonts.gstatic.com data:;
 ">
 
 
@@ -89,5 +93,7 @@
       })();
     </script>
      <audio id="assistantAudio" autoplay></audio>
-  </body>
+  
+  <div class="xr-ui parallax-stage" data-theme="dark-glass"></div>
+</body>
 </html>
