@@ -4,14 +4,15 @@
     <meta charset="utf-8" />
     <title>A‑Frame + Google + Chat GPT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="Content-Security-Policy" content="
+<meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   script-src 'self' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval';
   connect-src 'self' https://cdn.aframe.io https://docs.google.com https://www.googleapis.com;
   img-src 'self' data: blob: https://cdn.aframe.io https://i.ytimg.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.gstatic.com https://*.ggpht.com;
   style-src 'self' 'unsafe-inline';
-  font-src 'self' data:;
+  font-src 'self' data: https://cdn.aframe.io;
 ">
+
 
     <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
     <script src="sheets.js" defer></script>
