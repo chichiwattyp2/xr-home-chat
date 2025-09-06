@@ -63,6 +63,29 @@
         <!-- Hint plane (uses chatHintCanvas) -->
         <a-plane id="chatHintPlane" material="transparent: true; src: #chatHintCanvas" position="-0.62 -0.28 0.01" scale="0.74 0.22 1"></a-plane>
       </a-entity>
+
+
+       <a-entity light="color: #EEE; intensity: 0.5" position="-1.5379 5.13754 8.19083"></a-entity>
+      <a-entity
+        light="type: directional; color: #fff; intensity: 0.25"
+        position="-1 1 0"
+      ></a-entity>
+      <a-entity
+        light="type: directional; color: #EEE; intensity: 0.5"
+        position="-6 5 0"
+      ></a-entity
+      ><a-entity
+        light="color: #EEE; intensity: 0.5"
+        position="0.31022 5 0"
+      ></a-entity>
+    <a-entity light="color: #EEE; intensity: 0.5" position="0.31022 7.23722 7.51975"></a-entity>
+      <a-light
+        type="directional"
+        position="12.95206 5.55805 -1.79917"
+        rotation="0 0 0"
+        target="#directionaltarget"
+      ></a-light>
+      <a-entity id="directionaltarget" position="0 0 -1"></a-entity>
     </a-scene>
 
     <audio id="assistantAudio" autoplay></audio>
