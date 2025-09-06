@@ -1,22 +1,115 @@
 // client.js — Chat (SSE-ish) + Realtime Voice (WebRTC) — robust edition
+// + Lookbook font rendering via Canvas → A-Frame texture (no MSDF JSON needed)
+
+// ==================
+// Canvas text config
+// ==================
+const CHAT_PLANE_SELECTOR = '#chatTextPlane';   // <a-plane material="src: #chatTextCanvas">
+const CHAT_CANVAS_ID      = 'chatTextCanvas';   // <canvas id="chatTextCanvas">
+const HINT_CANVAS_ID      = 'chatHintCanvas';   // optional <canvas id="chatHintCanvas">
+const CHAT_FONT_FAMILY    = 'Rampart One';      // lookbook display
+const HINT_FONT_FAMILY    = 'Asimovian';        // lookbook accent
+const CHAT_FONT_SIZE_PX   = 60;                 // tweak to taste
+const HINT_FONT_SIZE_PX   = 44;
 
 // ===============
 // Boot sequence
 // ===============
 let scene = null;
-let chatText = null;
+let chatText = null;          // A-Frame <a-entity id="chatText"> (fallback)
 let promptInput = null;
 let sendBtn = null;
 let voiceBtn = null;
 let audioEl = null;
 
-// Buffer any UI text updates until scene + #chatText exist
+// Canvas/plane refs
+let chatCanvas = null;
+let chatPlane  = null;
+
+// Buffer any UI text updates until scene + UI exist
 let pendingPanelText = '';
 
+function drawTextToCanvas({ canvas, text, fontFamily, fontSize=56, color="#fff",
+                            bg=null, padding=28, maxWidth=null, align="left",
+                            lineHeight=1.22, weight="600" }) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width  || 1024;
+  const H = canvas.height || 256;
+
+  // Clear / BG
+  ctx.clearRect(0, 0, W, H);
+  if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
+
+  // Font + wrap
+  ctx.fillStyle    = color;
+  ctx.textBaseline = 'top';
+  ctx.font = `${weight} ${fontSize}px "${fontFamily}", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
+
+  const words = String(text ?? '').split(/\s+/);
+  const lines = [];
+  const max   = (maxWidth ?? (W - padding * 2));
+  let line = '';
+  for (const w of words) {
+    const test = line ? `${line} ${w}` : w;
+    if (ctx.measureText(test).width > max) { lines.push(line); line = w; }
+    else { line = test; }
+  }
+  if (line) lines.push(line);
+
+  let y = padding;
+  for (const l of lines) {
+    let x = padding;
+    const lw = ctx.measureText(l).width;
+    if (align === 'center') x = (W - lw) / 2;
+    if (align === 'right')  x = W - padding - lw;
+    ctx.fillText(l, x, y);
+    y += fontSize * lineHeight;
+    if (y > H - padding - fontSize) break;
+  }
+
+  // Nudge A-Frame/THREE to refresh the texture
+  if (chatPlane?.object3D) {
+    const mesh = chatPlane.getObject3D('mesh');
+    if (mesh?.material?.map) mesh.material.map.needsUpdate = true;
+  }
+}
+
+// Throttled panel setter (streams smoothly)
+let rafPending = false;
+let latestPanelText = '';
+function setPanelCanvas(text) {
+  latestPanelText = (text || '').slice(-8000);
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => {
+    rafPending = false;
+    const doDraw = () => drawTextToCanvas({
+      canvas:     chatCanvas,
+      text:       latestPanelText,
+      fontFamily: CHAT_FONT_FAMILY,
+      fontSize:   CHAT_FONT_SIZE_PX,
+      color:      '#fff',
+      align:      'left',
+      maxWidth:   (chatCanvas?.width || 1024) - 64
+    });
+    // First run: wait for fonts to avoid FOUT on canvas
+    if (setPanelCanvas.firstRun && document.fonts?.ready) {
+      setPanelCanvas.firstRun = false;
+      document.fonts.ready.then(doDraw);
+    } else {
+      doDraw();
+    }
+  });
+}
+setPanelCanvas.firstRun = true;
+
+// Unified panel API: use canvas if present, else fallback to A-Frame text
 function setPanel(text) {
   const t = (text || '').slice(-8000);
-  if (chatText) {
-    // A-Frame text component
+  if (chatCanvas && chatPlane) {
+    setPanelCanvas(t);
+  } else if (chatText) {
     chatText.setAttribute('text', 'value', t);
   } else {
     pendingPanelText = t;
@@ -24,7 +117,10 @@ function setPanel(text) {
 }
 function appendPanel(chunk) {
   if (!chunk) return;
-  const current = chatText?.getAttribute('text')?.value || pendingPanelText || '';
+  const current =
+    (chatCanvas ? latestPanelText :
+     chatText?.getAttribute('text')?.value) ||
+    pendingPanelText || '';
   setPanel(current + chunk);
 }
 
@@ -33,58 +129,66 @@ function whenSceneReady() {
   return new Promise((resolve) => {
     const onDom = () => {
       scene = document.querySelector('a-scene');
-      if (!scene) return resolve(); // page without a scene: resolve anyway
+      if (!scene) return resolve();           // page without a scene
       if (scene.hasLoaded) return resolve();
       scene.addEventListener('loaded', resolve, { once: true });
     };
-    if (document.readyState === 'loading') {
-      window.addEventListener('DOMContentLoaded', onDom, { once: true });
-    } else {
-      onDom();
-    }
+    if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', onDom, { once: true });
+    else onDom();
   });
 }
 
 (async () => {
   await whenSceneReady();
 
-  // Now it is safe to query scene children
-  chatText = document.querySelector('#chatText');
+  // Query scene/UI elements
+  chatText    = document.querySelector('#chatText');     // fallback text entity
+  chatCanvas  = document.getElementById(CHAT_CANVAS_ID); // canvas
+  chatPlane   = document.querySelector(CHAT_PLANE_SELECTOR); // plane using the canvas
   promptInput = document.querySelector('#prompt');
-  sendBtn = document.querySelector('#send');
-  voiceBtn = document.querySelector('#voice');
-  audioEl = document.querySelector('#assistantAudio');
+  sendBtn     = document.querySelector('#send');
+  voiceBtn    = document.querySelector('#voice');
+  audioEl     = document.querySelector('#assistantAudio');
 
   // iOS playback friendliness
   if (audioEl) {
-    audioEl.autoplay = true;
+    audioEl.autoplay  = true;
     audioEl.playsInline = true;
     audioEl.muted = false;
   }
 
   // Flush any buffered panel text
-  if (pendingPanelText && chatText) {
-    chatText.setAttribute('text', 'value', pendingPanelText);
+  if (pendingPanelText) {
+    setPanel(pendingPanelText);
     pendingPanelText = '';
   }
 
   // Wire events if elements exist
   if (sendBtn) sendBtn.addEventListener('click', sendPrompt);
   if (promptInput) {
-    promptInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') sendPrompt();
-    });
+    promptInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendPrompt(); });
   }
   if (voiceBtn) {
-    voiceBtn.addEventListener('click', async () => {
-      if (!voiceActive) await startVoice(); else await stopVoice();
-    });
+    voiceBtn.addEventListener('click', async () => { if (!voiceActive) await startVoice(); else await stopVoice(); });
   }
 
-  // Nice initial hint
-  if (!pendingPanelText && chatText) {
-    setPanel('Hello! Type below or use the mic.\n');
+  // One-time hint on secondary canvas (if present)
+  const hintCanvas = document.getElementById(HINT_CANVAS_ID);
+  if (hintCanvas) {
+    const drawHint = () => drawTextToCanvas({
+      canvas:     hintCanvas,
+      text:       'Type below or press mic',
+      fontFamily: HINT_FONT_FAMILY,
+      fontSize:   HINT_FONT_SIZE_PX,
+      color:      '#9ad',
+      align:      'left',
+      maxWidth:   (hintCanvas.width || 1024) - 56
+    });
+    if (document.fonts?.ready) document.fonts.ready.then(drawHint); else drawHint();
   }
+
+  // Nice initial hint on main panel
+  setPanel('Hello! Type below or use the mic.\n');
 })().catch((e) => {
   console.error('Boot error:', e);
   setPanel(`Boot error: ${e?.message || e}`);
@@ -125,9 +229,9 @@ async function sendPrompt() {
       return;
     }
 
-    const reader = res.body.getReader();
+    const reader  = res.body.getReader();
     const decoder = new TextDecoder();
-    let partial = '';
+    let partial   = '';
 
     for (;;) {
       const { value, done } = await reader.read();
@@ -203,7 +307,7 @@ async function startVoice() {
   voiceBtn.disabled = true;
 
   try {
-    // 1) Fetch ephemeral realtime token (your server must allow this in CSP)
+    // 1) Fetch ephemeral realtime token
     const tokenRes = await fetch('/api/realtime-token');
     let tokenJson = null;
     try { tokenJson = await tokenRes.json(); } catch {}
@@ -232,7 +336,7 @@ async function startVoice() {
       return;
     }
 
-    // 3) Create offer and include ICE candidates (better interop)
+    // 3) Create offer and include ICE candidates
     const offer = await pc.createOffer({ offerToReceiveAudio: true });
     await pc.setLocalDescription(offer);
     await waitForIceGatheringComplete(pc);
@@ -282,7 +386,7 @@ async function startVoice() {
     };
 
     ws.onerror = (e) => console.error('WS error', e);
-    ws.onclose = () => console.log('WS closed');
+    ws.onclose  = () => console.log('WS closed');
 
     voiceActive = true;
     if (voiceBtn) voiceBtn.textContent = '⏹ Stop';
@@ -322,15 +426,15 @@ async function stopVoice() {
 function waitForIceGatheringComplete(pc) {
   return new Promise((resolve) => {
     if (pc.iceGatheringState === 'complete') return resolve();
-    const check = () => {
+    const onChange = () => {
       if (pc.iceGatheringState === 'complete') {
-        pc.removeEventListener('icegatheringstatechange', check);
+        pc.removeEventListener('icegatheringstatechange', onChange);
         resolve();
       }
     };
-    pc.addEventListener('icegatheringstatechange', check);
+    pc.addEventListener('icegatheringstatechange', onChange);
     setTimeout(() => { // Failsafe for quirky networks
-      pc.removeEventListener('icegatheringstatechange', check);
+      pc.removeEventListener('icegatheringstatechange', onChange);
       resolve();
     }, 4000);
   });
