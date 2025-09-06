@@ -1,22 +1,24 @@
-// client.js — Chat (SSE-ish) + Realtime Voice (WebRTC) — robust edition
-// + Lookbook font rendering via Canvas → A-Frame texture (no MSDF JSON needed)
+// client.js — Chat (SSE-ish) + Realtime Voice (WebRTC)
+// + Lookbook font rendering via Canvas → A-Frame texture (ALL Asimovian)
 
 // ==================
 // Canvas text config
 // ==================
 const CHAT_PLANE_SELECTOR = '#chatTextPlane';   // <a-plane material="src: #chatTextCanvas">
 const CHAT_CANVAS_ID      = 'chatTextCanvas';   // <canvas id="chatTextCanvas">
-const HINT_CANVAS_ID      = 'chatHintCanvas';   // optional <canvas id="chatHintCanvas">
-const CHAT_FONT_FAMILY    = 'Rampart One';      // lookbook display
-const HINT_FONT_FAMILY    = 'Asimovian';        // lookbook accent
-const CHAT_FONT_SIZE_PX   = 60;                 // tweak to taste
+const HINT_CANVAS_ID      = 'chatHintCanvas';   // <canvas id="chatHintCanvas">
+
+// 🔤 Use Asimovian everywhere
+const CHAT_FONT_FAMILY    = 'Asimovian';
+const HINT_FONT_FAMILY    = 'Asimovian';
+const CHAT_FONT_SIZE_PX   = 60;
 const HINT_FONT_SIZE_PX   = 44;
 
 // ===============
 // Boot sequence
 // ===============
 let scene = null;
-let chatText = null;          // A-Frame <a-entity id="chatText"> (fallback)
+let chatText = null;          // fallback <a-entity text> (not used if canvas present)
 let promptInput = null;
 let sendBtn = null;
 let voiceBtn = null;
@@ -29,6 +31,7 @@ let chatPlane  = null;
 // Buffer any UI text updates until scene + UI exist
 let pendingPanelText = '';
 
+// Draw text into canvas and refresh the A-Frame texture
 function drawTextToCanvas({ canvas, text, fontFamily, fontSize=56, color="#fff",
                             bg=null, padding=28, maxWidth=null, align="left",
                             lineHeight=1.22, weight="600" }) {
@@ -37,11 +40,9 @@ function drawTextToCanvas({ canvas, text, fontFamily, fontSize=56, color="#fff",
   const W = canvas.width  || 1024;
   const H = canvas.height || 256;
 
-  // Clear / BG
   ctx.clearRect(0, 0, W, H);
   if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
 
-  // Font + wrap
   ctx.fillStyle    = color;
   ctx.textBaseline = 'top';
   ctx.font = `${weight} ${fontSize}px "${fontFamily}", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
@@ -68,7 +69,7 @@ function drawTextToCanvas({ canvas, text, fontFamily, fontSize=56, color="#fff",
     if (y > H - padding - fontSize) break;
   }
 
-  // Nudge A-Frame/THREE to refresh the texture
+  // force texture refresh
   if (chatPlane?.object3D) {
     const mesh = chatPlane.getObject3D('mesh');
     if (mesh?.material?.map) mesh.material.map.needsUpdate = true;
@@ -93,7 +94,8 @@ function setPanelCanvas(text) {
       align:      'left',
       maxWidth:   (chatCanvas?.width || 1024) - 64
     });
-    // First run: wait for fonts to avoid FOUT on canvas
+
+    // First run: wait for fonts to be ready to avoid blank canvas
     if (setPanelCanvas.firstRun && document.fonts?.ready) {
       setPanelCanvas.firstRun = false;
       document.fonts.ready.then(doDraw);
@@ -104,7 +106,7 @@ function setPanelCanvas(text) {
 }
 setPanelCanvas.firstRun = true;
 
-// Unified panel API: use canvas if present, else fallback to A-Frame text
+// Unified panel API: use canvas if present, else A-Frame text component
 function setPanel(text) {
   const t = (text || '').slice(-8000);
   if (chatCanvas && chatPlane) {
@@ -142,9 +144,9 @@ function whenSceneReady() {
   await whenSceneReady();
 
   // Query scene/UI elements
-  chatText    = document.querySelector('#chatText');     // fallback text entity
-  chatCanvas  = document.getElementById(CHAT_CANVAS_ID); // canvas
-  chatPlane   = document.querySelector(CHAT_PLANE_SELECTOR); // plane using the canvas
+  chatText    = document.querySelector('#chatText');           // fallback (not used if canvas exists)
+  chatCanvas  = document.getElementById(CHAT_CANVAS_ID);       // canvas
+  chatPlane   = document.querySelector(CHAT_PLANE_SELECTOR);   // plane using the canvas
   promptInput = document.querySelector('#prompt');
   sendBtn     = document.querySelector('#send');
   voiceBtn    = document.querySelector('#voice');
@@ -152,9 +154,9 @@ function whenSceneReady() {
 
   // iOS playback friendliness
   if (audioEl) {
-    audioEl.autoplay  = true;
+    audioEl.autoplay   = true;
     audioEl.playsInline = true;
-    audioEl.muted = false;
+    audioEl.muted      = false;
   }
 
   // Flush any buffered panel text
@@ -187,7 +189,7 @@ function whenSceneReady() {
     if (document.fonts?.ready) document.fonts.ready.then(drawHint); else drawHint();
   }
 
-  // Nice initial hint on main panel
+  // Initial text
   setPanel('Hello! Type below or use the mic.\n');
 })().catch((e) => {
   console.error('Boot error:', e);
@@ -255,7 +257,6 @@ async function sendPrompt() {
               buf += evt.delta;
               setPanel(buf);
             } else if (typeof evt.text === 'string') {
-              // Fallback
               buf += evt.text;
               setPanel(buf);
             }
@@ -299,10 +300,7 @@ function b64urlDecode(b64url) {
 }
 
 async function startVoice() {
-  if (!window.RTCPeerConnection) {
-    setPanel('WebRTC not supported in this browser.');
-    return;
-  }
+  if (!window.RTCPeerConnection) { setPanel('WebRTC not supported in this browser.'); return; }
   if (!voiceBtn) return;
   voiceBtn.disabled = true;
 
@@ -317,10 +315,7 @@ async function startVoice() {
       return;
     }
     const EPHEMERAL_KEY = tokenJson?.client_secret?.value || tokenJson?.value;
-    if (!EPHEMERAL_KEY) {
-      setPanel('Realtime error: token missing "value".');
-      return;
-    }
+    if (!EPHEMERAL_KEY) { setPanel('Realtime error: token missing "value".'); return; }
 
     // 2) RTCPeerConnection + mic
     pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
@@ -345,21 +340,13 @@ async function startVoice() {
     const sdpB64url = b64urlEncode(pc.localDescription.sdp);
     ws = new WebSocket(
       `wss://api.openai.com/v1/realtime?model=${encodeURIComponent(REALTIME_MODEL)}`,
-      [
-        'realtime',
-        'openai-insecure-api-key.' + EPHEMERAL_KEY,
-        'openai-sdp.' + sdpB64url
-      ]
+      ['realtime', 'openai-insecure-api-key.' + EPHEMERAL_KEY, 'openai-sdp.' + sdpB64url]
     );
 
     ws.onopen = () => {
-      // Session preferences
       ws.send(JSON.stringify({
         type: 'session.update',
-        session: {
-          type: 'realtime',
-          audio: { output: { voice: 'alloy' } }
-        }
+        session: { type: 'realtime', audio: { output: { voice: 'alloy' } } }
       }));
     };
 
@@ -433,10 +420,7 @@ function waitForIceGatheringComplete(pc) {
       }
     };
     pc.addEventListener('icegatheringstatechange', onChange);
-    setTimeout(() => { // Failsafe for quirky networks
-      pc.removeEventListener('icegatheringstatechange', onChange);
-      resolve();
-    }, 4000);
+    setTimeout(() => { pc.removeEventListener('icegatheringstatechange', onChange); resolve(); }, 4000);
   });
 }
 
