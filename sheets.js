@@ -1,7 +1,7 @@
 // sheets.js — GViz → A-Frame tiles + Lookbook overlay panels (no duplicates)
 // - Removes old table/list UI before rendering (legacy selectors)
 // - Global guard: window.__LOOKBOOK_ACTIVE = true
-// - Lookbook overlay panels only (in-scene label disabled by default)
+// - Lookbook overlay panels only (scene label OFF by default)
 // - GitHub blob→raw normalizer + local /assets fallback for images/models
 (function () {
   // ---------- flags ----------
