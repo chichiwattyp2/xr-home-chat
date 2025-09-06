@@ -25,9 +25,9 @@
   <body>
     <!-- Overlay UI -->
     <div id="ui">
-      <input id="prompt" placeholder="Ask something…" />
+      <input id="prompt" placeholder="Prompt">
       <button id="send">Send</button>
-      <button id="voice">🎤 Voice</button>
+      <button id="voice">Voice</button>
     </div>
 
     <a-scene>
@@ -39,7 +39,7 @@
       </a-assets>
 
       <!-- Solid sky (remove any sky1.jpg reference to kill the 404) -->
-      <a-sky color="#0b0d12"></a-sky>
+      <a-sky color="#FAA18F"></a-sky>
 
       <!-- Where rows spawn -->
       <a-entity id="csv-root"></a-entity>
@@ -48,7 +48,7 @@
       <a-entity id="player"
                 camera
                 spawn-in-circle="radius:3;"
-                position="0 1.9 0"
+                position="0 2 2"
                 wasd-controls
                 look-controls>
         <a-cursor></a-cursor>
@@ -57,7 +57,7 @@
       <!-- Chat panel (canvas textures) -->
       <a-entity id="chatPanel" data-raycastable
                 position="9.43415 3.83854 -1.88325"
-                rotation="0 -45 0" scale="5 5 5">
+                rotation="0 -45 0" scale="2 2 2">
         <a-plane width="1.35" height="0.8"
                  color="#111" material="opacity: 0.9"></a-plane>
 
