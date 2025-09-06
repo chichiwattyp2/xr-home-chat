@@ -105,7 +105,7 @@
     scene.querySelectorAll(`a-image[width="2"][height="1"]`).forEach(el => {
       if (!el.closest(`#${ourContainerId}`)) el.remove();
     });
-    const LEGACY_SCALE = "0.03 0.03 0.03";
+    const LEGACY_SCALE = "1 1 1";
     const LEGACY_POS   = "0 2.10635 2.61942";
     const LEGACY_ROT   = "0 30 0";
     scene.querySelectorAll(`a-entity[gltf-model]`).forEach(el => {
