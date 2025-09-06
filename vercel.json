@@ -3,7 +3,10 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' 'unsafe-inline' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; script-src-elem 'self' 'unsafe-eval' 'wasm-unsafe-eval' 'unsafe-inline' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; connect-src 'self' blob: https://api.openai.com wss://api.openai.com https://cdn.aframe.io https://cdn.glitch.com https://cdn.glitch.global https://www.youtube.com https://i.ytimg.com https://*.googleapis.com https://*.gstatic.com https://docs.google.com https://www.googleapis.com https://raw.githubusercontent.com https://github.com https://user-images.githubusercontent.com; img-src 'self' data: blob: https://cdn.aframe.io https://i.ytimg.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.gstatic.com https://*.ggpht.com https://*.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://cdn.aframe.io https://fonts.gstatic.com"
+        }
       ]
     }
   ]
