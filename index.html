@@ -54,24 +54,14 @@
         <a-cursor></a-cursor>
       </a-entity>
 
-      <!-- Chat panel (canvas textures) -->
-      <a-entity id="chatPanel" data-raycastable
-                position="9.43415 3.83854 -1.88325"
-                rotation="0 -45 0" scale="2 2 2">
-        <a-plane width="1.35" height="0.8"
-                 color="#111" material="opacity: 0.9"></a-plane>
+     <a-entity id="chatPanel" data-raycastable="" position="6.57803 2.66472 -1.88325" rotation="-29.999999999999996 -45 0" scale="2 2 2">
+        <a-plane width="1.35" height="0.8" color="#111" material="opacity: 0.9"></a-plane>
 
         <!-- Main chat text plane (uses chatTextCanvas) -->
-        <a-plane id="chatTextPlane"
-                 material="src: #chatTextCanvas; transparent: true"
-                 position="-0.62 0.28 0.01"
-                 scale="0.74 0.30 1"></a-plane>
+        <a-plane id="chatTextPlane" material="transparent: true; src: #chatTextCanvas" position="-0.62 0.28 0.01" scale="0.74 0.3 1"></a-plane>
 
         <!-- Hint plane (uses chatHintCanvas) -->
-        <a-plane id="chatHintPlane"
-                 material="src: #chatHintCanvas; transparent: true"
-                 position="-0.62 -0.28 0.01"
-                 scale="0.74 0.22 1"></a-plane>
+        <a-plane id="chatHintPlane" material="transparent: true; src: #chatHintCanvas" position="-0.62 -0.28 0.01" scale="0.74 0.22 1"></a-plane>
       </a-entity>
     </a-scene>
 
