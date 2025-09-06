@@ -45,12 +45,12 @@
   </div>
     <a-scene>
      
-  <!-- MSDF font from A-Frame CDN -->
 <a-assets>
-  <a-asset-item id="roboto-msdf"
-                src="https://cdn.aframe.io/fonts/Roboto-msdf.json"
-                crossorigin="anonymous"></a-asset-item>
+  <a-asset-item id="rampart-msdf" src="assets/fonts/RampartOne-msdf.json"></a-asset-item>
+  <a-asset-item id="asimovian-msdf" src="assets/fonts/Asimovian-msdf.json"></a-asset-item>
+  <a-asset-item id="dmsans-msdf" src="assets/fonts/DMSans-msdf.json"></a-asset-item>
 </a-assets>
+
 
 
       <!-- Where rows spawn -->
@@ -68,12 +68,28 @@
       >
         <a-cursor></a-cursor>
          </a-entity>
- <a-entity id="chatPanel" data-raycastable position="2.637 2.081 -1.25" rotation="0 -45 0">
-      <a-plane width="1.35" height="0.8" color="#111" material="opacity: 0.9"></a-plane>
-      <a-entity id="chatText" text="value: Hello!; shader: msdf; font: #roboto-msdf  color: #fff" position="-0.62 0.28 0.01" scale="0.8 0.8 0.8"></a-entity>
-      <a-entity id="hint" text="value: Type below or press mic; wrapCount: 36; color: #9ad shader: msdf; font: #roboto-msdf"
-                position="-0.62 -0.28 0.01" scale="0.6 0.6 0.6" msdf; font: #roboto-msd></a-entity>
-    </a-entity>
+<a-entity id="chatPanel" data-raycastable
+          position="9.43415 3.83854 -1.88325"
+          rotation="0 -45 0" scale="5 5 5">
+
+  <a-plane width="1.35" height="0.8"
+           color="#111" material="opacity: 0.9"></a-plane>
+
+  <!-- Main chat text (Rampart One = bold display) -->
+  <a-entity id="chatText"
+            text="font: #rampart-msdf; color: #fff; shader: msdf;
+                   value: Hello! Type below or use the mic.; wrapCount: 28"
+            position="-0.62 0.28 0.01" scale="0.8 0.8 0.8">
+  </a-entity>
+
+  <!-- Hint (Asimovian = sci-fi accent, lighter color) -->
+  <a-entity id="hint"
+            text="font: #asimovian-msdf; color: #9ad; shader: msdf;
+                   value: Type below or press mic; wrapCount: 36"
+            position="-0.62 -0.28 0.01" scale="0.6 0.6 0.6">
+  </a-entity>
+</a-entity>
+
     </a-scene>
 
   
