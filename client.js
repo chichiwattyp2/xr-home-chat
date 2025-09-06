@@ -16,11 +16,37 @@ const HINT_FONT_FAMILY    = 'Asimovian';
 const CHAT_FONT_SIZE_PX   = 60;
 const HINT_FONT_SIZE_PX   = 44;
 
-// Keep canvas textures power-of-two (A-Frame/THREE 1.0.x era likes POT)
-function ensurePOTCanvasSize(canvas, w = 1024, h = 256) {
+// ========= POT helpers (prevents auto-resize spam on three r111) =========
+function ensurePOTCanvasSize(canvas, w, h) {
   if (!canvas) return;
   if (canvas.width !== w)  canvas.width  = w;
   if (canvas.height !== h) canvas.height = h;
+}
+function tuneCanvasTexture(planeEl) {
+  // Wait until the mesh exists
+  const apply = () => {
+    const mesh = planeEl.getObject3D && planeEl.getObject3D('mesh');
+    const tex  = mesh && mesh.material && mesh.material.map;
+    if (!tex || typeof THREE === 'undefined') return false;
+
+    // Stop WebGL from generating mipmaps / resizing to POT (we already are POT)
+    tex.generateMipmaps = false;
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    tex.needsUpdate = true;
+
+    // Also ask material not to use mipmaps
+    if (mesh.material) {
+      mesh.material.needsUpdate = true;
+    }
+    return true;
+  };
+
+  if (!apply() && planeEl) {
+    planeEl.addEventListener('object3dset', () => apply(), { once: true });
+  }
 }
 
 // ===============
@@ -47,6 +73,11 @@ function drawTextToCanvas({
   lineHeight = 1.22, weight = "600"
 }) {
   if (!canvas) return;
+
+  // Enforce POT sizes on every draw (guards if DOM changed)
+  if (canvas === chatCanvas) ensurePOTCanvasSize(canvas, 1024, 256);
+  if (canvas.id === HINT_CANVAS_ID) ensurePOTCanvasSize(canvas, 1024, 128);
+
   const ctx = canvas.getContext('2d');
   const W = canvas.width  || 1024;
   const H = canvas.height || 256;
@@ -181,8 +212,9 @@ function whenSceneReady() {
   voiceBtn    = document.querySelector('#voice');
   audioEl     = document.querySelector('#assistantAudio');
 
-  // Ensure POT sizes (prevents WebGL resize spam)
+  // Enforce POT sizes and tune texture
   ensurePOTCanvasSize(chatCanvas, 1024, 256);
+  if (chatPlane) tuneCanvasTexture(chatPlane);
 
   // iOS playback friendliness
   if (audioEl) {
@@ -228,6 +260,10 @@ function whenSceneReady() {
       maxWidth:   (hintCanvas.width || 1024) - 56
     });
     if (document.fonts?.ready) document.fonts.ready.then(drawHint); else drawHint();
+
+    // If you also mapped hintCanvas to a plane, tune it too:
+    const hintPlane = document.querySelector('#chatHintPlane');
+    if (hintPlane) tuneCanvasTexture(hintPlane);
   }
 
   // Initial text
