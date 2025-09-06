@@ -4,11 +4,7 @@
     <meta charset="utf-8" />
     <title>A‑Frame + Google + Chat GPT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Asimovian&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Rampart+One&display=swap" rel="stylesheet">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval'; script-src-elem 'self' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://api.openai.com wss://api.openai.com https://cdn.aframe.io https://cdn.glitch.com https://cdn.glitch.global https://www.youtube.com https://i.ytimg.com https://*.googleapis.com https://*.gstatic.com https://docs.google.com https://www.googleapis.com https://raw.githubusercontent.com https://github.com https://user-images.githubusercontent.com; img-src 'self' data: blob: https://cdn.aframe.io https://i.ytimg.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.gstatic.com https://*.ggpht.com https://*.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://cdn.aframe.io https://fonts.gstatic.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://api.openai.com wss://api.openai.com https://cdn.aframe.io https://cdn.glitch.com https://cdn.glitch.global https://www.youtube.com https://i.ytimg.com https://*.googleapis.com https://*.gstatic.com https://docs.google.com https://www.googleapis.com https://raw.githubusercontent.com https://github.com https://user-images.githubusercontent.com; img-src 'self' data: blob: https://cdn.aframe.io https://i.ytimg.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.gstatic.com https://*.ggpht.com https://*.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://cdn.aframe.io https://fonts.gstatic.com;">
 
 
     <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
@@ -66,7 +62,7 @@
  <a-entity id="chatPanel" data-raycastable position="2.637 2.081 -1.25" rotation="0 -45 0">
       <a-plane width="1.35" height="0.8" color="#111" material="opacity: 0.9"></a-plane>
       <a-entity id="chatText" text="value: Hello!; shader: msdf; font: #roboto-msdf  color: #fff" position="-0.62 0.28 0.01" scale="0.8 0.8 0.8"></a-entity>
-      <a-entity id="hint" text="value: Type below or press mic; wrapCount: 36; color: #9ad; shader: msdf; font: #roboto-msdf"
+      <a-entity id="hint" text="value: Type below or press mic; wrapCount: 36; color: #9ad shader: msdf; font: #roboto-msdf"
                 position="-0.62 -0.28 0.01" scale="0.6 0.6 0.6" msdf; font: #roboto-msd></a-entity>
     </a-entity>
     </a-scene>
@@ -86,7 +82,5 @@
       })();
     </script>
      <audio id="assistantAudio" autoplay></audio>
-  
-  <div class="xr-ui parallax-stage" data-theme="dark-glass"></div>
-</body>
+  </body>
 </html>
