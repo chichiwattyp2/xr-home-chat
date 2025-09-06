@@ -57,17 +57,13 @@
         <a-cursor></a-cursor>
       </a-entity>
 
-     <a-entity id="chatPanel" data-raycastable="" position="6.57803 2.66472 -1.88325" rotation="-29.999999999999996 -45 0" scale="2 2 2">
-        <a-plane width="1.35" height="0.8" color="#111" material="opacity: 0.9"></a-plane>
-
-        <!-- Main chat text plane (uses chatTextCanvas) -->
-        <a-plane id="chatTextPlane" material="transparent: true; src: #chatTextCanvas" position="-0.62 0.28 0.01" scale="0.74 0.3 1"></a-plane>
-
-        <!-- Hint plane (uses chatHintCanvas) -->
-        <a-plane id="chatHintPlane" material="transparent: true; src: #chatHintCanvas" position="-0.62 -0.28 0.01" scale="0.74 0.22 1"></a-plane>
-      </a-entity>
-
-
+      <!-- Chat panel -->
+    <a-entity id="chatPanel" data-raycastable position="2.637 2.081 -1.25" rotation="0 -45 0">
+      <a-plane width="1.35" height="0.8" color="#111" material="opacity: 0.9"></a-plane>
+      <a-entity id="chatText" text="value: Hello!; color: #fff" position="-0.62 0.28 0.01" scale="0.8 0.8 0.8"></a-entity>
+      <a-entity id="hint" text="value: Type below or press mic; wrapCount: 36; color: #9ad"
+                position="-0.62 -0.28 0.01" scale="0.6 0.6 0.6"></a-entity>
+    </a-entity>
        <a-entity light="color: #EEE; intensity: 0.5" position="-1.5379 5.13754 8.19083"></a-entity>
       <a-entity
         light="type: directional; color: #fff; intensity: 0.25"
