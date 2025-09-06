@@ -1,10 +1,12 @@
 // sheets.js — GViz → A-Frame tiles + Lookbook 3D panels (all text in Asimovian via canvas)
 // - Removes legacy DOM/tiles (no duplicates)
 // - Local-first asset resolve (+ GitHub blob→raw)
-// - HEAD-checks links/images; only binds if they exist
+// - HEAD-checks links/images with cache; only binds if they exist
 // - ALL in-scene typography rendered with Google font "Asimovian" onto canvases
 
 (function () {
+  'use strict';
+
   // ---------- flags ----------
   const REMOVE_LEGACY_DOM = true;
   const SHOW_SCENE_LABEL = false;       // (legacy) tiny label under raw tiles
@@ -37,10 +39,29 @@
     return buf.join("");
   }
 
+  // cache HEAD lookups + warn once
+  const _urlOkCache = new Map();
+  const _urlWarned  = new Set();
   async function headOK(url) {
     if (!url) return false;
-    try { const r = await fetch(url, { method: "HEAD" }); return r.ok; }
-    catch { return false; }
+    if (_urlOkCache.has(url)) return _urlOkCache.get(url);
+    try {
+      const r = await fetch(url, { method: "HEAD" });
+      const ok = !!r.ok;
+      _urlOkCache.set(url, ok);
+      if (!ok && !_urlWarned.has(url)) {
+        console.warn("HEAD", url, r.status || "not ok");
+        _urlWarned.add(url);
+      }
+      return ok;
+    } catch {
+      _urlOkCache.set(url, false);
+      if (!_urlWarned.has(url)) {
+        console.warn("HEAD", url, "network error");
+        _urlWarned.add(url);
+      }
+      return false;
+    }
   }
 
   function toRawGitHub(u) {
@@ -57,33 +78,32 @@
     return u;
   }
 
-  // LOCAL-FIRST: try /assets/<basename> before remote
+  // LOCAL-FIRST: try /assets/<basename> first, then remote candidate
   async function resolveURL(u) {
-    if (!u) return u;
+    if (!u) return "";
     let candidate = toRawGitHub(u);
 
     // Bare filename → /assets/<name>
     const isBare = !/^(https?:)?\/\//i.test(candidate) && !candidate.includes("/") && !candidate.startsWith("#");
-    if (isBare) return `assets/${candidate}`;
+    if (isBare) {
+      const local = `assets/${candidate}`;
+      return (await headOK(local)) ? local : "";
+    }
 
-    // Try local by basename first
+    // Try /assets/<basename> first
     try {
       const base = candidate.split("?")[0].split("#")[0];
       const name = base.substring(base.lastIndexOf("/") + 1);
       if (name) {
         const local = `assets/${name}`;
-        const resLocal = await fetch(local, { method: "HEAD" });
-        if (resLocal.ok) return local;
+        if (await headOK(local)) return local;
       }
-    } catch (_e) {}
+    } catch {}
 
-    // Then remote
-    try {
-      const res = await fetch(candidate, { method: "HEAD", mode: "cors" });
-      if (res.ok) return candidate;
-    } catch (_e) {}
+    // Then remote candidate
+    if (await headOK(candidate)) return candidate;
 
-    return candidate;
+    return "";
   }
 
   const qp = (k, d) => (new URLSearchParams(location.search).get(k) ?? d);
@@ -105,7 +125,8 @@
     scene.querySelectorAll(`a-image[width="2"][height="1"]`).forEach(el => {
       if (!el.closest(`#${ourContainerId}`)) el.remove();
     });
-    const LEGACY_SCALE = "1 1 1";
+    // match the old legacy tile model transform from your previous build
+    const LEGACY_SCALE = "0.03 0.03 0.03";
     const LEGACY_POS   = "0 2.10635 2.61942";
     const LEGACY_ROT   = "0 30 0";
     scene.querySelectorAll(`a-entity[gltf-model]`).forEach(el => {
@@ -122,6 +143,12 @@
   }
 
   // ---------- Canvas text (Asimovian everywhere) ----------
+  function nextPow2(n) {
+    let p = 1;
+    while (p < n) p <<= 1;
+    return p;
+  }
+
   function drawTextToCanvas({ canvas, text, fontPx=48, color="#fff",
                               bg=null, padding=24, maxWidth=null,
                               align="center", lineHeight=1.22, weight="600" }) {
@@ -161,16 +188,19 @@
   }
 
   function makeTextPlane({ id, text, w, h, fontPx, color, align="center", bg=null, maxWidthPx }) {
-    // create or reuse a hidden canvas
+    // create or reuse a hidden canvas (power-of-two dimensions to avoid WebGL resize spam)
     let canvas = document.getElementById(id);
     if (!canvas) {
       canvas = document.createElement("canvas");
       canvas.id = id;
-      canvas.width = 1024;
-      canvas.height = Math.max(256, Math.round(1024 * (h / Math.max(0.01, w))));
+      canvas.width = 1024; // fixed POT width
+      // compute height proportional to plane aspect, then clamp to POT
+      const rawH = Math.max(64, Math.round(1024 * (h / Math.max(0.01, w))));
+      canvas.height = Math.min(1024, nextPow2(rawH));
       canvas.style.display = "none";
       document.body.appendChild(canvas);
     }
+
     const draw = () => drawTextToCanvas({
       canvas, text, fontPx, color, bg, align, maxWidth: maxWidthPx ?? (canvas.width - 64)
     });
@@ -262,6 +292,7 @@
     panel.appendChild(chips);
 
     function addChip(txt, xOffset) {
+      const safeTxt = String(txt).replace(/[^\w-]+/g, '_');
       const g = document.createElement("a-entity");
       const chipW = 0.34, chipH = 0.14;
 
@@ -273,7 +304,7 @@
       g.appendChild(chipBg);
 
       const chipTxt = makeTextPlane({
-        id: `chip-${txt}-${item.__uid}`,
+        id: `chip-${safeTxt}-${item.__uid}`,
         text: txt,
         w: chipW * 0.9, h: chipH * 0.75,
         fontPx: CHIP_PX,
@@ -339,6 +370,7 @@
       const MODEL_SCALE   = "0.03 0.03 0.03";
       const MODEL_POS     = "0 2.10635 2.61942";
       const MODEL_ROT     = "0 30 0";
+      const MSDF_FONT     = "https://cdn.aframe.io/fonts/Roboto-msdf.json"; // (unused now, kept for fallback)
 
       // ===== Remove legacy UIs & tiles first =====
       removeLegacyDOM();
@@ -408,6 +440,16 @@
         if (item.linkOK && item.link) tile.setAttribute("link", `href: ${item.link}`);
         container.appendChild(tile);
 
+        // Optional legacy label (disabled)
+        if (SHOW_SCENE_LABEL) {
+          const label = document.createElement("a-entity");
+          label.setAttribute("geometry", "primitive: plane; width: 2; height: .2");
+          label.setAttribute("material", "color: #111");
+          label.setAttribute("text", `align: center; value: ${encodeHtml(item.title || "")}; color: #fff; shader: msdf; font: ${MSDF_FONT}`);
+          label.setAttribute("position", "0 -.6 0");
+          tile.appendChild(label);
+        }
+
         // Attach model if needed
         if (isModel && item.image) {
           const model = document.createElement("a-entity");
@@ -418,12 +460,10 @@
           tile.appendChild(model);
         }
 
-        // >>> Lookbook card (Asimovian text via canvases)
+        // Lookbook card (Asimovian via canvases)
         if (RENDER_IN_SCENE_PANELS) {
           createScenePanel(tile, item, { position: "0 0 0.02" });
         }
-
-        // (optional) legacy label removed; SHOW_SCENE_LABEL = false by default
 
         // grid stepping
         i++; h++;
