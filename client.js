@@ -16,6 +16,13 @@ const HINT_FONT_FAMILY    = 'Asimovian';
 const CHAT_FONT_SIZE_PX   = 60;
 const HINT_FONT_SIZE_PX   = 44;
 
+// Keep canvas textures power-of-two (A-Frame/THREE 1.0.x era likes POT)
+function ensurePOTCanvasSize(canvas, w = 1024, h = 256) {
+  if (!canvas) return;
+  if (canvas.width !== w)  canvas.width  = w;
+  if (canvas.height !== h) canvas.height = h;
+}
+
 // ===============
 // Boot sequence
 // ===============
@@ -55,7 +62,7 @@ function drawTextToCanvas({
 
   // Respect explicit newlines, then wrap each paragraph
   const outLines = [];
-  const paragraphs = String(text ?? '').split('\n');
+  const paragraphs = String(text ?? '').replace(/\r/g, '').split('\n');
   for (let pi = 0; pi < paragraphs.length; pi++) {
     const para = paragraphs[pi];
     if (para.length === 0) { outLines.push(''); continue; } // blank line
@@ -96,21 +103,26 @@ function drawTextToCanvas({
 // Throttled panel setter (streams smoothly)
 let rafPending = false;
 let latestPanelText = '';
+let lastDrawnText = '';
 function setPanelCanvas(text) {
   latestPanelText = (text || '').slice(-8000);
+  if (latestPanelText === lastDrawnText) return; // no redraw if same
   if (rafPending) return;
   rafPending = true;
   requestAnimationFrame(() => {
     rafPending = false;
-    const doDraw = () => drawTextToCanvas({
-      canvas:     chatCanvas,
-      text:       latestPanelText,
-      fontFamily: CHAT_FONT_FAMILY,
-      fontSize:   CHAT_FONT_SIZE_PX,
-      color:      '#fff',
-      align:      'left',
-      maxWidth:   (chatCanvas?.width || 1024) - 64
-    });
+    const doDraw = () => {
+      drawTextToCanvas({
+        canvas:     chatCanvas,
+        text:       latestPanelText,
+        fontFamily: CHAT_FONT_FAMILY,
+        fontSize:   CHAT_FONT_SIZE_PX,
+        color:      '#fff',
+        align:      'left',
+        maxWidth:   (chatCanvas?.width || 1024) - 64
+      });
+      lastDrawnText = latestPanelText;
+    };
 
     // First run: wait for fonts to avoid blank canvas
     if (setPanelCanvas.firstRun && document.fonts?.ready) {
@@ -169,12 +181,23 @@ function whenSceneReady() {
   voiceBtn    = document.querySelector('#voice');
   audioEl     = document.querySelector('#assistantAudio');
 
+  // Ensure POT sizes (prevents WebGL resize spam)
+  ensurePOTCanvasSize(chatCanvas, 1024, 256);
+
   // iOS playback friendliness
   if (audioEl) {
     audioEl.autoplay    = true;
     audioEl.playsInline = true;
     audioEl.muted       = false;
   }
+
+  // Optional: restrict raycaster for perf if a cursor exists
+  try {
+    const cursor = document.querySelector('a-cursor');
+    if (cursor && !cursor.getAttribute('raycaster')?.objects) {
+      cursor.setAttribute('raycaster', 'objects: [data-raycastable]');
+    }
+  } catch {}
 
   // Flush any buffered panel text
   if (pendingPanelText) {
@@ -194,6 +217,7 @@ function whenSceneReady() {
   // One-time hint on secondary canvas (if present)
   const hintCanvas = document.getElementById(HINT_CANVAS_ID);
   if (hintCanvas) {
+    ensurePOTCanvasSize(hintCanvas, 1024, 128);
     const drawHint = () => drawTextToCanvas({
       canvas:     hintCanvas,
       text:       'Type below or press mic',
@@ -391,8 +415,9 @@ async function startVoice() {
         }
 
         if (msg.type === 'error') {
-          console.error('[Realtime error]', msg);
-          appendPanel(`\n\n[Realtime error] ${msg.error?.message || ''}`);
+          const m = msg.error?.message || JSON.stringify(msg);
+          console.error('[Realtime error]', m, msg);
+          appendPanel(`\n\n[Realtime error] ${m}`);
         }
       } catch (e) {
         console.error('WS parse error', e);
@@ -400,7 +425,10 @@ async function startVoice() {
     };
 
     ws.onerror = (e) => console.error('WS error', e);
-    ws.onclose  = () => console.log('WS closed');
+    ws.onclose  = (e) => {
+      console.log('WS closed', e?.code, e?.reason || '');
+      if (e?.reason) appendPanel(`\n\n[Realtime closed] ${e.reason}`);
+    };
 
     voiceActive = true;
     if (voiceBtn) voiceBtn.textContent = '⏹ Stop';
