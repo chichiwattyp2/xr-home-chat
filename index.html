@@ -30,7 +30,10 @@
       <button id="voice">Voice</button>
     </div>
 
-    <a-scene>
+    <a-scene embedded
+   vr-mode-ui="enabled: true"
+        loading-screen="backgroundColor: white">
+    
       <!-- Register assets FIRST so A-Frame can build textures safely -->
       <a-assets timeout="15000">
         <!-- Move canvases into a-assets to avoid 0x0 textures -->
