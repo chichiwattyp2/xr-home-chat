@@ -1,24 +1,33 @@
-// sheets.js — GViz → A-Frame tiles + Lookbook-styled 3D panels (no duplicates)
-// - Renders lookbook cards INSIDE the scene (3D)
-// - Removes legacy DOM/table UI and old tiles before rendering
-// - GitHub blob→raw + /assets fallback for images/models
+// sheets.js — GViz → A-Frame tiles + Lookbook 3D panels (all text in Asimovian via canvas)
+// - Removes legacy DOM/tiles (no duplicates)
+// - Local-first asset resolve (+ GitHub blob→raw)
+// - HEAD-checks links/images; only binds if they exist
+// - ALL in-scene typography rendered with Google font "Asimovian" onto canvases
+
 (function () {
   // ---------- flags ----------
   const REMOVE_LEGACY_DOM = true;
-  const SHOW_SCENE_LABEL = false;       // legacy small text under tiles
+  const SHOW_SCENE_LABEL = false;       // (legacy) tiny label under raw tiles
   const RENDER_IN_SCENE_PANELS = true;  // lookbook cards as 3D entities
 
-  // ---------- colors to match your CSS themes (dark-glass defaults) ----------
+  // ---------- lookbook palette ----------
   const C = {
-    panelBg:    "#14161C",   // --panel-bg visual (we'll use opacity for the glass)
+    panelBg:    "#14161C",
     panelOp:    0.68,
-    panelBorder:"#FFFFFF",   // --panel-border visual
+    panelBorder:"#FFFFFF",
     borderOp:   0.14,
-    ink:        "#EEF2F6",   // --ink
-    inkMuted:   "#B6C0CA",   // --ink-muted
-    accent:     "#D4A373",   // --accent
+    ink:        "#EEF2F6",
+    inkMuted:   "#B6C0CA",
+    accent:     "#D4A373",
     accentInk:  "#111111"
   };
+
+  // ---------- typography (ALL Asimovian) ----------
+  const FONT_FAMILY = 'Asimovian';  // loaded via <link> in index.html
+  const TITLE_PX    = 64;
+  const SUB_PX      = 40;
+  const CHIP_PX     = 36;
+  const BTN_PX      = 40;
 
   // ---------- utils ----------
   function encodeHtml(str) {
@@ -27,17 +36,19 @@
     for (var i = str.length - 1; i >= 0; i--) buf.unshift(["&#", str[i].charCodeAt(), ";"].join(""));
     return buf.join("");
   }
-async function headOK(url) {
-  try { const r = await fetch(url, { method: 'HEAD' }); return r.ok; }
-  catch { return false; }
-}
+
+  async function headOK(url) {
+    if (!url) return false;
+    try { const r = await fetch(url, { method: "HEAD" }); return r.ok; }
+    catch { return false; }
+  }
 
   function toRawGitHub(u) {
     try {
       if (!u) return u;
       const url = new URL(u, location.href);
       if (url.hostname === "github.com" && url.pathname.includes("/blob/")) {
-        const parts = url.pathname.split("/"); // ["", user, repo, "blob", ref, ...rest]
+        const parts = url.pathname.split("/");
         const user = parts[1], repo = parts[2], ref = parts[4];
         const rest = parts.slice(5).join("/");
         return `https://raw.githubusercontent.com/${user}/${repo}/${ref}/${rest}`;
@@ -46,26 +57,32 @@ async function headOK(url) {
     return u;
   }
 
+  // LOCAL-FIRST: try /assets/<basename> before remote
   async function resolveURL(u) {
     if (!u) return u;
     let candidate = toRawGitHub(u);
 
+    // Bare filename → /assets/<name>
     const isBare = !/^(https?:)?\/\//i.test(candidate) && !candidate.includes("/") && !candidate.startsWith("#");
     if (isBare) return `assets/${candidate}`;
 
-    try {
-      const res = await fetch(candidate, { method: "HEAD", mode: "cors" });
-      if (res.ok) return candidate;
-    } catch (_) {}
-
+    // Try local by basename first
     try {
       const base = candidate.split("?")[0].split("#")[0];
       const name = base.substring(base.lastIndexOf("/") + 1);
-      if (!name) return candidate;
-      const local = `assets/${name}`;
-      const resLocal = await fetch(local, { method: "HEAD" });
-      if (resLocal.ok) return local;
-    } catch (_) {}
+      if (name) {
+        const local = `assets/${name}`;
+        const resLocal = await fetch(local, { method: "HEAD" });
+        if (resLocal.ok) return local;
+      }
+    } catch (_e) {}
+
+    // Then remote
+    try {
+      const res = await fetch(candidate, { method: "HEAD", mode: "cors" });
+      if (res.ok) return candidate;
+    } catch (_e) {}
+
     return candidate;
   }
 
@@ -104,24 +121,84 @@ async function headOK(url) {
     });
   }
 
-  // Build a lookbook card INSIDE the scene (planes + msdf text)
+  // ---------- Canvas text (Asimovian everywhere) ----------
+  function drawTextToCanvas({ canvas, text, fontPx=48, color="#fff",
+                              bg=null, padding=24, maxWidth=null,
+                              align="center", lineHeight=1.22, weight="600" }) {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width  || 1024;
+    const H = canvas.height || 256;
+
+    ctx.clearRect(0,0,W,H);
+    if (bg) { ctx.fillStyle = bg; ctx.fillRect(0,0,W,H); }
+
+    ctx.fillStyle = color;
+    ctx.textBaseline = "top";
+    ctx.font = `${weight} ${fontPx}px "${FONT_FAMILY}", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
+
+    const words = String(text ?? "").split(/\s+/);
+    const lines = [];
+    const max = (maxWidth ?? (W - padding*2));
+    let line = "";
+    for (const w of words) {
+      const test = line ? `${line} ${w}` : w;
+      if (ctx.measureText(test).width > max) { lines.push(line); line = w; }
+      else { line = test; }
+    }
+    if (line) lines.push(line);
+
+    let y = padding;
+    for (const l of lines) {
+      let x = padding;
+      const lw = ctx.measureText(l).width;
+      if (align === "center") x = (W - lw)/2;
+      if (align === "right")  x = W - padding - lw;
+      ctx.fillText(l, x, y);
+      y += fontPx * lineHeight;
+      if (y > H - padding - fontPx) break;
+    }
+  }
+
+  function makeTextPlane({ id, text, w, h, fontPx, color, align="center", bg=null, maxWidthPx }) {
+    // create or reuse a hidden canvas
+    let canvas = document.getElementById(id);
+    if (!canvas) {
+      canvas = document.createElement("canvas");
+      canvas.id = id;
+      canvas.width = 1024;
+      canvas.height = Math.max(256, Math.round(1024 * (h / Math.max(0.01, w))));
+      canvas.style.display = "none";
+      document.body.appendChild(canvas);
+    }
+    const draw = () => drawTextToCanvas({
+      canvas, text, fontPx, color, bg, align, maxWidth: maxWidthPx ?? (canvas.width - 64)
+    });
+    if (document.fonts?.ready) document.fonts.ready.then(draw); else draw();
+
+    // return an a-plane that uses this canvas as its texture
+    const plane = document.createElement("a-plane");
+    plane.setAttribute("width", w.toString());
+    plane.setAttribute("height", h.toString());
+    plane.setAttribute("material", `src: #${id}; transparent: true; shader: flat;`);
+    return plane;
+  }
+
+  // Build a lookbook card INSIDE the scene (planes + canvas text)
   function createScenePanel(parent, item, opts = {}) {
-    // Layout metrics (in meters)
-    const W = 1.6, H = 1.0, R = 0.08;            // card width/height, "rounded" simulated by slightly inset inner content
-    const BORDER_PAD = 0.02;                     // fake border grow
+    // Layout (meters)
+    const W = 1.6, H = 1.0;
+    const BORDER_PAD = 0.02;
     const PADS = { x: 0.10, y: 0.10 };
-    const MEDIA_H = 0.48;                        // media plane height
-    const TITLE_SIZE = 0.12;                     // msdf title size-ish via geometry plane
-    const SUB_SIZE = 0.08;
-    const CHIP_SIZE = 0.07;
+    const MEDIA_H = 0.48;
     const BTN_W = 0.42, BTN_H = 0.16;
 
     const panel = document.createElement("a-entity");
     panel.setAttribute("class", "lookbook-card-3d");
-    panel.setAttribute("position", opts.position || "0 0 0.02"); // slightly forward to avoid z-fighting
+    panel.setAttribute("position", opts.position || "0 0 0.02");
     parent.appendChild(panel);
 
-    // Border plane (slightly larger, low opacity)
+    // Border
     const border = document.createElement("a-plane");
     border.setAttribute("width", (W + BORDER_PAD).toString());
     border.setAttribute("height", (H + BORDER_PAD).toString());
@@ -129,7 +206,7 @@ async function headOK(url) {
     border.setAttribute("position", "0 0 -0.002");
     panel.appendChild(border);
 
-    // Background glass plane
+    // Background glass
     const bg = document.createElement("a-plane");
     bg.setAttribute("width", W.toString());
     bg.setAttribute("height", H.toString());
@@ -137,7 +214,7 @@ async function headOK(url) {
     bg.setAttribute("position", "0 0 0");
     panel.appendChild(bg);
 
-    // Optional media
+    // Media (image only; models appear as separate glTF below)
     const isModel = /\.(glb|gltf)(\?|$)/i.test(item.image);
     if (!isModel && item.image) {
       const media = document.createElement("a-plane");
@@ -149,26 +226,34 @@ async function headOK(url) {
       panel.appendChild(media);
     }
 
-    // Title (MSDF text)
-    const title = document.createElement("a-entity");
-    title.setAttribute(
-      "text",
-      `align: center; value: ${encodeHtml(item.title)}; color: ${C.ink}; shader: msdf; font: https://cdn.aframe.io/fonts/Roboto-msdf.json;`
-    );
-    title.setAttribute("position", `0 ${isModel ? H/2 - PADS.y - 0.18 : (H/2 - PADS.y - MEDIA_H - 0.10)} 0.001`);
-    panel.appendChild(title);
+    // Title (Asimovian via canvas)
+    const titleY = isModel ? (H/2 - PADS.y - 0.18) : (H/2 - PADS.y - MEDIA_H - 0.10);
+    const titlePlane = makeTextPlane({
+      id: `title-${item.__uid}`,
+      text: item.title || "",
+      w: 1.34, h: 0.18,
+      fontPx: TITLE_PX,
+      color: C.ink,
+      align: "center",
+      maxWidthPx: 960
+    });
+    titlePlane.setAttribute("position", `0 ${titleY.toFixed(3)} 0.001`);
+    panel.appendChild(titlePlane);
 
     // Subtitle/domain (muted)
     let domain = "";
     try { domain = new URL(item.link).hostname.replace(/^www\./,''); } catch {}
     if (domain) {
-      const sub = document.createElement("a-entity");
-      sub.setAttribute(
-        "text",
-        `align: center; value: ${encodeHtml(domain)}; color: ${C.inkMuted}; shader: msdf; font: https://cdn.aframe.io/fonts/Roboto-msdf.json;`
-      );
-      sub.setAttribute("position", `0 ${parseFloat(title.getAttribute("position").y) - 0.14} 0.001`);
-      panel.appendChild(sub);
+      const subPlane = makeTextPlane({
+        id: `sub-${item.__uid}`,
+        text: domain,
+        w: 1.2, h: 0.14,
+        fontPx: SUB_PX,
+        color: C.inkMuted,
+        align: "center"
+      });
+      subPlane.setAttribute("position", `0 ${(titleY - 0.14).toFixed(3)} 0.001`);
+      panel.appendChild(subPlane);
     }
 
     // Chips row
@@ -187,19 +272,24 @@ async function headOK(url) {
       chipBg.setAttribute("position", `${xOffset} 0 0`);
       g.appendChild(chipBg);
 
-      const t = document.createElement("a-entity");
-      t.setAttribute("text", `align: center; value: ${encodeHtml(txt)}; color: ${C.ink}; shader: msdf; font: https://cdn.aframe.io/fonts/Roboto-msdf.json;`);
-      t.setAttribute("position", `${xOffset} 0 0.001`);
-      g.appendChild(t);
+      const chipTxt = makeTextPlane({
+        id: `chip-${txt}-${item.__uid}`,
+        text: txt,
+        w: chipW * 0.9, h: chipH * 0.75,
+        fontPx: CHIP_PX,
+        color: C.ink,
+        align: "center"
+      });
+      chipTxt.setAttribute("position", `${xOffset} 0 0.001`);
+      g.appendChild(chipTxt);
 
       chips.appendChild(g);
     }
-
     addChip(isModel ? "3D" : "Image", -0.18);
-    if (item.link) addChip("Link", 0.18);
+    if (item.linkOK) addChip("Link", 0.18);
 
-    // Button
-    if (item.link) {
+    // Button (only if linkOK)
+    if (item.linkOK) {
       const btn = document.createElement("a-entity");
       btn.setAttribute("position", `0 ${-H/2 + PADS.y + 0.02} 0.001`);
 
@@ -210,16 +300,20 @@ async function headOK(url) {
       btnBg.classList.add("interactive");
       btn.appendChild(btnBg);
 
-      const btnTxt = document.createElement("a-entity");
-      btnTxt.setAttribute("text", `align: center; value: Open; color: ${C.accentInk}; shader: msdf; font: https://cdn.aframe.io/fonts/Roboto-msdf.json;`);
+      const btnTxt = makeTextPlane({
+        id: `btn-${item.__uid}`,
+        text: "Open",
+        w: BTN_W * 0.9, h: BTN_H * 0.8,
+        fontPx: BTN_PX,
+        color: C.accentInk,
+        align: "center"
+      });
       btnTxt.setAttribute("position", `0 0 0.001`);
       btn.appendChild(btnTxt);
 
-      // use link component so it works in XR too
       btn.setAttribute("link", `href: ${item.link}`);
       panel.appendChild(btn);
 
-      // simple hover feedback
       btn.addEventListener("mouseenter", () => btnBg.setAttribute("material", `color: ${C.accent}; opacity: 0.9; shader: flat;`));
       btn.addEventListener("mouseleave", () => btnBg.setAttribute("material", `color: ${C.accent}; opacity: 1; shader: flat;`));
     }
@@ -245,7 +339,6 @@ async function headOK(url) {
       const MODEL_SCALE   = "0.03 0.03 0.03";
       const MODEL_POS     = "0 2.10635 2.61942";
       const MODEL_ROT     = "0 30 0";
-      const MSDF_FONT     = "https://cdn.aframe.io/fonts/Roboto-msdf.json";
 
       // ===== Remove legacy UIs & tiles first =====
       removeLegacyDOM();
@@ -273,7 +366,7 @@ async function headOK(url) {
       }
       if (!rows.length) { console.warn("No rows in sheet."); return; }
 
-      // Build listings (Title | Image | Link) with normalization/fallback
+      // Build listings (Title | Image | Link)
       const listings = [];
       for (let r = 1; r < rows.length; r++) {
         const c = rows[r].c || [];
@@ -282,14 +375,24 @@ async function headOK(url) {
         let   link  = (c[2]?.v ?? "").toString();
 
         const [imageResolved, linkResolved] = await Promise.all([resolveURL(image), resolveURL(link)]);
-        listings.push({ title, image: imageResolved, link: linkResolved });
+        const [imageOK, linkOK] = await Promise.all([
+          imageResolved ? headOK(imageResolved) : Promise.resolve(false),
+          linkResolved  ? headOK(linkResolved)  : Promise.resolve(false)
+        ]);
+
+        listings.push({
+          __uid: `${r}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
+          title,
+          image: imageOK ? imageResolved : "",
+          link:  linkOK  ? linkResolved  : "",
+          linkOK
+        });
       }
 
       // ===== Render exact grid =====
       let r = 0, i = 0, p = 0, h = 0, pages = 0;
       for (const item of listings) {
-        const titleSafe = encodeHtml(item.title || "");
-        const isModel   = /\.(glb|gltf)(\?|$)/i.test(item.image);
+        const isModel = /\.(glb|gltf)(\?|$)/i.test(item.image);
         const xStr = `${i * 2}.${i}`;
         const yStr = (r * 1.3).toString();
 
@@ -300,20 +403,13 @@ async function headOK(url) {
         tile.setAttribute("width", "2");
         tile.setAttribute("height", "1");
         tile.setAttribute("crossorigin", "anonymous");
+
         if (!isModel && item.image) tile.setAttribute("src", item.image);
-        if (item.link) tile.setAttribute("link", `href: ${item.link}`);
+        if (item.linkOK && item.link) tile.setAttribute("link", `href: ${item.link}`);
         container.appendChild(tile);
 
-        if (SHOW_SCENE_LABEL) {
-          const label = document.createElement("a-entity");
-          label.setAttribute("geometry", "primitive: plane; width: 2; height: .2");
-          label.setAttribute("material", "color: #111");
-          label.setAttribute("text", `align: center; value: ${titleSafe}; color: #fff; shader: msdf; font: ${MSDF_FONT}`);
-          label.setAttribute("position", "0 -.6 0");
-          tile.appendChild(label);
-        }
-
-        if (isModel) {
+        // Attach model if needed
+        if (isModel && item.image) {
           const model = document.createElement("a-entity");
           model.setAttribute("gltf-model", `url(${item.image})`);
           model.setAttribute("scale", MODEL_SCALE);
@@ -322,14 +418,14 @@ async function headOK(url) {
           tile.appendChild(model);
         }
 
-        // >>> NEW: in-scene lookbook card <<<
+        // >>> Lookbook card (Asimovian text via canvases)
         if (RENDER_IN_SCENE_PANELS) {
-          // Offset the card slightly forward so it's readable and not coplanar with the tile
-          const panelOffset = "0 0 0.02";
-          createScenePanel(tile, item, { position: panelOffset });
+          createScenePanel(tile, item, { position: "0 0 0.02" });
         }
 
-        // step grid
+        // (optional) legacy label removed; SHOW_SCENE_LABEL = false by default
+
+        // grid stepping
         i++; h++;
         if (i === 4) { r--; i = 0; p++; }
         if (p === 3) { r += 20; p = 0; pages++; console.log(pages); }
