@@ -1,4 +1,4 @@
-// client.js — Chat (SSE-ish) + Realtime Voice (WebRTC)
+// client.js — Chat (SSE) + Realtime Voice (WebRTC)
 // + Lookbook font rendering via Canvas → A-Frame texture (ALL Asimovian)
 
 // ==================
@@ -6,7 +6,7 @@
 // ==================
 const CHAT_PLANE_SELECTOR = '#chatTextPlane';   // <a-plane material="src: #chatTextCanvas">
 const CHAT_CANVAS_ID      = 'chatTextCanvas';   // <canvas id="chatTextCanvas">
-const HINT_CANVAS_ID      = 'chatHintCanvas';   // <canvas id="chatHintCanvas">
+const HINT_CANVAS_ID      = 'chatHintCanvas';   // <canvas id="chatHintCanvas'>
 
 // 🔤 Use Asimovian everywhere
 const CHAT_FONT_FAMILY    = 'Asimovian';
@@ -32,9 +32,11 @@ let chatPlane  = null;
 let pendingPanelText = '';
 
 // Draw text into canvas and refresh the A-Frame texture
-function drawTextToCanvas({ canvas, text, fontFamily, fontSize=56, color="#fff",
-                            bg=null, padding=28, maxWidth=null, align="left",
-                            lineHeight=1.22, weight="600" }) {
+function drawTextToCanvas({
+  canvas, text, fontFamily, fontSize = 56, color = "#fff",
+  bg = null, padding = 28, maxWidth = null, align = "left",
+  lineHeight = 1.22, weight = "600"
+}) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const W = canvas.width  || 1024;
@@ -95,7 +97,7 @@ function setPanelCanvas(text) {
       maxWidth:   (chatCanvas?.width || 1024) - 64
     });
 
-    // First run: wait for fonts to be ready to avoid blank canvas
+    // First run: wait for fonts to avoid blank canvas
     if (setPanelCanvas.firstRun && document.fonts?.ready) {
       setPanelCanvas.firstRun = false;
       document.fonts.ready.then(doDraw);
@@ -106,7 +108,7 @@ function setPanelCanvas(text) {
 }
 setPanelCanvas.firstRun = true;
 
-// Unified panel API: use canvas if present, else A-Frame text component
+// Unified panel API
 function setPanel(text) {
   const t = (text || '').slice(-8000);
   if (chatCanvas && chatPlane) {
@@ -126,7 +128,7 @@ function appendPanel(chunk) {
   setPanel(current + chunk);
 }
 
-// Wait for DOM + <a-scene> loaded (A-Frame done)
+// Wait for DOM + <a-scene>
 function whenSceneReady() {
   return new Promise((resolve) => {
     const onDom = () => {
@@ -165,7 +167,7 @@ function whenSceneReady() {
     pendingPanelText = '';
   }
 
-  // Wire events if elements exist
+  // Wire events
   if (sendBtn) sendBtn.addEventListener('click', sendPrompt);
   if (promptInput) {
     promptInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendPrompt(); });
@@ -240,35 +242,39 @@ async function sendPrompt() {
       if (done) break;
       partial += decoder.decode(value, { stream: true });
 
-      // Support both raw text streaming and SSE-style "data: {...}"
+      // Robust SSE parsing: only "data:" payloads; ignore comments / event lines
       const lines = partial.split('\n');
       partial = lines.pop() || '';
 
-      for (const line of lines) {
-        if (!line) continue;
+      for (const raw of lines) {
+        if (!raw) continue;
+        const line = raw.trimStart();
 
-        // SSE line
-        if (line.startsWith('data: ')) {
-          const payload = line.slice(6).trim();
-          if (!payload || payload === '[DONE]') continue;
-          try {
-            const evt = JSON.parse(payload);
-            if (evt.type === 'response.output_text.delta' && typeof evt.delta === 'string') {
-              buf += evt.delta;
-              setPanel(buf);
-            } else if (typeof evt.text === 'string') {
-              buf += evt.text;
-              setPanel(buf);
-            }
-          } catch {
-            // ignore bad/incomplete chunks
+        // Ignore keep-alive comments and named event lines
+        if (line.startsWith(':')) continue;
+        if (line.startsWith('event:')) continue;
+
+        if (!line.startsWith('data:')) continue;
+
+        const payload = line.slice(5).trim(); // after "data:"
+        if (!payload || payload === '[DONE]') continue;
+
+        try {
+          const evt = JSON.parse(payload);
+
+          if (evt.type === 'response.output_text.delta' && typeof evt.delta === 'string') {
+            buf += evt.delta;
+            setPanel(buf);
+          } else if (evt.type === 'response.delta' && evt?.response?.output_text?.delta) {
+            buf += String(evt.response.output_text.delta);
+            setPanel(buf);
+          } else if (typeof evt.text === 'string') {
+            buf += evt.text;
+            setPanel(buf);
           }
-          continue;
+        } catch {
+          // ignore malformed/incomplete chunks
         }
-
-        // Raw text line
-        buf += line;
-        setPanel(buf);
       }
     }
   } catch (e) {
