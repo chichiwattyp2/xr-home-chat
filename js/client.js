@@ -6,7 +6,7 @@
 // ==================
 const CHAT_PLANE_SELECTOR = '#chatTextPlane';   // <a-plane material="src: #chatTextCanvas">
 const CHAT_CANVAS_ID      = 'chatTextCanvas';   // <canvas id="chatTextCanvas">
-const HINT_CANVAS_ID      = 'chatHintCanvas';   // <canvas id="chatHintCanvas'>
+const HINT_CANVAS_ID      = 'chatHintCanvas';   // <canvas id="chatHintCanvas">
 
 // 🔤 Use Asimovian everywhere
 const CHAT_FONT_FAMILY    = 'Asimovian';
@@ -31,7 +31,7 @@ let chatPlane  = null;
 // Buffer any UI text updates until scene + UI exist
 let pendingPanelText = '';
 
-// Draw text into canvas and refresh the A-Frame texture
+// Draw text into canvas and refresh the A-Frame texture (newline-aware)
 function drawTextToCanvas({
   canvas, text, fontFamily, fontSize = 56, color = "#fff",
   bg = null, padding = 28, maxWidth = null, align = "left",
@@ -49,19 +49,32 @@ function drawTextToCanvas({
   ctx.textBaseline = 'top';
   ctx.font = `${weight} ${fontSize}px "${fontFamily}", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
 
-  const words = String(text ?? '').split(/\s+/);
-  const lines = [];
-  const max   = (maxWidth ?? (W - padding * 2));
-  let line = '';
-  for (const w of words) {
-    const test = line ? `${line} ${w}` : w;
-    if (ctx.measureText(test).width > max) { lines.push(line); line = w; }
-    else { line = test; }
+  const usable = (maxWidth ?? (W - padding * 2));
+
+  // Respect explicit newlines, then wrap each paragraph
+  const outLines = [];
+  const paragraphs = String(text ?? '').split('\n');
+  for (let pi = 0; pi < paragraphs.length; pi++) {
+    const para = paragraphs[pi];
+    if (para.length === 0) { outLines.push(''); continue; } // blank line
+
+    const words = para.split(/\s+/);
+    let line = '';
+    for (const w of words) {
+      const candidate = line ? `${line} ${w}` : w;
+      if (ctx.measureText(candidate).width > usable) {
+        outLines.push(line);
+        line = w;
+      } else {
+        line = candidate;
+      }
+    }
+    if (line) outLines.push(line);
+    if (pi !== paragraphs.length - 1) outLines.push('');
   }
-  if (line) lines.push(line);
 
   let y = padding;
-  for (const l of lines) {
+  for (const l of outLines) {
     let x = padding;
     const lw = ctx.measureText(l).width;
     if (align === 'center') x = (W - lw) / 2;
@@ -216,7 +229,9 @@ async function sendPrompt() {
   sendBtn.disabled = true;
 
   promptInput.value = '';
-  let buf = `You: ${prompt}\n\nAssistant: `;
+
+  // Seed with assistant on a NEW line (so it's visually separated)
+  let buf = `You: ${prompt}\nAssistant:\n`;
   setPanel(buf + '…');
 
   try {
@@ -277,6 +292,11 @@ async function sendPrompt() {
         }
       }
     }
+
+    // Add a trailing newline to separate turns
+    buf += '\n';
+    setPanel(buf);
+
   } catch (e) {
     if (e.name !== 'AbortError') setPanel(`Network error: ${e.message || e}`);
   } finally {
