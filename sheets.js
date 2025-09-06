@@ -27,6 +27,10 @@
     for (var i = str.length - 1; i >= 0; i--) buf.unshift(["&#", str[i].charCodeAt(), ";"].join(""));
     return buf.join("");
   }
+async function headOK(url) {
+  try { const r = await fetch(url, { method: 'HEAD' }); return r.ok; }
+  catch { return false; }
+}
 
   function toRawGitHub(u) {
     try {
