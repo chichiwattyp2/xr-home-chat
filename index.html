@@ -37,8 +37,9 @@
       <!-- Register assets FIRST so A-Frame can build textures safely -->
       <a-assets timeout="15000">
         <!-- Move canvases into a-assets to avoid 0x0 textures -->
-        <canvas id="chatTextCanvas" width="1024" height="256"></canvas>
-        <canvas id="chatHintCanvas" width="1024" height="192"></canvas>
+      <canvas id="chatTextCanvas" width="1024" height="256" style="display:none"></canvas>
+      <canvas id="chatHintCanvas" width="1024" height="128" style="display:none"></canvas>
+
       </a-assets>
 
       <!-- Solid sky (remove any sky1.jpg reference to kill the 404) -->
