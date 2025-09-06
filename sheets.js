@@ -1,8 +1,13 @@
-// sheets.js — GViz → A-Frame tiles + Lookbook overlay panels (CSP-safe)
-// - Lookbook CSS classes on DOM overlays: .float-box, .media, .title, .subtitle, .btn, .chip
+// sheets.js — GViz → A-Frame tiles + Lookbook overlay panels (no duplicates)
+// - Removes old table/list UI before rendering (legacy selectors)
+// - Global guard: window.__LOOKBOOK_ACTIVE = true
+// - Lookbook overlay panels only (in-scene label disabled by default)
 // - GitHub blob→raw normalizer + local /assets fallback for images/models
-// - MSDF text semicolon fix (still spawns a tiny in-scene label if you want)
 (function () {
+  // ---------- flags ----------
+  const REMOVE_LEGACY = true;          // remove old table/list UI
+  const SHOW_SCENE_LABEL = false;      // set true if you still want the MSDF text under each tile
+
   // ---------- utils ----------
   function encodeHtml(str) {
     var buf = [];
@@ -76,24 +81,38 @@
     return root;
   }
 
+  // Remove legacy UI containers (table/list, menus, etc.)
+  function removeLegacyUI() {
+    if (!REMOVE_LEGACY) return;
+    const selectors = [
+      "#list", "#lists", "#listings", "#menu", "#menu-root",
+      ".sheet-listings", ".listing-table", ".legacy-table", ".legacy-list",
+      ".menu", ".tables", "table.sheet-table"
+    ];
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(n => n.remove());
+    });
+  }
+
   // Build a lookbook panel for an item, attach to overlay root, and bind to follow a target entity
-  function attachPanelForEntity(targetEl, item, opts = {}) {
+  function attachPanelForEntity(targetEl, item) {
     const overlayRoot = ensureOverlayRoot();
     const panel = document.createElement("div");
     panel.className = "float-box float-anim reveal-rise tilt-hover parallax-layer parallax-d2";
     const isModel = /\.(glb|gltf)(\?|$)/i.test(item.image);
     const imgHTML = !isModel && item.image ? `<div class="media"><img src="${item.image}" alt=""></div>` : "";
 
-    const domain = (() => {
-      try { return new URL(item.link).hostname.replace(/^www\./,''); } catch { return ""; }
-    })();
+    const domain = (() => { try { return new URL(item.link).hostname.replace(/^www\./,''); } catch { return ""; } })();
 
     panel.innerHTML = `
       ${imgHTML}
       <div class="title">${encodeHtml(item.title)}</div>
       ${domain ? `<div class="subtitle asimovian">${domain}</div>` : ""}
-      <div class="chips">${isModel ? `<span class="chip">3D</span>` : `<span class="chip">Image</span>`}${item.link ? ` <span class="chip">Link</span>` : ""}</div>
-      ${item.link ? `<button class="btn">Open</button>` : ""}
+      <div class="chips">
+        ${isModel ? `<span class="chip">3D</span>` : `<span class="chip">Image</span>`}
+        ${item.link ? `<span class="chip">Link</span>` : ``}
+      </div>
+      ${item.link ? `<button class="btn">Open</button>` : ``}
     `;
     overlayRoot.appendChild(panel);
 
@@ -123,6 +142,12 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     (async function main() {
+      // Let any other scripts know we’ve taken over
+      window.__LOOKBOOK_ACTIVE = true;
+
+      // Clean out legacy UI first
+      removeLegacyUI();
+
       // ===== CONFIG =====
       const SHEET_ID = "1fy-ZztZlhwgfz1wH8YGji2zuiiEfV88XyCRBDzLB1AA";
       const GID = Number(qp("gid", 9));
@@ -145,7 +170,7 @@
         console.log("#container created at", CONTAINER_POS);
       }
 
-      // Clean prior render
+      // Clean prior A-Frame render
       Array.from(container.querySelectorAll('[data-from-sheet="1"]')).forEach(el => el.remove());
 
       // ===== Fetch sheet =====
@@ -182,7 +207,13 @@
         const xStr = `${i * 2}.${i}`;
         const yStr = (r * 1.3).toString();
 
-        // Tile (minimal in-scene: image plane + optional model + tiny label)
+        // Tile (image plane + optional model, label optional by flag)
+        const labelHTML = SHOW_SCENE_LABEL ? `
+            <a-entity geometry="primitive: plane; width: 2; height: .2"
+                      material="color: #111"
+                      text="align: center; value: ${titleSafe}; color: #fff; shader: msdf; font: ${MSDF_FONT}"
+                      position="0 -.6 0"></a-entity>` : ``;
+
         const html = `
           <a-image data-from-sheet="1"
                    id="tile-${h}"
@@ -191,10 +222,7 @@
                    crossorigin="anonymous"
                    ${item.link ? `link="href: ${item.link}"` : ""}
                    ${(!isModel && item.image) ? `src="${item.image}"` : ""}>
-            <a-entity geometry="primitive: plane; width: 2; height: .2"
-                      material="color: #111"
-                      text="align: center; value: ${titleSafe}; color: #fff; shader: msdf; font: ${MSDF_FONT}"
-                      position="0 -.6 0"></a-entity>
+            ${labelHTML}
             ${isModel ? `
               <a-entity gltf-model="url(${item.image})"
                         scale="${MODEL_SCALE}"
