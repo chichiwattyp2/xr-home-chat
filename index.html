@@ -27,14 +27,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Asimovian&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Rampart+One&display=swap" rel="stylesheet">
 
     <!-- A-Frame + components -->
-    <script src="https://cdn.aframe.io/releases/1.7.1/aframe.min.js"></script>
-    <script src="sheets.js" defer></script>
-    <script type="module" src="/js/client.js"></script>
+   <!-- LOAD A-FRAME FIRST -->
+<script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-mouse-cursor-component/dist/aframe-mouse-cursor-component.min.js" defer></script>
-    <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
-    <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js" defer></script>
+<!-- then your scripts/components (order matters) -->
+<script src="sheets.js" defer></script>
+<script type="module" src="/js/client.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-mouse-cursor-component/dist/aframe-mouse-cursor-component.min.js" defer></script>
+<script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
+<script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js" defer></script>
 
     <!-- Lookbook CSS overrides (includes overlay UI styles) -->
     <link href="lookbook-xr-override.css" rel="stylesheet" type="text/css" media="all">
