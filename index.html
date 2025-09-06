@@ -2,111 +2,98 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>A‑Frame + Google + Chat GPT</title>
-    
+    <title>A-Frame + Google + Chat GPT</title>
+
+    <!-- CSP (adds blob: to connect-src for GLTF & canvas textures) -->
     <meta http-equiv="Content-Security-Policy" content="
-  default-src 'self';
-  script-src 'self' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval';
-  script-src-elem 'self' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval';
-  connect-src 'self' https://api.openai.com wss://api.openai.com https://cdn.aframe.io https://cdn.glitch.com https://cdn.glitch.global https://www.youtube.com https://i.ytimg.com https://*.googleapis.com https://*.gstatic.com https://docs.google.com https://www.googleapis.com https://raw.githubusercontent.com https://github.com https://user-images.githubusercontent.com;
-  img-src 'self' data: blob: https://cdn.aframe.io https://i.ytimg.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.gstatic.com https://*.ggpht.com https://*.githubusercontent.com;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  font-src 'self' data: https://cdn.aframe.io https://fonts.gstatic.com;
-">
+      default-src 'self';
+      script-src 'self' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval';
+      script-src-elem 'self' https://aframe.io https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval';
+      connect-src 'self' blob: https://api.openai.com wss://api.openai.com https://cdn.aframe.io https://cdn.glitch.com https://cdn.glitch.global https://www.youtube.com https://i.ytimg.com https://*.googleapis.com https://*.gstatic.com https://docs.google.com https://www.googleapis.com https://raw.githubusercontent.com https://github.com https://user-images.githubusercontent.com;
+      img-src 'self' data: blob: https://cdn.aframe.io https://i.ytimg.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.gstatic.com https://*.ggpht.com https://*.githubusercontent.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' data: https://cdn.aframe.io https://fonts.gstatic.com;
+    ">
 
+    <!-- Google Fonts for canvas text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Asimovian&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Rampart+One&display=swap" rel="stylesheet">
 
+    <!-- A-Frame + components -->
     <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
     <script src="sheets.js" defer></script>
+    <!-- Updated client (canvas fonts) -->
     <script type="module" src="/js/client.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-mouse-cursor-component/dist/aframe-mouse-cursor-component.min.js" defer></script>
-<script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
-<script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js" defer></script>
-<link href="lookbook-xr-override.css" rel="stylesheet" type="text/css" media="all">
-     <!--<style>
-    html, body { margin:0; height:100%; background:#0b0d12; color:#fff;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-    #ui { position:fixed; left:12px; right:12px; bottom:12px; display:flex; gap:8px; z-index: 2;
-      background: rgba(16,18,24,.7); padding:10px; border-radius:12px; backdrop-filter: blur(6px); }
-    #prompt { flex:1; padding:10px 12px; font-size:16px; border-radius:10px;
-      border:1px solid rgba(255,255,255,.15); background:#0f1218; color:#fff; }
-    button { padding:10px 14px; font-size:15px; border-radius:10px;
-      border:1px solid rgba(255,255,255,.15); background:#1b2333; color:#fff; cursor:pointer; }
-    button:active { transform: translateY(1px); }
-    @media (max-width: 480px) { #ui { flex-direction: column; } button { width: 100%; } }
-  </style> -->
+
+    <script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-mouse-cursor-component/dist/aframe-mouse-cursor-component.min.js" defer></script>
+    <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
+    <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js" defer></script>
+
+    <link href="lookbook-xr-override.css" rel="stylesheet" type="text/css" media="all">
   </head>
   <body>
-     <div id="ui">
-    <input id="prompt" placeholder="Ask something…" />
-    <button id="send">Send</button>
-    <button id="voice">🎤 Voice</button>
-  </div>
+    <!-- UI overlay -->
+    <div id="ui">
+      <input id="prompt" placeholder="Ask something…" />
+      <button id="send">Send</button>
+      <button id="voice">🎤 Voice</button>
+    </div>
+
+    <!-- Canvas textures for in-scene chat text (hidden) -->
+    <canvas id="chatTextCanvas" width="1024" height="256" style="display:none"></canvas>
+    <canvas id="chatHintCanvas" width="1024" height="192" style="display:none"></canvas>
+
     <a-scene>
-     
-<a-assets>
-  <a-asset-item id="rampart-msdf" src="assets/fonts/RampartOne-msdf.json"></a-asset-item>
-  <a-asset-item id="asimovian-msdf" src="assets/fonts/Asimovian-msdf.json"></a-asset-item>
-  <a-asset-item id="dmsans-msdf" src="assets/fonts/DMSans-msdf.json"></a-asset-item>
-</a-assets>
-
-
-
-
       <!-- Where rows spawn -->
       <a-entity id="csv-root"></a-entity>
 
       <!-- Camera with mouse cursor + raycaster for clicking -->
-      <a-entity
-        id="player"
-       
-        camera
-        spawn-in-circle="radius:3;"
-        position="0 1.9 0"
-        wasd-controls
-        look-controls
-      >
+      <a-entity id="player"
+                camera
+                spawn-in-circle="radius:3;"
+                position="0 1.9 0"
+                wasd-controls
+                look-controls>
         <a-cursor></a-cursor>
       </a-entity>
-<a-entity id="chatPanel" data-raycastable
-          position="9.43415 3.83854 -1.88325"
-          rotation="0 -45 0" scale="5 5 5">
 
-  <a-plane width="1.35" height="0.8"
-           color="#111" material="opacity: 0.9"></a-plane>
+      <!-- Chat panel (now using canvas textures; no MSDF assets needed) -->
+      <a-entity id="chatPanel" data-raycastable
+                position="9.43415 3.83854 -1.88325"
+                rotation="0 -45 0" scale="5 5 5">
+        <a-plane width="1.35" height="0.8" color="#111" material="opacity: 0.9"></a-plane>
 
-  <!-- Main chat text (Rampart One) -->
-  <a-entity id="chatText"
-            text="font: #rampart-msdf; color: #fff; shader: msdf;
-                   value: Hello! Type below or use the mic.; wrapCount: 28"
-            position="-0.62 0.28 0.01" scale="0.8 0.8 0.8">
-  </a-entity>
+        <!-- Main chat text (Rampart One via #chatTextCanvas) -->
+        <a-plane id="chatTextPlane"
+                 material="src: #chatTextCanvas; transparent: true"
+                 position="-0.62 0.28 0.01"
+                 scale="0.74 0.30 1"></a-plane>
 
-  <!-- Hint (Asimovian) -->
-  <a-entity id="hint"
-            text="font: #asimovian-msdf; color: #9ad; shader: msdf;
-                   value: Type below or press mic; wrapCount: 36"
-            position="-0.62 -0.28 0.01" scale="0.6 0.6 0.6">
-  </a-entity>
-</a-entity>
-
+        <!-- Hint (Asimovian via #chatHintCanvas) -->
+        <a-plane id="chatHintPlane"
+                 material="src: #chatHintCanvas; transparent: true"
+                 position="-0.62 -0.28 0.01"
+                 scale="0.74 0.22 1"></a-plane>
+      </a-entity>
     </a-scene>
 
-  
+    <!-- Status helper -->
     <script>
-      // Show Spawned N / errors without opening DevTools
       (function(){
         const status = document.getElementById('status');
         const _log = console.log, _err = console.error;
         console.log = function(...args){ _log.apply(console,args);
-          args.forEach(a => { if (typeof a === 'string' && a.startsWith('Spawned')) status.textContent = a; });
+          args.forEach(a => { if (typeof a === 'string' && a.startsWith('Spawned')) status && (status.textContent = a); });
         };
         console.error = function(...args){ _err.apply(console,args);
-          status.textContent = 'Error: ' + args.map(String).join(' ');
+          if (status) status.textContent = 'Error: ' + args.map(String).join(' ');
         };
       })();
     </script>
-     <audio id="assistantAudio" autoplay></audio>
+
+    <audio id="assistantAudio" autoplay></audio>
   </body>
 </html>
