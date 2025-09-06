@@ -1,5 +1,5 @@
 // client.js — Chat (SSE) + Realtime Voice (WebRTC)
-// + Lookbook font rendering via Canvas → A-Frame texture (ALL Asimovian)
+// Canvas → A-Frame texture (ALL Asimovian) + safe priming + assets-ready
 
 // ==================
 // Canvas text config
@@ -155,8 +155,21 @@ function whenSceneReady() {
   });
 }
 
+// Wait for <a-assets> to finish (ensures canvases are registered as textures)
+function whenAssetsReady() {
+  return new Promise((resolve) => {
+    const assets = document.querySelector('a-scene > a-assets, a-assets');
+    if (!assets) return resolve();
+    if (assets.hasLoaded) return resolve();
+    assets.addEventListener('loaded', resolve, { once: true });
+    // failsafe in case assets never fire (empty a-assets)
+    setTimeout(resolve, 1500);
+  });
+}
+
 (async () => {
   await whenSceneReady();
+  await whenAssetsReady();
 
   // Query scene/UI elements
   chatText    = document.querySelector('#chatText');           // fallback (not used if canvas exists)
@@ -172,6 +185,19 @@ function whenSceneReady() {
     audioEl.autoplay   = true;
     audioEl.playsInline = true;
     audioEl.muted      = false;
+  }
+
+  // PRIME the texture once so it's never 0x0 (prevents WebGL invalid value)
+  if (chatCanvas) {
+    const prime = () => drawTextToCanvas({
+      canvas: chatCanvas,
+      text: ' ', // minimal draw
+      fontFamily: CHAT_FONT_FAMILY,
+      fontSize: CHAT_FONT_SIZE_PX,
+      color: '#fff',
+      maxWidth: (chatCanvas?.width || 1024) - 64
+    });
+    if (document.fonts?.ready) document.fonts.ready.then(prime); else prime();
   }
 
   // Flush any buffered panel text
@@ -305,3 +331,153 @@ async function sendPrompt() {
     if (sendBtn) sendBtn.disabled = false;
   }
 }
+
+// ===================================
+// Realtime Voice via WebRTC (OpenAI)
+// ===================================
+const REALTIME_MODEL = 'gpt-realtime';
+
+let pc = null;
+let ws = null;
+let localStream = null;
+let voiceActive = false;
+
+function b64urlEncode(str) {
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/,'');
+}
+function b64urlDecode(b64url) {
+  let b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  return atob(b64);
+}
+
+async function startVoice() {
+  if (!window.RTCPeerConnection) { setPanel('WebRTC not supported in this browser.'); return; }
+  if (!voiceBtn) return;
+  voiceBtn.disabled = true;
+
+  try {
+    // 1) Fetch ephemeral realtime token
+    const tokenRes = await fetch('/api/realtime-token');
+    let tokenJson = null;
+    try { tokenJson = await tokenRes.json(); } catch {}
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text().catch(() => '');
+      setPanel(`Realtime token error ${tokenRes.status}: ${errText}`);
+      return;
+    }
+    const EPHEMERAL_KEY = tokenJson?.client_secret?.value || tokenJson?.value;
+    if (!EPHEMERAL_KEY) { setPanel('Realtime error: token missing "value".'); return; }
+
+    // 2) RTCPeerConnection + mic
+    pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+    pc.ontrack = (e) => { if (audioEl) audioEl.srcObject = e.streams[0]; };
+    pc.onconnectionstatechange = () => console.log('PeerConnection:', pc.connectionState);
+
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    } catch {
+      setPanel('Microphone permission denied or unavailable.');
+      await stopVoice();
+      return;
+    }
+
+    // 3) Create offer and include ICE candidates
+    const offer = await pc.createOffer({ offerToReceiveAudio: true });
+    await pc.setLocalDescription(offer);
+    await waitForIceGatheringComplete(pc);
+
+    // 4) Open Realtime WS with URL-safe base64 SDP
+    const sdpB64url = b64urlEncode(pc.localDescription.sdp);
+    ws = new WebSocket(
+      `wss://api.openai.com/v1/realtime?model=${encodeURIComponent(REALTIME_MODEL)}`,
+      ['realtime', 'openai-insecure-api-key.' + EPHEMERAL_KEY, 'openai-sdp.' + sdpB64url]
+    );
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({
+        type: 'session.update',
+        session: { type: 'realtime', audio: { output: { voice: 'alloy' } } }
+      }));
+    };
+
+    ws.onmessage = async (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === 'webrtc.sdp_answer' && msg.sdp) {
+          const sdp = b64urlDecode(msg.sdp);
+          await pc.setRemoteDescription({ type: 'answer', sdp });
+        }
+
+        if (msg.type === 'response.output_text.delta' && typeof msg.delta === 'string') {
+          appendPanel(msg.delta);
+        }
+
+        if (msg.type === 'error') {
+          console.error('[Realtime error]', msg);
+          appendPanel(`\n\n[Realtime error] ${msg.error?.message || ''}`);
+        }
+      } catch (e) {
+        console.error('WS parse error', e);
+      }
+    };
+
+    ws.onerror = (e) => console.error('WS error', e);
+    ws.onclose  = () => console.log('WS closed');
+
+    voiceActive = true;
+    if (voiceBtn) voiceBtn.textContent = '⏹ Stop';
+  } catch (err) {
+    console.error('startVoice failed:', err);
+    await stopVoice();
+  } finally {
+    if (voiceBtn) voiceBtn.disabled = false;
+  }
+}
+
+async function stopVoice() {
+  if (voiceBtn) voiceBtn.disabled = true;
+  try {
+    if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+    ws = null;
+
+    if (pc) {
+      try { pc.getSenders()?.forEach(s => s.track && s.track.stop()); } catch {}
+      try { pc.getReceivers()?.forEach(r => r.track && r.track.stop()); } catch {}
+      try { pc.close(); } catch {}
+      pc = null;
+    }
+    if (localStream) {
+      localStream.getTracks().forEach(t => t.stop());
+      localStream = null;
+    }
+    if (audioEl) {
+      audioEl.srcObject = null;
+    }
+
+    voiceActive = false;
+    if (voiceBtn) voiceBtn.textContent = '🎤 Voice';
+  } finally {
+    if (voiceBtn) voiceBtn.disabled = false;
+  }
+}
+
+function waitForIceGatheringComplete(pc) {
+  return new Promise((resolve) => {
+    if (pc.iceGatheringState === 'complete') return resolve();
+    const onChange = () => {
+      if (pc.iceGatheringState === 'complete') {
+        pc.removeEventListener('icegatheringstatechange', onChange);
+        resolve();
+      }
+    };
+    pc.addEventListener('icegatheringstatechange', onChange);
+    setTimeout(() => { pc.removeEventListener('icegatheringstatechange', onChange); resolve(); }, 4000);
+  });
+}
+
+// Cleanup on page hide/unload
+window.addEventListener('visibilitychange', () => { if (document.hidden && voiceActive) stopVoice(); });
+window.addEventListener('beforeunload', () => { if (voiceActive) stopVoice(); });
