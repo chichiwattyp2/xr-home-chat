@@ -13,11 +13,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
 
     <!-- A-Frame + components (v1.0.4 to match your current console) -->
-    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
     <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js" defer></script>
-
+<script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
     <!-- Your scripts -->
     <script src="/sheets.js" defer></script>
     <script type="module" src="/client.js"></script>
@@ -48,6 +48,7 @@
     <canvas id="chatTextCanvas" width="1024" height="256" style="display:none"></canvas>
     <canvas id="chatHintCanvas" width="1024" height="128" style="display:none"></canvas>
 </a-assets>
+      <a-entity environment="preset: forest; groundColor: #445; grid: cross"></a-entity>
       <!-- Camera + cursor; raycaster whitelist silences performance warning -->
       <a-entity id="player"
                 camera
