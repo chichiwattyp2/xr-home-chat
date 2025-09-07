@@ -50,14 +50,14 @@
       <button id="voice">🎤 Voice</button>
     </div>
 
-    <!-- Hidden canvases used as textures (power-of-two heights to prevent WebGL resize spam) -->
-    <canvas id="chatTextCanvas" width="1024" height="256" style="display:none"></canvas>
-    <canvas id="chatHintCanvas" width="1024" height="128" style="display:none"></canvas>
-
+ 
     <a-scene renderer="colorManagement: true">
       <!-- Root where sheet tiles / panels get spawned -->
       <a-entity id="csv-root"></a-entity>
-
+<a-assets>   <!-- Hidden canvases used as textures (power-of-two heights to prevent WebGL resize spam) -->
+    <canvas id="chatTextCanvas" width="1024" height="256" style="display:none"></canvas>
+    <canvas id="chatHintCanvas" width="1024" height="128" style="display:none"></canvas>
+</a-assets>
       <!-- Camera + cursor; raycaster whitelist silences performance warning -->
       <a-entity id="player"
                 camera
