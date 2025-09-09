@@ -1,0 +1,446 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Spotify VR Panel (A-Frame 1.7)</title>
+
+    <!-- A-Frame 1.7.0 -->
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+
+    <!-- Helpers updated for A-Frame 1.7 (audioanalyser + layout fixes) -->
+    <script src="spotify/build.js"></script>
+
+    <!-- Spotify Web API JS (only used when you DO have a token) -->
+    <script src="https://unpkg.com/spotify-web-api-js/dist/spotify-web-api.js"></script>
+
+    <!-- annyang speech recognition -->
+    <script src="spotify/annyang.min.js"></script>
+
+    <!-- Optional: resume WebAudio on first gesture (Chrome autoplay policy) -->
+    <script>
+      window.addEventListener('pointerdown', () => {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        try { const ctx = new Ctx(); ctx.resume && ctx.resume(); } catch (e) {}
+      }, { once: true });
+    </script>
+
+    <!-- Bootstrap: use token flow if present, otherwise demo mode -->
+    <script>
+    (async () => {
+      if (!window.ensureSpotifyAccessToken) {
+        console.warn('[bootstrap] No Spotify token flow present; running in demo mode (iTunes fallback).');
+        return;
+      }
+      const token = await window.ensureSpotifyAccessToken();
+      if (!token) {
+        console.warn('[bootstrap] No Spotify token yet; components will fall back.');
+        return;
+      }
+      window.spotifyApi = new SpotifyWebApi();
+      window.spotifyApi.setAccessToken(token);
+      document.dispatchEvent(new CustomEvent('spotify-api-ready', {
+        detail: { api: window.spotifyApi, token }
+      }));
+    })();
+    </script>
+
+    <!-- Inlined spotify player component (adds artwork, stop(), voice bootstrap) -->
+    <script>
+    (function () {
+      'use strict';
+
+      function $(sel, root) { return (root || document).querySelector(sel); }
+      function on(el, ev, fn, opts) { el && el.addEventListener(ev, fn, opts); }
+      function emit(el, name, detail) { el && el.dispatchEvent(new CustomEvent(name, { detail })); }
+      function ensureId(el, base) { if (!el.id) el.id = base + '-' + Math.random().toString(36).slice(2,7); return '#' + el.id; }
+
+      // Small floating "Enable Voice" button for the browser mic permission.
+      function injectVoiceButton() {
+        if ($('#start-voice')) return;
+        const btn = document.createElement('button');
+        btn.id = 'start-voice';
+        btn.textContent = '🎤 Enable Voice';
+        btn.style.cssText = [
+          'position:fixed','right:1rem','bottom:1rem','z-index:9999',
+          'padding:.6rem .9rem','border:0','border-radius:.5rem',
+          'background:#222','color:#fff','cursor:pointer','font:500 14px/1.2 system-ui'
+        ].join(';');
+        document.body.appendChild(btn);
+
+        const clickOnce = async () => {
+          try {
+            if (navigator.mediaDevices?.getUserMedia) {
+              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              stream.getTracks().forEach(t => t.stop());
+            }
+          } catch (err) {
+            console.error('[voice] microphone permission failed:', err);
+            alert('Microphone permission is required for voice commands.');
+            return;
+          }
+          if (window.annyang) {
+            try { window.annyang.start({ autoRestart: true, continuous: false }); }
+            catch (e) { console.error('[voice] failed to start annyang:', e); }
+          }
+          btn.removeEventListener('click', clickOnce);
+          btn.style.display = 'none';
+        };
+        btn.addEventListener('click', clickOnce, { once: true });
+      }
+
+      function installVoiceCommands() {
+        if (!window.annyang || window.__spotifyVoiceInstalled) return;
+        window.__spotifyVoiceInstalled = true;
+        const cmds = {
+          'play *q':   (q) => emit(document, 'spotify-voice-query', { query: String(q||'').trim() }),
+          'search *q': (q) => emit(document, 'spotify-voice-query', { query: String(q||'').trim() }),
+          'stop':      ()  => emit(document, 'spotify-stop', {}),
+          'pause':     ()  => emit(document, 'spotify-stop', {})
+        };
+        window.annyang.addCommands(cmds);
+        window.annyang.setLanguage && window.annyang.setLanguage('en-US');
+      }
+
+      AFRAME.registerComponent('spotify', {
+        schema: { analyserEl: { type: 'selector', default: '#playerHost' } },
+
+        init: function () {
+          this.api = null;
+
+          // Hidden <audio> used for playback and for the analyser
+          this.audio = new Audio();
+          this.audio.preload = 'auto';
+          this.audio.crossOrigin = 'anonymous';
+          this.audio.playsInline = true;
+          this.audio.controls = false;
+          this.audio.style.display = 'none';
+          document.body.appendChild(this.audio);
+
+          const audioSel = ensureId(this.audio, 'spotify-audio');
+
+          // Point audioanalyser to our hidden <audio>
+          const host = this.data.analyserEl || this.el;
+          try {
+            host.setAttribute('audioanalyser',
+              Object.assign({}, host.getAttribute('audioanalyser')||{}, { src: audioSel })
+            );
+          } catch (e) {
+            host.setAttribute('audioanalyser', 'src', audioSel);
+          }
+
+          // Wire up API if present
+          on(document, 'spotify-api-ready', (evt) => {
+            this.api = evt.detail && evt.detail.api ? evt.detail.api : null;
+          });
+
+          // Voice input
+          this._onVoice = (evt) => {
+            const q = evt?.detail?.query ? String(evt.detail.query).trim() : '';
+            if (q) this.searchAndPlay(q);
+          };
+          on(document, 'spotify-voice-query', this._onVoice);
+
+          // Global stop
+          on(document, 'spotify-stop', () => this.stop());
+
+          injectVoiceButton();
+          installVoiceCommands();
+
+          // Best-effort: unlocking SR on first click helps in some browsers
+          const unlockOnce = () => {
+            if (window.annyang) { try { window.annyang.start({ autoRestart:true, continuous:false }); } catch (e) {} }
+            window.removeEventListener('click', unlockOnce, true);
+          };
+          window.addEventListener('click', unlockOnce, true);
+        },
+
+        remove: function () {
+          document.removeEventListener('spotify-voice-query', this._onVoice);
+          if (this.audio && this.audio.parentNode) this.audio.parentNode.removeChild(this.audio);
+        },
+
+        // Public stop() used by UI + voice
+        stop: function () {
+          if (this.audio) {
+            try { this.audio.pause(); } catch (e) {}
+            // keep time (pause) rather than resetting, feels better for Play toggle
+          }
+          this.el.emit('spotify-stopped', {});
+        },
+
+        // Search + play (Spotify when token present, otherwise iTunes preview)
+        searchAndPlay: async function (query) {
+          const el = this.el;
+          this.el.emit('spotify-search', { query });
+
+          try {
+            let track = null;
+
+            if (this.api?.searchTracks) {
+              const res = await this.api.searchTracks(query, { limit: 10 });
+              const items = (res?.tracks?.items) || [];
+              const found = items.find(t => t?.preview_url) || items[0];
+              if (found && found.preview_url) {
+                track = {
+                  name: found.name,
+                  artists: found.artists || [],
+                  preview_url: found.preview_url,
+                  artwork: (found.album && found.album.images && found.album.images[0] && found.album.images[0].url) || '',
+                  external_urls: found.external_urls || {}
+                };
+              }
+            }
+
+            if (!track) {
+              const qEnc = encodeURIComponent(query);
+              const resp = await fetch(`https://itunes.apple.com/search?term=${qEnc}&media=music&limit=10`);
+              const data = await resp.json();
+              const item = (data.results || []).find(r => r.previewUrl) || (data.results || [])[0];
+              if (!item || !item.previewUrl) throw new Error('No preview available for: ' + query);
+              const art = item.artworkUrl100 ? item.artworkUrl100.replace('100x100', '512x512') : '';
+              track = {
+                name: item.trackName,
+                artists: [{ name: item.artistName }],
+                preview_url: item.previewUrl,
+                artwork: art,
+                external_urls: { spotify: item.trackViewUrl }
+              };
+            }
+
+            this.audio.src = track.preview_url;
+            try { await this.audio.play(); } catch (e) {
+              console.warn('[spotify] Autoplay blocked; click the page and try again.', e);
+            }
+
+            el.emit('spotify-track', { track });
+            el.emit('spotify-play',  { query, track });
+          } catch (err) {
+            console.error('[spotify] search/play failed:', err);
+            el.emit('spotify-error', { error: String(err?.message || err) });
+          }
+        }
+      });
+
+      // === UI Panel built from A-Frame primitives ===
+      AFRAME.registerComponent('spotify-panel-ui', {
+        schema: {
+          width:   { default: 2.4 },
+          height:  { default: 1.35 },
+          player:  { type: 'selector', default: '#playerHost' }
+        },
+
+        init: function () {
+          const root = this.el;
+          const w = this.data.width, h = this.data.height;
+
+          // Background panel
+          const bg = document.createElement('a-plane');
+          bg.setAttribute('width',  w);
+          bg.setAttribute('height', h);
+          bg.setAttribute('color',  '#111');
+          bg.setAttribute('material', 'shader: flat; opacity: 0.98');
+          root.appendChild(bg);
+
+          // Album art square (left)
+          const art = document.createElement('a-plane');
+          art.setAttribute('position', `${-w/2 + 0.35} 0 0.01`);
+          art.setAttribute('width', '0.9');
+          art.setAttribute('height','0.9');
+          art.setAttribute('color', '#333');
+          art.setAttribute('material', 'shader: flat');
+          root.appendChild(art);
+          this._art = art;
+
+          // Track title
+          const title = document.createElement('a-entity');
+          title.setAttribute('text', 'value: —; color: #fff; width: 2.2; anchor: left; baseline: top');
+          title.setAttribute('position', `${-w/2 + 0.95} 0.35 0.02`);
+          root.appendChild(title);
+          this._title = title;
+
+          // Artist line
+          const artist = document.createElement('a-entity');
+          artist.setAttribute('text', 'value: ; color: #9ad; width: 2.2; anchor: left; baseline: top');
+          artist.setAttribute('position', `${-w/2 + 0.95} 0.13 0.02`);
+          root.appendChild(artist);
+          this._artist = artist;
+
+          // Progress bar track
+          const pbTrack = document.createElement('a-plane');
+          pbTrack.setAttribute('position', `${-w/2 + 0.95} -0.05 0.02`);
+          pbTrack.setAttribute('width', '1.25');
+          pbTrack.setAttribute('height','0.03');
+          pbTrack.setAttribute('color',  '#222');
+          pbTrack.setAttribute('material', 'shader: flat');
+          pbTrack.setAttribute('anchor', 'left');
+          root.appendChild(pbTrack);
+
+          // Progress bar fill
+          const pbFill = document.createElement('a-plane');
+          pbFill.setAttribute('position', `${-w/2 + 0.95} -0.05 0.03`);
+          pbFill.setAttribute('width', '0.001');
+          pbFill.setAttribute('height','0.03');
+          pbFill.setAttribute('color',  '#3ddc84');
+          pbFill.setAttribute('material', 'shader: flat');
+          pbFill.setAttribute('anchor', 'left');
+          root.appendChild(pbFill);
+          this._pbFill = pbFill;
+
+          // Buttons group (right side)
+          const btnX = w/2 - 0.35;
+
+          // Play/Pause circular button
+          const playBtn = document.createElement('a-circle');
+          playBtn.setAttribute('radius', '0.11');
+          playBtn.setAttribute('color',  '#1db954');
+          playBtn.setAttribute('material','shader: flat');
+          playBtn.setAttribute('position', `${btnX} 0.18 0.03`);
+          playBtn.classList.add('ui-interactive');
+          root.appendChild(playBtn);
+
+          // Play glyph (triangle)
+          const playGlyph = document.createElement('a-triangle');
+          playGlyph.setAttribute('color', '#fff');
+          playGlyph.setAttribute('material','shader: flat');
+          playGlyph.setAttribute('scale', '0.1 0.1 0.1');
+          playGlyph.setAttribute('rotation', '0 0 90');
+          playGlyph.setAttribute('position', `${btnX} 0.18 0.04`);
+          root.appendChild(playGlyph);
+
+          // Stop square button
+          const stopBtn = document.createElement('a-circle');
+          stopBtn.setAttribute('radius', '0.11');
+          stopBtn.setAttribute('color',  '#b00020');
+          stopBtn.setAttribute('material','shader: flat');
+          stopBtn.setAttribute('position', `${btnX} -0.04 0.03`);
+          stopBtn.classList.add('ui-interactive');
+          root.appendChild(stopBtn);
+
+          const stopGlyph = document.createElement('a-plane');
+          stopGlyph.setAttribute('width', '0.08');
+          stopGlyph.setAttribute('height','0.08');
+          stopGlyph.setAttribute('color', '#fff');
+          stopGlyph.setAttribute('material','shader: flat');
+          stopGlyph.setAttribute('position', `${btnX} -0.04 0.04`);
+          root.appendChild(stopGlyph);
+
+          // Mic button (triggers demo query prompt or voice)
+          const micBtn = document.createElement('a-circle');
+          micBtn.setAttribute('radius', '0.11');
+          micBtn.setAttribute('color',  '#333');
+          micBtn.setAttribute('material','shader: flat');
+          micBtn.setAttribute('position', `${btnX} -0.26 0.03`);
+          micBtn.classList.add('ui-interactive');
+          root.appendChild(micBtn);
+
+          const micGlyph = document.createElement('a-entity');
+          micGlyph.setAttribute('text', 'value: 🎤; color: #fff; width: 2; align: center');
+          micGlyph.setAttribute('position', `${btnX} -0.26 0.05`);
+          root.appendChild(micGlyph);
+
+          // Interactions
+          const player = this.data.player || $('#playerHost');
+          const getPlayerCmp = () => (player && player.components && player.components.spotify) ? player.components.spotify : null;
+
+          const tryPlayPause = async () => {
+            const cmp = getPlayerCmp();
+            if (!cmp) return;
+            const audio = cmp.audio;
+            if (!audio) return;
+            if (audio.paused) {
+              try { await audio.play(); } catch (e) { console.warn('Autoplay blocked, user gesture required.', e); }
+            } else {
+              audio.pause();
+            }
+          };
+
+          playBtn.addEventListener('click', tryPlayPause);
+          playGlyph.addEventListener('click', tryPlayPause);
+
+          stopBtn.addEventListener('click', () => document.dispatchEvent(new CustomEvent('spotify-stop')));
+          stopGlyph.addEventListener('click', () => document.dispatchEvent(new CustomEvent('spotify-stop')));
+
+          // Mic: if annyang present we just start listening; otherwise prompt user for a quick text query.
+          micBtn.addEventListener('click', async () => {
+            if (window.annyang) {
+              try { window.annyang.start({ autoRestart: true, continuous: false }); } catch (e) {}
+              alert('Say: “play <artist or song>”');
+            } else {
+              const q = prompt('Type a song or artist to play:');
+              if (q) document.dispatchEvent(new CustomEvent('spotify-voice-query', { detail: { query: q } }));
+            }
+          });
+
+          // Track updates -> update UI text + artwork
+          const setText = (el, key, value) => {
+            const t = el.getAttribute('text') || {};
+            t[key] = value;
+            el.setAttribute('text', t);
+          };
+
+          this._onTrack = (evt) => {
+            const t = evt.detail?.track || {};
+            const title = t.name || '—';
+            const artists = (t.artists || []).map(a => a && a.name ? a.name : '').filter(Boolean).join(', ');
+            setText(this._title,  'value', title);
+            setText(this._artist, 'value', artists || '');
+            const art = t.artwork || t.albumArt || (t.album && t.album.images && t.album.images[0] && t.album.images[0].url) || '';
+            if (art) this._art.setAttribute('material', `shader: flat; src: ${art};`);
+            else     this._art.setAttribute('material', 'shader: flat; color: #333;');
+          };
+          player.addEventListener('spotify-track', this._onTrack);
+
+          // Progress update in tick
+          this._playerCmpGetter = getPlayerCmp;
+        },
+
+        tick: function () {
+          const cmp = this._playerCmpGetter && this._playerCmpGetter();
+          const audio = cmp && cmp.audio;
+          if (!audio || !isFinite(audio.duration) || audio.duration <= 0) {
+            this._pbFill && this._pbFill.setAttribute('width', '0.001');
+            return;
+          }
+          const pct = Math.max(0, Math.min(1, audio.currentTime / audio.duration));
+          const full = 1.25; // same as pbTrack width
+          this._pbFill && this._pbFill.setAttribute('width', (full * pct).toFixed(4));
+        },
+
+        remove: function () {
+          const player = this.data.player || document.querySelector('#playerHost');
+          if (player && this._onTrack) player.removeEventListener('spotify-track', this._onTrack);
+        }
+      });
+    })();
+    </script>
+  </head>
+
+  <body>
+    <!-- A-Frame 1.7: antialias now on renderer -->
+    <a-scene renderer="antialias: true">
+      <a-assets>
+        <img id="floor"  src="https://cdn.aframe.io/a-painter/images/floor.jpg" crossOrigin="anonymous">
+        <img id="skymap" src="https://cdn.aframe.io/a-painter/images/sky.jpg"   crossOrigin="anonymous">
+      </a-assets>
+
+      <!-- Hidden “host” for the player + analyser -->
+      <a-entity id="playerHost" audioanalyser spotify position="0 0 0" visible="false"></a-entity>
+
+      <!-- Centered UI panel in front of the camera -->
+      <a-entity position="0 1.5 -2.2" spotify-panel-ui></a-entity>
+
+      <!-- Simple environment -->
+      <a-entity id="sky"
+        geometry="primitive: sphere; radius: 30; phiLength: 360; phiStart: 0; thetaLength: 90"
+        material="shader: flat; side: back; src: #skymap">
+      </a-entity>
+
+      <a-entity id="ground"
+        geometry="primitive: circle; radius: 30.5"
+        rotation="-90 0 0"
+        material="src: #floor">
+      </a-entity>
+    </a-scene>
+  </body>
+</html>

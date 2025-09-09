@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Spotify Callback</title></head>
+<body>
+  <p>Connecting to Spotify…</p>
+  <script src="spotify/spotify-auth.js"></script>
+  <script>
+    (async () => {
+      const token = await window.ensureSpotifyAccessToken();
+      if (token) location.replace('/'); // go back to your main scene
+    })();
+  </script>
+</body>
+</html>
