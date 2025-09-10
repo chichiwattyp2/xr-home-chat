@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+    <script src="htmlbuild.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+    body{
+      font-family: 'Roboto', sans-serif;
+      text-shadow: 0px 0px 10px #00d2ff;
+      color: #fff;
+      font-size: 32px;
+    }
+    h1{
+      font-size: 52px;
+    }
+    .dark{
+      background-color: rgba(0,0,0,0.2);
+      border-radius:50px;  
+      background-repeat: no-repeat;
+      background-position: bottom right;
+      padding: 40px;
+    }
+    .main{
+      width: 1024px;
+      height: 768px;
+      overflow: hidden;
+    }
+    .menu{
+      width: 256px;
+      height: 768px;
+      text-align: center;
+    }
+    .menu ul{
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    a.button{
+      display: inline-block;
+      width: 100%;
+      border-radius: 20px;
+      background-color: #000;
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+      padding: 10px 0;
+      margin-bottom: 20px;
+    }
+    a.button:hover{
+      background-color: #fff;
+      color: #888;
+    }
+    a.button:active{
+      background-color: #fff;
+      color: #888;
+      box-shadow: 0px 0px 50px #00d2ff;
+    }
+    a.imgLink{
+      width: 100%;
+      border-radius: 20px;
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+      padding: 10px 0;
+      margin-bottom: 20px;
+      background-color: #444;
+      border: 3px solid #444;
+      text-shadow: none;
+      display: block;
+    }
+    a.imgLink:hover{
+      border: 3px solid #fff;
+      background-color: #444;
+    }
+    .code{
+      white-space: pre;
+      font-size: 0.7em;
+      background-color: #000;
+      margin-bottom: 30px;
+    }
+    .next,.prev{
+      position: absolute;
+      bottom: 0px;
+      right: 30px;
+      display: inline-block;
+      width: auto !important;
+      padding: 20px 30px !important;
+    }
+    .prev{
+      right: auto;
+      left: 30px;
+    }
+    #page1{
+      position: relative;
+      height: 100%;
+    }
+    #page2, #page3, #page4{
+      display: none;
+      position: relative;
+      height: 100%;
+    }
+    .slide{
+      height:100%;
+    }
+    .slide:target #page1{
+      display: none;
+    }
+    #slide2:target #page2{
+      display: block;
+    }
+    #slide3:target #page3{
+      display: block;
+    }
+    #slide4:target #page4{
+      display: block;
+    }
+    #page4 ul{
+      list-style-type: square;
+      font-size: 0.8em;
+    }
+    </style>
+    <script>
+    AFRAME.registerComponent('showbutton', {
+      schema: {
+        'target': {type: 'selector'},
+      },
+      init: function () {
+        var show=false;    
+        this.el.addEventListener("click",()=>{
+          if(show){
+            this.data.target.setAttribute("visible","false");
+            this.el.querySelector("a").innerHTML="Show Box";
+          }else{
+            this.data.target.setAttribute("visible","true");
+            this.el.querySelector("a").innerHTML="Hide Box";
+          }
+          show=!show;
+        });
+      }
+    });
+    </script>
+  </head>
+  <body>
+    <div id="slide2" class="slide">
+    <div id="slide3" class="slide">
+    <div id="slide4" class="slide">
+    <a-scene fog="type: linear; color: #222222; far: 20;">
+      <a-assets>
+        <img id="floor" src="assets/floor.png">
+        <img id="tex1" src="assets/box.png">
+      </a-assets>
+      <a-plane material="src:#floor; repeat: 700 700; transparent: true;" height="500" width="500" rotation="-90 0 0"></a-plane>
+      <a-sky color="#222222"></a-sky>
+      <a-entity id="cameraRig">
+        <a-camera id="camera">
+        </a-camera>
+        <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: .screen"></a-entity>
+        <a-entity laser-controls raycaster="objects: .screen;"></a-entity>
+      </a-entity>
+    <!-- Left Menu -->
+<a-entity id="menu-left" class="screen menu dark" htmlembed="ppu:256" position="-2.712 2.5 -4.476" rotation="0 45 0">
+  <h2>Menu</h2>
+  <ul>
+    <li><a href="#" class="button">Home</a></li>
+    <li><a href="#slide2" class="button">Wellness</a></li>
+    <li><a href="#slide3" class="button">Vapes</a></li>
+    <li><a href="#slide4" class="button">Contact</a></li>
+  </ul>
+</a-entity>
+
+<!-- Main Panel -->
+<a-entity id="main" class="screen dark main" htmlembed="ppu:256" position="0 2.5 -5">
+  <div id="page1">
+    <h1>iLabs - Cannabis Products Delivered Nationwide</h1>
+    <p>Shop edibles, oils, topicals, vape pens, disposable vapes, cartridges, capsules, and dabs, delivered throughout South Africa. Browse curated collections for Wellness and Vapes with fast, reliable shipping.</p>
+    <p>Explore best sellers from our house brands (including Awaken) and discover limited drops like live rosin etched cartridges and DUO disposables.</p>
+    <a href="#slide2" class="button next">Next Page</a>
+  </div>
+
+  <div id="page2">
+    <h1>Wellness (Drops, Capsules, Topicals)</h1>
+    <p>Find targeted formulas in drops, capsules, balms, creams, and oils designed for daily balance and specific needs.</p>
+    <ul>
+      <li><strong>Categories:</strong> Calming, Pain, Pets, Neurological, Skin, Sleep</li>
+      <li><strong>Formats:</strong> Tinctures and drops, softgels and capsules, creams and balms, specialty oils</li>
+      <li><strong>Highlights:</strong> Nationwide delivery, clear labeling, consistent dosing</li>
+    </ul>
+    <div class="code">
+      Wellness quick path:<br>
+      Shop > Wellness > Choose a category > Select format > Add to cart
+    </div>
+    <a href="#" class="button prev">Prev Page</a>
+    <a href="#slide3" class="button next">Next Page</a>
+  </div>
+
+  <div id="page3">
+    <h1>Vapes (Disposables and Cartridges)</h1>
+    <p>Discover etched coil cartridges and disposable vapes in classic and limited strains. Options include 1 ml etched carts, 1 ml disposables, and 2 ml DUO devices.</p>
+    <ul>
+      <li><strong>Cartridges:</strong> 1 ml etched coil lineup (for example: Durban Poison, Watermelon Yeti, Rainbow Kush, Super Sativa)</li>
+      <li><strong>Disposables:</strong> 1 ml etched disposables and 2 ml DUO two-strains-in-one devices</li>
+      <li><strong>Extras:</strong> Compatible devices like GHOST and VOLT pens (Awaken.za)</li>
+    </ul>
+    <div class="code">
+      Tip:<br>
+      Choose your format (cartridge or disposable) > pick strain > check device compatibility > add to cart
+    </div>
+    <a-entity showbutton="target:#box"><a class="button" href="javascript:void(0)">Show Device</a></a-entity>
+    <a href="#slide2" class="button prev">Prev Page</a>
+    <a href="#slide4" class="button next">Next Page</a>
+  </div>
+
+  <div id="page4">
+    <h1>Contact and Support</h1>
+    <p>Questions about orders, wellness guidance, or stocking our brands? Use the contact page and select your inquiry type.</p>
+    <ul>
+      <li><strong>Inquiry types:</strong> Customer Service, Wholesale Enquiry, General Enquiry</li>
+      <li><strong>Response:</strong> A team member will assist with product info, orders, and delivery</li>
+      <li><strong>Location:</strong> Delivery available nationwide in South Africa</li>
+    </ul>
+    <a href="#slide3" class="button prev">Prev Page</a>
+  </div>
+</a-entity>
+
+<!-- Right Panel (no images to avoid CORS/path issues) -->
+<a-entity id="links" class="screen menu dark" htmlembed="ppu:256" position="2.712 2.5 -4.476" rotation="0 -45 0">
+  <h2>Links</h2>
+  <ul>
+    <li><a class="button" href="https://ilabs.co.za/">Shop iLabs</a></li>
+    <li><a class="button" href="https://ilabs.co.za/collections/wellness">Wellness</a></li>
+    <li><a class="button" href="https://ilabs.co.za/collections/vapes">Vapes</a></li>
+    <li><a class="button" href="https://ilabs.co.za/pages/contact">Contact</a></li>
+  </ul>
+</a-entity>
+
+
+      <a-box material="src:#tex1" scale="0.5 0.5 0.5" position="0 0.5 -4" id="box" visible="false"></a-box>
+    </a-scene>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>
