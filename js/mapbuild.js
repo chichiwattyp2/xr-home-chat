@@ -1,8 +1,8 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 require("aframe");
-require("../index.js");
+require("mapindex.js");
 
-},{"../index.js":2,"aframe":4}],2:[function(require,module,exports){
+},{"mapindex.js":2,"aframe":4}],2:[function(require,module,exports){
 /* global AFRAME, THREE */
 
 if (typeof AFRAME === "undefined") {
@@ -11,7 +11,7 @@ if (typeof AFRAME === "undefined") {
   );
 }
 
-require("./lib/terrainloader.js");
+require("terrainloader.js");
 
 /**
  * Terrain model component.
@@ -257,7 +257,7 @@ AFRAME.registerComponent("terrain-model", {
   },
 });
 
-},{"./lib/terrainloader.js":3}],3:[function(require,module,exports){
+},{"terrainloader.js":3}],3:[function(require,module,exports){
 /**
  * For loading binary data into a 3D terrain model
  * @author Bjorn Sandvik / http://thematicmapping.org/
