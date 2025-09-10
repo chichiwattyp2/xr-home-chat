@@ -42,154 +42,886 @@
     </style>
   </head>
 
+ 
+  <!--BODYBODYBODYBODY -->
   <body>
-    <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121">
-      <!-- Aframe asset management system-->
-      <a-assets>
-        <!-- audio -->
-        <audio id="piano_c" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fnote%20c%20piano.mp3?v=1565881186559" crossorigin="anonymous"></audio>
-        <audio id="piano_d" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20d.mp3?v=1565883564721" crossorigin="anonymous"></audio>
-        <audio id="piano_e" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20e.mp3?v=1565883566923" crossorigin="anonymous"></audio>
-        <audio id="piano_f" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20f.mp3?v=1565883568318" crossorigin="anonymous"></audio>
-        <audio id="piano_g" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20g.mp3?v=1565883569859" crossorigin="anonymous"></audio>
-        <audio id="piano_a" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20a.mp3?v=1565883562372" crossorigin="anonymous"></audio>
-        <audio id="piano_b" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b.mp3?v=1565883563277" crossorigin="anonymous"></audio>
-        <audio id="piano_hc" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fhigh%20c%20piano.mp3?v=1565889882364" crossorigin="anonymous"></audio>
-        <audio id="piano_csharp" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fc%20sharp.mp3?v=1565890996511" crossorigin="anonymous"></audio>
-        <audio id="piano_eflat" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fe%20flat.mp3?v=1565890997434" crossorigin="anonymous"></audio>
-        <audio id="piano_fsharp" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Ff%20sharp.mp3?v=1565890998603" crossorigin="anonymous"></audio>
-        <audio id="piano_gsharp" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fg%20sharp.mp3?v=1565890999944" crossorigin="anonymous"></audio>
-        <audio id="piano_bflat" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b%20flat.mp3?v=1565891011666" crossorigin="anonymous"></audio>
+  
 
-        <!-- mixins -->
+    <!-- Start Header -->
+
+   
+
+    <!--ENDENDENDNEND -->
+
+    <a-scene 
+      antialias="true"
+      vr-mode-ui="enabled: true"
+      loading-screen="backgroundColor: #212121"
+      physics
+    >
+      <!-- Aframe asset management system-->
+
+      <a-assets>
+        <audio
+          id="piano_c"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fnote%20c%20piano.mp3?v=1565881186559"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_d"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20d.mp3?v=1565883564721"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_e"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20e.mp3?v=1565883566923"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_f"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20f.mp3?v=1565883568318"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_g"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20g.mp3?v=1565883569859"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_a"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20a.mp3?v=1565883562372"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_b"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b.mp3?v=1565883563277"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_hc"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fhigh%20c%20piano.mp3?v=1565889882364"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_csharp"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fc%20sharp.mp3?v=1565890996511"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_eflat"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fe%20flat.mp3?v=1565890997434"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_fsharp"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Ff%20sharp.mp3?v=1565890998603"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_gsharp"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fg%20sharp.mp3?v=1565890999944"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_bflat"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b%20flat.mp3?v=1565891011666"
+          crossorigin="anonymous"
+        ></audio>
+        <!--MIXINS declare attributes just once, for reuse - like a javascript variable!-->
+        <!--geometry mixins-->
+
+        <!--color mixins-->
         <a-mixin id="black" material="color:#000000"></a-mixin>
         <a-mixin id="white" material="color:#e6e6e6"></a-mixin>
-        <a-mixin id="bar" geometry="primitive: box" material="color: rgb(10, 20, 50); shader: flat" scale-y-color="from: 10 20 50; to: 210, 220, 250; maxScale: 15"></a-mixin>
-        <a-mixin id="board" geometry="depth: .05; height: 1; width: 6" material="shader: flat" pivot="0 0.5 0" position="0 -1 0"></a-mixin>
-        <a-mixin id="unhinge" attribute="rotation" to="0 0 0" dur="1000" fill="both"></a-mixin>
+      <a-mixin id="bar"
+          geometry="primitive: box"
+          material="color: rgb(10, 20, 50); shader: flat"
+          scale-y-color="from: 10 20 50; to: 210, 220, 250; maxScale: 15"
+        ></a-mixin>
+        <a-asset-item
+          id="adidas"
+          src="https://cdn.glitch.com/80103382-77c7-436e-ac28-b71dc8e4468c%2Fgazelle.glb"
+        ></a-asset-item>
+        <a-asset-item
+          id="newbalance"
+          src="https://cdn.glitch.com/b2a38be5-8f68-46a7-9578-fcbaeb96f8a1%2Fnb.glb"
+        ></a-asset-item>
+        <a-asset-item
+          id="vizor-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fvizor.obj"
+        ></a-asset-item>
+        <a-asset-item
+          id="frame-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fframe.obj"
+        ></a-asset-item>
+        <a-asset-item
+          id="helmet-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fhelmet.obj"
+        ></a-asset-item>
+        <a-asset-item
+          id="suit-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fsuit.obj"
+        ></a-asset-item>
+        <img
+          id="dawn"
+          crossorigin="anonymous"
+          src="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fdawn.jpeg"
+        />
+        <a-mixin
+          id="board"
+          geometry="depth: .05; height: 1; width: 6"
+          material="shader: flat"
+          pivot="0 0.5 0"
+          position="0 -1 0"
+        ></a-mixin>
+        <a-mixin
+          id="unhinge"
+          attribute="rotation"
+          to="0 0 0"
+          dur="1000"
+          fill="both"
+        ></a-mixin>
         <a-mixin id="checkpoint"></a-mixin>
         <a-mixin id="checkpoint-hovered" color="#141414"></a-mixin>
+        <video id="1" autoplay loop="true" src="assets/1.mp4"></video>
+        <video id="2" autoplay loop="true" src="assets/2.mp4"></video>
+        <video id="3" autoplay loop="true" src="assets/3.mp4"></video>
+        <video id="4" autoplay loop="true" src="assets/4.mp4"></video>
+        <video id="5" autoplay loop="true" src="assets/5.mp4"></video>
+        <a-asset-item
+          id="picframe.obj"
+          src="assets/picframe.obj"
+          preload="auto"
+        ></a-asset-item>
+        <a-asset-item
+          id="las_vegas_obj"
+          src="assets/Las_Vegas.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="las_vegas_diffuse"
+          src="assets/Las_vegas_Diffuse_01.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="las_vegas_normal"
+          src="assets/Las_vegas_Normal_01.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="damas_pillier_obj"
+          src="assets/Damas.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="Damas_Pillier_diffuse"
+          src="assets/Damas_02_diffuse_03.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="damas_sortie_obj"
+          src="assets/panneau_sortie.obj"
+          preload="auto"
+        ></a-asset-item>
+        <a-asset-item
+          id="damas_station_obj"
+          src="assets/panneau_station.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="Damas_panneaux_diffuse"
+          src="assets/Panneau_metro_Diffuse.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="bust"
+          src="assets/Statue.glb"
+          preload="auto"
+        ></a-asset-item>
+        
+        <a-asset-item
+          id="console"
+          src="assets/walnut.glb"
+          preload="auto"
+        ></a-asset-item>
+        <a-asset-item
+          id="lamp_obj"
+          src="assets/Lamp.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="lamp_diffuse"
+          src="assets/echelle_diffuse_01.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="cimaise_billet_obj"
+          src="assets/Cimese_Echelle_Billet_01.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="cimaise_billet_diffuse"
+          src="assets/Cimese_Echelle_Billet_Diffuse_02.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="cimaise_poster_obj"
+          src="assets/Cimaise_02.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="cimaise_posters_diffuse"
+          src="assets/Cimaise_02_Diffuse_05_4096.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="pic1"
+          src="assets/pic1.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="pic2"
+          src="assets/pic2.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="floor"
+          src="assets/floor2.png"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="pic3"
+          src="assets/pic3.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="toit_obj"
+          src="assets/Toit_01.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="toit_diffuse"
+          src="assets/ToitOcclusion_ambiante.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="mur_obj"
+          src="assets/Mur_Scene_03.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="mur_diffuse"
+          src="assets/5-Mur_Diffuse_01_15.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+         <img
+          id="vidcards"
+          src="assets/cards-01.png"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="sol_obj"
+          src="assets/Sol.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="sol_diffuse"
+          src="assets/Sol_diffuse_08.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+                <a-mixin id="all-interactions"
+                 hoverable grabbable stretchable draggable
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+                 dynamic-body
+        ></a-mixin>
 
-        <!-- models/images -->
-        <a-asset-item id="adidas" src="https://cdn.glitch.com/80103382-77c7-436e-ac28-b71dc8e4468c%2Fgazelle.glb"></a-asset-item>
-        <a-asset-item id="newbalance" src="https://cdn.glitch.com/b2a38be5-8f68-46a7-9578-fcbaeb96f8a1%2Fnb.glb"></a-asset-item>
-        <a-asset-item id="vizor-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fvizor.obj"></a-asset-item>
-        <a-asset-item id="frame-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fframe.obj"></a-asset-item>
-        <a-asset-item id="helmet-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fhelmet.obj"></a-asset-item>
-        <a-asset-item id="suit-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fsuit.obj"></a-asset-item>
+        <a-mixin id="grab-move"
+                 hoverable grabbable draggable
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+                 dynamic-body
+        ></a-mixin>
 
-        <img id="dawn" src="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fdawn.jpeg" crossorigin="anonymous" />
-
-        <!-- local assets -->
-        <video id="1" src="assets/1.mp4" muted playsinline loop preload="auto" crossorigin="anonymous"></video>
-        <video id="2" src="assets/2.mp4" muted playsinline loop preload="auto" crossorigin="anonymous"></video>
-        <video id="3" src="assets/3.mp4" muted playsinline loop preload="auto" crossorigin="anonymous"></video>
-        <video id="4" src="assets/4.mp4" muted playsinline loop preload="auto" crossorigin="anonymous"></video>
-        <video id="5" src="assets/5.mp4" muted playsinline loop preload="auto" crossorigin="anonymous"></video>
-
-        <a-asset-item id="picframe.obj" src="assets/picframe.obj" preload="auto"></a-asset-item>
-        <a-asset-item id="las_vegas_obj" src="assets/Las_Vegas.obj" preload="auto"></a-asset-item>
-        <img id="las_vegas_diffuse" src="assets/Las_vegas_Diffuse_01.jpg" crossorigin="anonymous" preload="auto" />
-        <img id="las_vegas_normal" src="assets/Las_vegas_Normal_01.jpg" crossorigin="anonymous" preload="auto" />
-        <a-asset-item id="damas_pillier_obj" src="assets/Damas.obj" preload="auto"></a-asset-item>
-        <img id="Damas_Pillier_diffuse" src="assets/Damas_02_diffuse_03.jpg" crossorigin="anonymous" preload="auto" />
-        <a-asset-item id="damas_sortie_obj" src="assets/panneau_sortie.obj" preload="auto"></a-asset-item>
-        <a-asset-item id="damas_station_obj" src="assets/panneau_station.obj" preload="auto"></a-asset-item>
-        <img id="Damas_panneaux_diffuse" src="assets/Panneau_metro_Diffuse.jpg" crossorigin="anonymous" preload="auto" />
-        <a-asset-item id="bust" src="assets/Statue.glb" preload="auto"></a-asset-item>
-        <a-asset-item id="console" src="assets/walnut.glb" preload="auto"></a-asset-item>
-        <a-asset-item id="lamp_obj" src="assets/Lamp.obj" preload="auto"></a-asset-item>
-        <img id="lamp_diffuse" src="assets/echelle_diffuse_01.jpg" crossorigin="anonymous" preload="auto" />
-        <a-asset-item id="cimaise_billet_obj" src="assets/Cimese_Echelle_Billet_01.obj" preload="auto"></a-asset-item>
-        <img id="cimaise_billet_diffuse" src="assets/Cimese_Echelle_Billet_Diffuse_02.jpg" crossorigin="anonymous" preload="auto" />
-        <a-asset-item id="cimaise_poster_obj" src="assets/Cimaise_02.obj" preload="auto"></a-asset-item>
-        <img id="cimaise_posters_diffuse" src="assets/Cimaise_02_Diffuse_05_4096.jpg" crossorigin="anonymous" preload="auto" />
-        <img id="pic1" src="assets/pic1.jpg" crossorigin="anonymous" preload="auto" />
-        <img id="pic2" src="assets/pic2.jpg" crossorigin="anonymous" preload="auto" />
-        <img id="floor" src="assets/floor2.png" crossorigin="anonymous" preload="auto" />
-        <img id="pic3" src="assets/pic3.jpg" crossorigin="anonymous" preload="auto" />
-        <a-asset-item id="toit_obj" src="assets/Toit_01.obj" preload="auto"></a-asset-item>
-        <img id="toit_diffuse" src="assets/ToitOcclusion_ambiante.jpg" crossorigin="anonymous" preload="auto" />
-        <a-asset-item id="mur_obj" src="assets/Mur_Scene_03.obj" preload="auto"></a-asset-item>
-        <img id="mur_diffuse" src="assets/5-Mur_Diffuse_01_15.jpg" crossorigin="anonymous" preload="auto" />
-        <img id="vidcards" src="assets/cards-01.png" crossorigin="anonymous" preload="auto" />
-        <a-asset-item id="sol_obj" src="assets/Sol.obj" preload="auto"></a-asset-item>
-        <img id="sol_diffuse" src="assets/Sol_diffuse_08.jpg" crossorigin="anonymous" preload="auto" />
+        <a-mixin id="physics-hands"
+                 physics-collider phase-shift
+                 collision-filter="collisionForces: false"
+                 static-body="shape: sphere; sphereRadius: 0.02"
+                 super-hands="colliderEvent: collisions;
+                              colliderEventProperty: els;
+                              colliderEndEvent: collisions;
+                              colliderEndEventProperty: clearedEls;" ></a-mixin>
       </a-assets>
-
-      <!-- Scene content (unchanged from yours except where noted) -->
       <a-entity scale="0.25 0.25 0.25" position="5.49845 2.56973 -8.70685">
-        <a-obj-model id="#helmet-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fhelmet.obj" material="side: double; color: #f9f7b3;  metalness: 0.5" scale="10 10 10" position="0 0 10" animation="property: position; to: 0 -10 -5; dur: 5500"></a-obj-model>
-        <a-obj-model id="#vizor-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fvizor.obj" material="side: double; color: #eaf2f9; transparent: true; opacity: 0.5" scale="10 10 10" position="0 -10 20" animation="property: position; to: 0 -10 -5; dur: 6000"></a-obj-model>
-        <a-obj-model id="#frame-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fframe.obj" material="side: double; color: #182838; metalness: 0.25" scale="10 10 10" position="-3.71 -1 0" animation="property: position; to: 0 -10 -5; dur: 5000"></a-obj-model>
-        <a-obj-model id="#suit-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fsuit.obj" scale="10 10 10" position="0 -10 -5" rotation="0 0 0" material="side: double; color: #f9f7b3;  metalness: 0"></a-obj-model>
+        <a-obj-model
+          id="#helmet-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fhelmet.obj"
+          material="side: double; color: #f9f7b3;  metalness: 0.5"
+          scale="10 10 10"
+          position="0 0 10"
+          animation="property: position; to: 0 -10 -5; dur: 5500"
+        ></a-obj-model>
+
+        <a-obj-model
+          id="#vizor-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fvizor.obj"
+          material="side: double; color: #eaf2f9; transparent: true; opacity: 0.5"
+          scale="10 10 10"
+          position="0 -10 20"
+          animation="property: position; to: 0 -10 -5; dur: 6000"
+        ></a-obj-model>
+
+        <a-obj-model
+          id="#frame-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fframe.obj"
+          material="side: double; color: #182838; metalness: 0.25"
+          scale="10 10 10"
+          position="-3.71 -1 0"
+          animation="property: position; to: 0 -10 -5; dur: 5000"
+        ></a-obj-model>
+
+        <a-obj-model
+          id="#suit-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fsuit.obj"
+          scale="10 10 10"
+          position="0 -10 -5"
+          rotation="0 0 0"
+          material="side: double; color: #f9f7b3;  metalness: 0"
+        ></a-obj-model>
       </a-entity>
+      <a-video
+        src="#1"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="13.563 2.256 -6.933"
+        rotation="0 -90 0"
+        scale="2.19 2.16 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-video
+        src="#2"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="6.155 2.244 0.189"
+        rotation="0 130.05 0"
+        scale="2.19 2.16 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-video
+        src="#3"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="-7.157 2.019 6.079"
+        rotation="0 -180 0"
+        scale="2.19 2.16 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-video
+        src="#4"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="13.563 2.256 1.839"
+        rotation="0 -90 0"
+        scale="2.19 2.16 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-video
+        src="#5"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="-14.48 2.229 -1.681"
+        rotation="0 90 0"
+        scale="2.22 2.21 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-obj-model
+        id="frame"
+        src="#toit_obj"
+        position="3.719 0 -7.826"
+        scale="1.06 1 1.02"
+        material="src: #toit_diffuse; side: double; transparency: true; opacity: 0.3;"
+      ></a-obj-model>
 
-      <!-- Video planes (videos now autoplay-safe) -->
-      <a-video src="#1" video-controls width="1.6" height="0.9" position="13.563 2.256 -6.933" rotation="0 -90 0" scale="2.19 2.16 1"></a-video>
-      <a-video src="#2" video-controls width="1.6" height="0.9" position="6.155 2.244 0.189" rotation="0 130.05 0" scale="2.19 2.16 1"></a-video>
-      <a-video src="#3" video-controls width="1.6" height="0.9" position="-7.157 2.019 6.079" rotation="0 -180 0" scale="2.19 2.16 1"></a-video>
-      <a-video src="#4" video-controls width="1.6" height="0.9" position="13.563 2.256 1.839" rotation="0 -90 0" scale="2.19 2.16 1"></a-video>
-      <a-video src="#5" video-controls width="1.6" height="0.9" position="-14.48 2.229 -1.681" rotation="0 90 0" scale="2.22 2.21 1"></a-video>
+      <a-obj-model
+        id="Mur_Global"
+        src="#mur_obj"
+        position="3.719 0 -7.873"
+        scale="1 1 1"
+        material="src :#mur_diffuse;"
+      ></a-obj-model>
+      <a-obj-model
+        id="Cimaise_Billet"
+        src="#cimaise_billet_obj"
+        position="3.719 0 -7.873"
+        scale="1 1 1"
+        material="src: #cimaise_billet_diffuse;"
+      ></a-obj-model>
+      <a-obj-model
+        id="Cimaise_poster"
+        src="#cimaise_poster_obj"
+        position="3.719 0 -7.873"
+        scale="1 1 1"
+        material="src: #cimaise_posters_diffuse;"
+      ></a-obj-model>
+     
+      <a-obj-model
+        id="frame1"
+        src="#picframe.obj"
+        position="6.695683250457223 0.002 3.378"
+        rotation="0 -140 0"
+        scale="1 1 1"
+        material="src: #pic1;"
+      ></a-obj-model>
+      <a-gltf-model
+        src="#bust"
+        position="-12.47268 0.22641 -6.40102"
+        scale="0.6 0.6 0.6"
+        rotation="0 90 0"
+        gltf-model="assets/Statue.glb"
+        shadow=""
+        animation-mixer=""
+      ></a-gltf-model>
+   
+   <a-gltf-model src="#console" position="14.65241 0.13496 -2.89366" scale="0.0015 0.0015 0.0015" rotation="0 265.12 0" gltf-model="assets/walnut.glb" shadow="" animation-mixer=""></a-gltf-model>
+      <a-gltf-model
+        src="#adidas"
+        position="12.83067 1.67233 -2.2927"
+        scale="0.08 0.08 0.08"
+        rotation="-29.999999999999996 90 0"
+        shadow=""
+        animation-mixer=""
+        gltf-model="https://cdn.glitch.com/80103382-77c7-436e-ac28-b71dc8e4468c%2Fgazelle.glb"
+      ></a-gltf-model>
+      <a-gltf-model
+        src="#newbalance"
+        position="12.95206 1.55805 -1.79917"
+        scale="3 3 3"
+        rotation="0 0 29.999999999999996"
+        shadow=""
+        animation-mixer=""
+        gltf-model="https://cdn.glitch.com/b2a38be5-8f68-46a7-9578-fcbaeb96f8a1%2Fnb.glb"
+      ></a-gltf-model>
+      
+      <a-obj-model
+        id="frame2"
+        src="#picframe.obj"
+        position="5.295 0.002 1.655"
+        rotation="0 -140 0"
+        scale="1 1 1"
+        material="src: #pic2;"
+      ></a-obj-model>
+      <a-obj-model
+        id="frame3"
+        src="#picframe.obj"
+        position="8.133 0.002 5.07"
+        rotation="0 -140 0"
+        scale="1 1 1"
+        material="src: #pic3;"
+      ></a-obj-model>
+      <a-entity material="src: #floor" static-body geometry="depth: 17.56; width: 30"
+position="0 -0.5 -1.5517035038049425"></a-entity>
 
-      <a-obj-model id="frame" src="#toit_obj" position="3.719 0 -7.826" scale="1.06 1 1.02" material="src: #toit_diffuse; side: double; transparency: true; opacity: 0.3;"></a-obj-model>
-      <a-obj-model id="Mur_Global" src="#mur_obj" position="3.719 0 -7.873" scale="1 1 1" material="src :#mur_diffuse;"></a-obj-model>
-      <a-obj-model id="Cimaise_Billet" src="#cimaise_billet_obj" position="3.719 0 -7.873" scale="1 1 1" material="src: #cimaise_billet_diffuse;"></a-obj-model>
-      <a-obj-model id="Cimaise_poster" src="#cimaise_poster_obj" position="3.719 0 -7.873" scale="1 1 1" material="src: #cimaise_posters_diffuse;"></a-obj-model>
+  <!-- <a-entity id="structure">
+    <a-box
+        color="red"
+        velocity=""
+        static-body="sphereRadius:NaN"
+        position="-1.441 3.233 -9.36"
+        shadow=""
+        scale="7.748 6.049 0.702"
+        material="opacity:0.5"
+        geometry="height:1.1;width:3.85"
+      ></a-box>
+    
 
-      <a-obj-model id="frame1" src="#picframe.obj" position="6.695683250457223 0.002 3.378" rotation="0 -140 0" scale="1 1 1" material="src: #pic1;"></a-obj-model>
+      <a-box
+        color="red"
+        velocity=""
+        static-body="sphereRadius:NaN"
+        position="-1.441 3.233 6.39471731730822"
+        shadow=""
+        scale="7.748 6.049 0.702"
+        material="opacity:0.5"
+        geometry="height:1.1;width:3.85"
+      ></a-box>
+      <a-box
+        color="red"
+        velocity=""
+        static-body="sphereRadius:NaN"
+        position="-14.624 3.233 -1.571"
+        shadow=""
+        rotation="0 90 0"
+        scale="7.748 6.049 0.702"
+        material="opacity:0.5"
+        geometry="height:1.1;width:2.0100000000000002"
+      ></a-box>
+      <a-box
+        color="red"
+        velocity=""
+        static-body="sphereRadius:NaN"
+        position="13.795 3.233 -1.571"
+        shadow=""
+        rotation="0 90 0"
+        scale="7.748 6.049 0.702"
+        material="opacity:0.5"
+        geometry="height:1.1;width:2.0100000000000002"
+      ></a-box>
+      <a-box
+        color="red"
+        velocity=""
+        static-body="sphereRadius:NaN"
+        position="-5.479 4 -1.52"
+        shadow=""
+        rotation="0 45 0"
+        scale="7.748 6.049 0.702"
+        material="opacity:0.5"
+        geometry=""
+      ></a-box>
+      <a-box
+        color="red"
+        velocity=""
+        static-body="sphereRadius:NaN"
+        position="7.013 2.7821932052151355 1.601"
+        shadow=""
+        rotation="0 -50.98 0"
+        scale="7.748 6.049 0.702"
+        material="opacity:0.5"
+        geometry=""
+      ></a-box>
+</a-entity>-->
+<a-plane position="0.47382 2.37922 -9.06616" rotation="" height="0.66" width="0.438" material="src: #vidcards; shader: flat" geometry="height: 0.438; width: 0.66" scale="3.3 3.3 0.00001"></a-plane>
+      <a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="5.83164 0 3.09267"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_01"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="4.61411 0 0.79671"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_09"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="7.67384 0 4.4626"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_10"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="-5.56655 0 1.46361"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_03"
+      ></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="-2.43195 0 -0.53906" color="#141414" material="" geometry="" id="check_08"></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="-7.98664 0 2.87739"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_11"
+      ></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="-0.20941 0 -6.67811" color="#141414" material="" geometry="" id="check_12"></a-cylinder>
 
-      <a-gltf-model src="#bust" position="-12.47268 0.22641 -6.40102" scale="0.6 0.6 0.6" rotation="0 90 0" gltf-model="assets/Statue.glb" shadow animation-mixer></a-gltf-model>
-      <a-gltf-model src="#console" position="14.65241 0.13496 -2.89366" scale="0.0015 0.0015 0.0015" rotation="0 265.12 0" gltf-model="assets/walnut.glb" shadow animation-mixer></a-gltf-model>
-      <a-gltf-model src="#adidas" position="12.83067 1.67233 -2.2927" scale="0.08 0.08 0.08" rotation="-30 90 0" shadow animation-mixer gltf-model="https://cdn.glitch.com/80103382-77c7-436e-ac28-b71dc8e4468c%2Fgazelle.glb"></a-gltf-model>
-      <a-gltf-model src="#newbalance" position="12.95206 1.55805 -1.79917" scale="3 3 3" rotation="0 0 30" shadow animation-mixer gltf-model="https://cdn.glitch.com/b2a38be5-8f68-46a7-9578-fcbaeb96f8a1%2Fnb.glb"></a-gltf-model>
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="-11.28 0 0.332"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_04"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="-9.841 0 -5.713"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_02"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="8.035 0 -5.71"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_05"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="10.05 0 -2.585"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_06"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="9.784 0 1.002"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_07"
+      ></a-cylinder>
 
-      <a-obj-model id="frame2" src="#picframe.obj" position="5.295 0.002 1.655" rotation="0 -140 0" scale="1 1 1" material="src: #pic2;"></a-obj-model>
-      <a-obj-model id="frame3" src="#picframe.obj" position="8.133 0.002 5.07" rotation="0 -140 0" scale="1 1 1" material="src: #pic3;"></a-obj-model>
-
-      <a-entity material="src: #floor;" position="0 -0.5 -1.5517035038049425" geometry="width:30;depth:17.56"></a-entity>
-
-      <!-- Your UI card plane (unchanged) -->
-      <a-plane position="0.47382 2.37922 -9.06616" height="0.66" width="0.438" material="src: #vidcards; shader: flat" geometry="height: 0.438; width: 0.66" scale="3.3 3.3 0.00001"></a-plane>
-
-      <!-- Teleport indicator block: replace any planes that ended up with [object HTMLImageElement] with the vidcards asset -->
-      <a-entity teleport-indicator="lookAtObj:[camera]" position="2.5 0 -3.8" rotation="0 -33.34 0">
-        <a-entity geometry="primitive:ring;radiusInner:0.4;radiusOuter:0.41" position="0 0.06 0" rotation="-90 0 0" material="color:#fc00e9;shader:flat"></a-entity>
-        <a-entity geometry="primitive:ring;radiusInner:0.4;radiusOuter:0.46" position="0 0.1 0" rotation="-90 0 0" material="color:#fc00e9;shader:flat"></a-entity>
-        <a-entity geometry="primitive:ring;radiusInner:0.4;radiusOuter:0.51" position="0 0.14 0" rotation="-90 0 0" material="color:#fc00e9;opacity:0.8;shader:flat"></a-entity>
-        <a-entity geometry="primitive:ring;radiusInner:0.4;radiusOuter:0.56" position="0 0.18 0" rotation="-90 0 0" material="color:#fc00e9;opacity:0.6;shader:flat"></a-entity>
-        <a-entity geometry="primitive:ring;radiusInner:0.4;radiusOuter:0.61" position="0 0.22 0" rotation="-90 0 0" material="color:#fc00e9;opacity:0.4;shader:flat"></a-entity>
-        <a-entity geometry="primitive:ring;radiusInner:0.4;radiusOuter:0.66" position="0 0.26 0" rotation="-90 0 0" material="color:#fc00e9;opacity:0.2;shader:flat"></a-entity>
-
-        <!-- Instead of [object HTMLImageElement], explicitly use the asset -->
-        <a-entity geometry="primitive:plane;width:0.5;height:0.5" position="0 0.10 0" rotation="-90 0 0" material="src:#vidcards;transparent:true;shader:flat"></a-entity>
-        <a-entity geometry="primitive:plane;width:0.5;height:0.5" position="0 0.11 0" rotation="-90 0 0" material="src:#vidcards;transparent:true;opacity:0.8;shader:flat"></a-entity>
-        <a-entity geometry="primitive:plane;width:0.5;height:0.5" position="0 0.12 0" rotation="-90 0 0" material="src:#vidcards;transparent:true;opacity:0.6;shader:flat"></a-entity>
-        <a-entity geometry="primitive:plane;width:0.5;height:0.5" position="0 0.13 0" rotation="-90 0 0" material="src:#vidcards;transparent:true;opacity:0.4;shader:flat"></a-entity>
-        <a-entity geometry="primitive:plane;width:0.5;height:0.5" position="0 0.14 0" rotation="-90 0 0" material="src:#vidcards;transparent:true;opacity:0.2;shader:flat"></a-entity>
-
-        <a-entity geometry="primitive:cylinder;radius:0.41;height:0.4" position="0 0.2 0" material="color:#fff;opacity:0"></a-entity>
-      </a-entity>
-
-      <!-- Camera -->
       <a-entity position="0 1.9 0" camera look-controls wasd-controls>
-        <a-cursor></a-cursor>
-      </a-entity>
-
-      <!-- Lights -->
+     
+      <a-cursor></a-cursor>
+      <a-entity sphere-collider="objects: a-box" super-hands hand-controls="hand: left"></a-entity>
+      <a-entity sphere-collider="objects: a-box" super-hands hand-controls="hand: right"></a-entity>
+    </a-entity>
+    <!-- hover & drag-drop won't have any obvious effect without some additional event handlers or components. See the examples page for more -->
+    <a-box hoverable grabbable stretchable draggable dropppable color="blue" position="0 1 -3"></a-box>
+  
+      
       <a-entity light="color: #EEE; intensity: 0.5" position="-1.5379 5.13754 8.19083"></a-entity>
-      <a-entity light="type: directional; color: #fff; intensity: 0.25" position="-1 1 0"></a-entity>
-      <a-entity light="type: directional; color: #EEE; intensity: 0.5" position="-6 5 0"></a-entity>
-      <a-entity light="color: #EEE; intensity: 0.5" position="0.31022 5 0"></a-entity>
-      <a-entity light="color: #EEE; intensity: 0.5" position="0.31022 7.23722 7.51975"></a-entity>
-      <a-light type="directional" position="12.95206 5.55805 -1.79917" rotation="0 0 0" target="#directionaltarget"></a-light>
+      <a-entity
+        light="type: directional; color: #fff; intensity: 0.25"
+        position="-1 1 0"
+      ></a-entity>
+      <a-entity
+        light="type: directional; color: #EEE; intensity: 0.5"
+        position="-6 5 0"
+      ></a-entity
+      ><a-entity
+        light="color: #EEE; intensity: 0.5"
+        position="0.31022 5 0"
+      ></a-entity>
+    <a-entity light="color: #EEE; intensity: 0.5" position="0.31022 7.23722 7.51975"></a-entity>
+      <a-light
+        type="directional"
+        position="12.95206 5.55805 -1.79917"
+        rotation="0 0 0"
+        target="#directionaltarget"
+      ></a-light>
       <a-entity id="directionaltarget" position="0 0 -1"></a-entity>
+<!--audio-->
 
-      <!-- Sky -->
+   <a-entity id="cntrCntrl"  position="9.16546 0.56545 2.4014" scale="0.25 0.25 0.25" rotation="29.999999999999996 -230 0"
+         event-set__enter="_event: mouseenter; _target: #Text; visible: true"
+                  event-set__leave="_event: mouseleave; _target: #Text; visible: false">
+       
+        
+      <a-text id="Text" value="Play this keyboard" align="center" color="#FFF" visible="false" position="0 3.74283 -1.92847" geometry="primitive: plane; width: 2" material="color: #000; opacity: 1" text=""></a-text>
+        <!--mouse over box to see color change-->
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="-3.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fnote%20c%20piano.mp3; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -3.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -3.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="-2.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20d.mp3?v=1565883564721; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -2.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -2.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="-1.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20e.mp3?v=1565883566923; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -1.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -1.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="-0.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20f.mp3?v=1565883568318; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="0.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20g.mp3?v=1565883569859; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 0.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 0.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="1.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20a.mp3?v=1565883562372; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 1.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 1.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="2.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b.mp3?v=1565883563277; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 2.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 2.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="3.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fhigh%20c%20piano.mp3?v=1565889882364; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 3.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 3.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="2 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b%20flat.mp3?v=1565891011666; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 2 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 2 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="1 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fg%20sharp.mp3?v=1565890999944; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 1 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 1 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="0 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Ff%20sharp.mp3?v=1565890998603; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 0 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 0 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="-3 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fc%20sharp.mp3?v=1565890996511; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -3 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -3 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="-2 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fe%20flat.mp3?v=1565890997434; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -2 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -2 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+        
+      </a-entity>
+      
       <a-sky src="#dawn"></a-sky>
     </a-scene>
 
-    <!-- Start videos on first user gesture to satisfy autoplay policies and prevent WebGL texture errors -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!-- Start videos on first user gesture to satisfy autoplay policies and prevent WebGL texture errors -->
     <script>
       (function () {
         const vids = Array.from(document.querySelectorAll('video'));
@@ -202,7 +934,6 @@
       })();
     </script>
 
-    <!-- (Optional) jQuery, not required by A-Frame -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
   </body>
 </html>
