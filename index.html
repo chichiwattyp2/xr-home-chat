@@ -50,10 +50,13 @@
 </a-assets>
       <a-entity environment="preset: forest; groundColor: #445; grid: cross"></a-entity>
       <!-- Camera + cursor; raycaster whitelist silences performance warning -->
-      <a-entity id="rig" movement-controls="controls: checkpoint" checkpoint-controls="mode: animate" position="0 2.22085 6.6555" rotation="0 0 0">
-          <a-camera>
-         <a-entity cursor="" position="0.00705 0.04225 -1.70324" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="shader: flat; color: #CCC" raycaster=""></a-entity></a-camera></a-entity>
-
+       <a-entity id="player">
+               <a-entity camera
+                position="0 1.9 0"
+                wasd-controls
+                look-controls
+                "></a-entity> <a-entity cursor="" position="0.00705 0.04225 -1.70324" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="shader: flat; color: #CCC" raycaster=""></a-entity>
+      </a-entity>
       <!-- Chat panel using the canvases -->
       <a-entity id="chatPanel" data-raycastable
                 position="9.43415 3.83854 -1.88325"
