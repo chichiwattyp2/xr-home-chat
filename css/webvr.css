@@ -1,0 +1,10 @@
+#video-permission { font-family: verdana; position: fixed; top: 0;left: 0; width: calc( 100% - 60px ); height: calc( 100% - 60px ); text-align: center; padding: 30px; background: rgba(0, 0, 0, 0.88); z-index: 10000; color: white; display: none;}
+#video-permission-button {position: fixed; top: calc(50% - 1em);left: calc(50% - 60px);width: 120px;height: 2em;}
+#file {display:none;width: 0;height: 0;overflow: hidden;margin: 0;padding: 0;line-height: 0; }
+body{font-family:Verdana;color:white;font-size:11px;}
+a{color:white;}
+.welcome{z-index:20000;display:block;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);color:white}
+.wlcnt{margin:auto;width:600px;position:absolute;top:0;bottom:0;left:0;right:0;height:420px;width:600px}
+#btnstart{border:0;background:white;color:black;padding:10px 20px;cursor:pointer}
+#btnstart:hover{background:rgba(255,255,255,0.8);}
+.hidden{display:none}
