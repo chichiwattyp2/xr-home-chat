@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A-Frame Terrain Model Component - Crater Floor</title>
+    <script src="../../build.js"></script>
+  </head>
+  <body>
+    <a-scene renderer="antialias: true">
+      <!-- Camera -->
+      <a-entity position="-32 20 -33" rotation="0 -140 0">
+        <a-entity camera look-controls wasd-controls></a-entity>
+      </a-entity>
+
+      <!-- Terrain -->
+      <a-entity
+        terrain-model="dem: url(data/clipped-envi3.bin);
+          map: url(data/MRGB_handclipped_2048px.png);
+          planeWidth: 99.8;
+          planeHeight: 99.8;
+          segmentsWidth: 199;
+          segmentsHeight: 199;
+          zPosition: 50;"
+      ></a-entity>
+
+      <!-- Sky -->
+      <a-sky color="#ffd4a6"></a-sky>
+    </a-scene>
+  </body>
+</html>
