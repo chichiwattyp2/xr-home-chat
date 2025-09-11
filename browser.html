@@ -91,17 +91,26 @@
      look-controls="" 
      wasd-controls="" 
      position="0 1.8 2.5" 
-     rotation="-.552338329811108 -0.5729577951308217 0">
-              look-controls>  <a-entity cursor="" position="0.00705 0.04225 2.70324" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="shader: flat; color: #ff3300" raycaster=“objects: .clickable”; rayOrigin: “mouse"></a-entity>
+     rotation="-.552338329811108 -0.5729577951308217 0"
+    look-controls>  
+     <a-entity cursor="" 
+       position="0.00705 0.04225 2.70324" 
+       geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+       material="shader: flat; color: #ff3300" 
+       raycaster=“objects: .clickable”; 
+       rayOrigin: “mouse"></a-entity>
     </a-entity>   
 
 
 
-<a-assets>  <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
-     </a-assets>
+<a-assets>  
+  <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
+  </a-assets>
 
     <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
-<--ai-_><a-entity>
+<--ai-_>
+  
+  <a-entity>
 <a-entity id="virtual-assistant"
           class="clickable"
           gltf-model="#assistant-gltf"
@@ -134,7 +143,7 @@
       </a-entity>
     </a-entity>
 
-    <a-image id="how-to"
+    <!--<a-image id="how-to"
              src="https://cdn.glitch.com/22ec690f-3d8c-49a9-b10a-903a96c741e5%2Fpng.png"
              position="-1.26232 1.6 0.02932"
              width="0.47" height="0.3"
@@ -144,7 +153,7 @@
               material="opacity: 0;"
               typer="message: Click on a item to get in touch.\n\n; on: click;"
               text="value: Looking forward to hearing from you.; font: roboto; align: center; color: white; width: 2.8; zOffset: 0.01; letterSpacing: -1; tabSize: 1; side: double;"
-              position="0 1.4 -2" rotation="-15 0 0"></a-entity>
+              position="0 1.4 -2" rotation="-15 0 0"></a-entity> -->
   </a-scene>
 <script>
 AFRAME.registerComponent('speech-input', {
