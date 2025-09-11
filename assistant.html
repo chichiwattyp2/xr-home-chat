@@ -1,29 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <title>Animated AI Virtual Assistant</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
-    <!-- A-Frame Animation Mixer for GLTF animations -->
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.2.0/dist/aframe-extras.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Assistant</title>
+
+ 
+
+    <!-- Google Fonts: Asimovian -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Keep only Asimovian loaded to guarantee it’s ready for canvases -->
+    <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
+
+    <!-- A-Frame + components (v1.0.4 to match your current console) -->
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
+    <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.2.0/dist/aframe-extras.min.js"></script>
+  
+<script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
+    <!-- Your scripts -->
+    <script src="sheets.js" defer></script>
+    <!— <script type="module" src="client.js"></script> —>
+
+    <style>
+      body { margin:0; font-family: Asimovian, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+      #ui {
+        position: fixed; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 8px;
+        z-index: 10; background: rgba(0,0,0,.35); padding: 8px; border-radius: 10px; backdrop-filter: blur(6px);
+      }
+      #prompt { flex: 1; padding: 10px 12px; font-size: 16px; border-radius: 8px; border: 1px solid #333; background:#111; color:#fff; }
+      #send, #voice { padding: 10px 12px; border-radius: 8px; border: 1px solid #333; background:#1b1b1b; color:#fff; cursor:pointer; }
+    </style>
   </head>
   <body>
-    <a-scene environment="preset: forest; dressingAmount: 500">
-      <a-assets>
-        <!-- Load your GLTF/GLB model -->
-        <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
-      </a-assets>
+    <!-- UI overlay -->
+    <div id="ui">
+      <input id="prompt" placeholder="Ask something…" />
+      <button id="send">Send</button>
+      <button id="voice"> Voice</button>
+    </div>
 
-   <!-- Camera -->
+ 
+    <a-scene renderer="colorManagement: true">
+    
+
+
+  <!-- Root where sheet tiles / panels get spawned -->
+      <a-entity id="csv-root"></a-entity>
+
+
+
+<a-assets>  <a-asset-item id="assistant-gltf" src="assets/character.glb">
+  
+</a-asset-item>
+     <canvas id="chatTextCanvas" width="1024" height="256" style="display:none"></canvas>
+    <canvas id="chatHintCanvas" width="1024" height="128" style="display:none"></canvas>
+</a-assets>
+
+
+      <a-entity environment="preset: starry; shadow: on; shadowSize: 10; skyType: gradient; skyColor: #cfe2f3; ground: Orography style; groundColor: #f4cccc; grid: none"></a-entity>
+  
+
+
+          <a-entity id="rig" movement-controls="controls: checkpoint" checkpoint-controls="mode: animate" position="0 2.22085 6.6555" rotation="0 0 0">
+      <!-- Camera -->
 <a-entity id="camera"
           camera
           position="0 1.6 0"
-          look-controls
-          cursor="rayOrigin: mouse"
-          raycaster="objects: .clickable"></a-entity>
-
-<!-- Assistant -->
-<a-entity id="virtual-assistant"
+          look-controls>  <a-entity cursor="" position="0.00705 0.04225 -1.70324" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="shader: flat; color: #ff3300" raycaster=“objects: .clickable”; rayOrigin: “mouse"></a-entity></camera>  <a-entity id="virtual-assistant"
           class="clickable"
           gltf-model="#assistant-gltf"
           animation-mixer="crossFadeDuration: 0.4"
@@ -33,13 +78,11 @@
           speech-input
           speech-output
           ai-brain></a-entity>
-
-
-
-      <!-- Simple UI for status/interaction indication -->
+         <!-- Simple UI for status/interaction indication -->
       <a-entity geometry="primitive: plane; width: 2.8; height: 0.32"
           material="color: #222; opacity: 0.65"
-          position="0 2.5 -2.01"></a-entity>
+          position="0 2.5 -2.01"></a-entity></a-entity>
+            
 
 <a-entity id="status-text"
           position="0 2.5 -2"
@@ -48,8 +91,7 @@
 
 
     </a-scene>
-
-    <script>
+<script>
 AFRAME.registerComponent('speech-input', {
   init() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
