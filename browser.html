@@ -96,18 +96,13 @@
   <a-entity
         id="player"
         camera
-        spawn-in-circle="radius:3;"
         position="0 1.8 0"
         wasd-controls
         look-controls
          movement-controls="controls: checkpoint" 
-          checkpoint-controls="mode: animate">
-     <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clickable; showLine: true; far: 10"></a-entity>
-    </a-entity>
-                 
-      
-        
-     
+          checkpoint-controls="mode: animate"
+         cursor="rayOrigin: mouse; fuse: true"
+        raycaster="objects: .clickable; showLine: false; far: 10; useWorldCoordinates: true; origin: 0 1.8 0; direction: -0.2809990368615457 0.04197495986313033 -0.958789676637881"></a-entity>
 
 
 
