@@ -86,20 +86,25 @@
 
 
   <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121" physics>
-   <a-entity id="player" 
-     camera="" 
-     look-controls="" 
-     wasd-controls="" 
-     position="0 1.8 2.5" 
-     rotation="-.552338329811108 -0.5729577951308217 0"
-    look-controls>  
-     <a-entity cursor="" 
-       position="0.00705 0.04225 2.70324" 
-       geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-       material="shader: flat; color: #ff3300" 
-       raycaster=“objects: .clickable”; 
-       rayOrigin: “mouse"></a-entity>
-    </a-entity>   
+  
+    
+ 
+
+ <a-entity id="rig" movement-controls="controls: checkpoint" 
+   checkpoint-controls="mode: animate" 
+   position="0 2.22085 2.5" 
+   rotation="-.552338329811108 -0.5729577951308217 0"
+   wasd-controls="">
+          <a-camera>
+         <a-entity cursor="" 
+           position="0.00705 0.04225 -1.70324" 
+           geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" 
+           material="shader: flat; color: #ff3300" 
+           raycaster=“objects: .clickable”; rayOrigin: “mouse">
+         </a-entity>
+          </a-camera>
+ </a-entity>
+     
 
 
 
