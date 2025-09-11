@@ -2,7 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>XR Browser</title>
+    <title>XR Browser</title>     <!-- Google Fonts: Asimovian -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Keep only Asimovian loaded to guarantee it’s ready for canvases -->
+    <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
+
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
@@ -74,19 +79,47 @@
       }
     });
   });
-  </script>
+  </script> 
 </head>
 <body>
+
+
+
   <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121" physics>
    <a-entity id="player" 
      camera="" 
      look-controls="" 
      wasd-controls="" 
      position="0 1.8 2.5" 
-     rotation="-3.552338329811108 -0.5729577951308217 0">
-      <a-cursor raycaster=""></a-cursor>
-    </a-entity>
+     rotation="-.552338329811108 -0.5729577951308217 0">
+              look-controls>  <a-entity cursor="" position="0.00705 0.04225 2.70324" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="shader: flat; color: #ff3300" raycaster=“objects: .clickable”; rayOrigin: “mouse"></a-entity>
+    </a-entity>   
+
+
+
+<a-assets>  <a-asset-item id="assistant-gltf" src="character.glb"></a-asset-item>
+     </a-assets>
+
     <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
+
+<a-entity id="virtual-assistant"
+          class="clickable"
+          gltf-model="#assistant-gltf"
+          animation-mixer="crossFadeDuration: 0.4"
+          position="0 0 -3"
+          scale="1 1 1"
+          rotation="0 0 0"
+          speech-input
+          speech-output
+          ai-brain></a-entity>
+         <!-- Simple UI for status/interaction indication -->
+      <a-entity geometry="primitive: plane; width: 2.8; height: 0.32"
+          material="color: #222; opacity: 0.65"
+          position="0 2.5 -2.01"></a-entity>
+
+<a-entity id="status-text"
+          position="0 2.5 -2"
+          text="value: Press SPACE or click assistant to talk!; color: #FFF; align: center"></a-entity>
 
     <a-entity id="catalog" scale=".2 .2 .2" position="0 1.1 -1.05">
       <a-entity class="container" id="container" position="-3.15 4 0"></a-entity>
@@ -113,5 +146,177 @@
               text="value: Looking forward to hearing from you.; font: roboto; align: center; color: white; width: 2.8; zOffset: 0.01; letterSpacing: -1; tabSize: 1; side: double;"
               position="0 1.4 -2" rotation="-15 0 0"></a-entity>
   </a-scene>
+<script>
+AFRAME.registerComponent('speech-input', {
+  init() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const statusText = document.getElementById('status-text');
+
+    if (!SR) { statusText.setAttribute('text','value: SpeechRecognition not supported.'); return; }
+
+    this.recognition = new SR();
+    this.recognition.continuous = false;
+    this.recognition.lang = 'en-US';
+    this.recognition.interimResults = true;   // show live text, but only act on finals
+    this.recognition.maxAlternatives = 1;
+
+    this._running = false;
+    this._handledThisTurn = false;
+
+    const begin = () => {
+      if (this._running) return;
+      try {
+        // abort any zombie session before starting
+        try { this.recognition.abort(); } catch(e) {}
+        this._running = true;
+        this._handledThisTurn = false;
+        statusText.setAttribute('text','value: Listening...');
+        this.el.emit('listening-started');
+        this.recognition.start();
+      } catch (e) {
+        this._running = false;
+        statusText.setAttribute('text','value: Could not start mic. Check permissions.');
+        this.el.emit('listening-stopped');
+      }
+    };
+
+    window.addEventListener('keydown', e => { if (e.key === ' ') begin(); });
+    this.el.addEventListener('click', begin);
+
+    // --- KEY PART: handle interim vs final ---
+    this.recognition.onresult = (ev) => {
+      let interim = '';
+      let final = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const chunk = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) final += chunk;
+        else interim += chunk;
+      }
+
+      if (final && !this._handledThisTurn) {
+        this._handledThisTurn = true;          // ensure we only emit once per turn
+        const said = final.trim();
+        statusText.setAttribute('text', `value: You said: ${said}`);
+        this.el.sceneEl.emit('user-speech', { text: said });
+        // end this listening turn; onend will clear UI/flags
+        try { this.recognition.stop(); } catch(e) {}
+      } else if (interim) {
+        // show rolling partial without triggering the AI
+        const preview = interim.trim().slice(0, 80);
+        statusText.setAttribute('text', `value: ${preview}…`);
+      }
+    };
+
+    this.recognition.onerror = (e) => {
+      statusText.setAttribute('text', `value: Speech error: ${e.error}.`);
+      this._running = false;
+      this.el.emit('listening-stopped');
+    };
+
+    this.recognition.onend = () => {
+      this._running = false;
+      this._handledThisTurn = false;
+      statusText.setAttribute('text','value: Press SPACE or click assistant to talk!');
+      this.el.emit('listening-stopped');
+    };
+  }
+});
+
+
+
+// --- ai-brain (same simple rules) ---
+AFRAME.registerComponent('ai-brain', {
+  init() {
+    this.el.sceneEl.addEventListener('user-speech', (e) => {
+      const u = (e.detail.text || '').toLowerCase();
+      let r = "I'm not sure how to respond to that.";
+      if (u.includes('hello') || u.includes('hi') || u.startsWith('hey')) {
+        r = 'Hey! How are you doing? What can I help with?';
+      } else if (u.includes('how are you') || u.includes('how you do')) {
+        r = "I'm running smoothly and ready to help!";
+      } else if (u.includes('what is this place')) {
+        r = 'This is a serene forest environment. Feel free to explore!';
+      } else if (u.includes('thank')) {
+        r = "You’re welcome! Anything else I can do?";
+      }
+      setTimeout(() => this.el.sceneEl.emit('ai-response', { text: r }), 150);
+    });
+  }
+});
+
+// --- speech-output (queued) ---
+AFRAME.registerComponent('speech-output', {
+  init() {
+    this.synth = window.speechSynthesis;
+    this.queue = [];
+    this.busy = false;
+
+    const pump = () => {
+      if (this.busy || !this.queue.length) return;
+      const text = this.queue.shift();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.onstart = () => { this.busy = true; this.el.emit('speech-started'); };
+      utt.onend   = () => { this.busy = false; this.el.emit('speech-ended'); pump(); };
+      utt.onerror = () => { this.busy = false; this.el.emit('speech-ended'); pump(); };
+      this.synth.speak(utt);
+    };
+
+    this.el.sceneEl.addEventListener('ai-response', (e) => { this.queue.push(e.detail.text); pump(); });
+
+    if (this.synth && 'onvoiceschanged' in this.synth) {
+      this.synth.onvoiceschanged = () => console.log('Voices loaded.');
+    }
+  }
+});
+</script>
+<script>
+AFRAME.registerComponent('assistant-anim', {
+  schema: { idle: {default:'Idle'}, speaking:{default:'Talking'}, listening:{default:'Listening'} },
+  init() {
+    this.ready=false; this.clips=[]; this.current=null; this.map={};
+    const setClip = (name) => {
+      if (!this.ready || !name || !this.clips.includes(name) || this.current===name) return;
+      this.current = name;
+      this.el.setAttribute('animation-mixer', `clip: ${name}; crossFadeDuration: 0.4`);
+    };
+    const pick = (pref, fb=[]) => [pref, ...fb].find(n=>this.clips.includes(n));
+
+    this.el.addEventListener('model-loaded',(e)=>{
+      const m = (e.detail&&e.detail.model) || this.el.getObject3D('mesh');
+      const names = [];
+      if (Array.isArray(m?.animations)) names.push(...m.animations.map(c=>c.name));
+      if (Array.isArray(m?.userData?.gltfAnimations)) names.push(...m.userData.gltfAnimations.map(c=>c.name));
+      this.clips = [...new Set(names)];
+      console.log('[assistant-anim] available clips:', this.clips);
+
+      this.map = {
+        idle:      pick(this.data.idle,      ['Idle','Breathing','Stand','Standing']),
+        speaking:  pick(this.data.speaking,  ['Talking','Gestures','Walking','Walk','Idle']),
+        listening: pick(this.data.listening, ['Listening','Thinking','Idle'])
+      };
+      if (!this.map.idle) this.map.idle = this.clips[0];
+
+      this.ready = true;
+      setClip(this.map.idle);
+
+      this.el.sceneEl.addEventListener('listening-started', ()=> setClip(this.map.listening || this.map.idle));
+      this.el.sceneEl.addEventListener('listening-stopped', ()=> setClip(this.map.idle));
+      this.el.sceneEl.addEventListener('speech-started',     ()=> setClip(this.map.speaking || this.map.idle));
+      this.el.sceneEl.addEventListener('speech-ended',       ()=> setClip(this.map.idle));
+    });
+  }
+});
+
+// Attach automatically (keeps HTML tidy)
+AFRAME.registerSystem('assistant-attach', {
+  init() {
+    this.el.addEventListener('loaded', ()=>{
+      const npc = this.el.querySelector('#virtual-assistant');
+      if (npc && !npc.hasAttribute('assistant-anim')) npc.setAttribute('assistant-anim','');
+    });
+  }
+});
+</script>
+
 </body>
 </html>
