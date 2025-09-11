@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AI Virtual Assistant</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
+  </head>
+  <body>
+    <a-scene environment="preset: forest; dressingAmount: 500">
+      <a-assets>
+        <!-- Load your virtual assistant's 3D model here -->
+        <!-- For now, we'll use a simple box as a placeholder -->
+        <a-mixin id="assistant-model" geometry="primitive: box; height: 1.8; width: 0.6; depth: 0.6" material="color: #6a1b9a"></a-mixin>
+      </a-assets>
+
+      <!-- Camera with cursor for interaction -->
+      <a-entity id="camera" camera position="0 1.6 0" look-controls>
+        <a-cursor></a-cursor>
+      </a-entity>
+
+      <!-- Our Virtual Assistant (NPC) -->
+      <a-entity id="virtual-assistant" mixin="assistant-model" position="0 1 -3" rotation="0 180 0"
+                speech-input
+                speech-output
+                assistant-animator
+                ai-brain></a-entity>
+
+      <!-- Simple UI for status/interaction indication -->
+      <a-entity position="0 2.5 -2" text="value: Press SPACE or click assistant to talk!; color: #FFF; align: center" id="status-text"></a-entity>
+
+    </a-scene>
+
+    <script>
+      // A-Frame component for speech input
+      AFRAME.registerComponent('speech-input', {
+        init: function () {
+          console.log('Speech input component initialized.');
+          this.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+          this.recognition.continuous = false; // Listen for a single utterance
+          this.recognition.lang = 'en-US';
+          this.recognition.interimResults = false;
+          this.recognition.maxAlternatives = 1;
+
+          const statusText = document.getElementById('status-text');
+
+          this.recognition.onresult = (event) => {
+            const speechResult = event.results[0][0].transcript;
+            statusText.setAttribute('text', `value: You said: ${speechResult}`);
+            console.log('Speech recognized:', speechResult);
+            // Trigger AI processing here
+            this.el.sceneEl.emit('user-speech', { text: speechResult });
+          };
+
+          this.recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            statusText.setAttribute('text', `value: Speech error: ${event.error}. Try again!`);
+          };
+
+          this.recognition.onend = () => {
+            console.log('Speech recognition ended.');
+            statusText.setAttribute('text', `value: Press SPACE or click assistant to talk!`);
+          };
+
+          // Add a way to start listening, e.g., a click on the assistant or a key press
+          window.addEventListener('keydown', (e) => {
+            if (e.key === ' ') { // Press spacebar to talk
+              statusText.setAttribute('text', `value: Listening...`);
+              this.recognition.start();
+              console.log('Listening started...');
+            }
+          });
+
+          // Or a click on the assistant itself
+          this.el.addEventListener('click', () => {
+              statusText.setAttribute('text', `value: Listening...`);
+              this.recognition.start();
+              console.log('Listening started...');
+          });
+        }
+      });
+
+      // A-Frame component for AI brain (simple rule-based for now)
+      AFRAME.registerComponent('ai-brain', {
+        init: function () {
+          this.el.sceneEl.addEventListener('user-speech', (event) => {
+            const userText = event.detail.text.toLowerCase();
+            const statusText = document.getElementById('status-text');
+            statusText.setAttribute('text', `value: Assistant thinking...`);
+            let aiResponse = "I'm not sure how to respond to that.";
+
+            if (userText.includes("hello") || userText.includes("hi")) {
+              aiResponse = "Hello there! How can I assist you in this virtual world?";
+            } else if (userText.includes("how are you")) {
+              aiResponse = "I am a virtual assistant, so I don't have feelings, but I'm ready to help!";
+            } else if (userText.includes("what is this place")) {
+              aiResponse = "This is a serene forest environment. Feel free to explore!";
+            } else if (userText.includes("thank you")) {
+                aiResponse = "You're most welcome! Is there anything else I can do?";
+            }
+
+            // Simulate a short processing delay
+            setTimeout(() => {
+                this.el.sceneEl.emit('ai-response', { text: aiResponse });
+            }, 500); // 0.5 second delay
+          });
+        }
+      });
+
+      // A-Frame component for speech output
+      AFRAME.registerComponent('speech-output', {
+        init: function () {
+          this.synth = window.speechSynthesis;
+          // Ensure voices are loaded
+          this.synth.onvoiceschanged = () => {
+              console.log("Voices loaded.");
+          };
+
+          this.el.sceneEl.addEventListener('ai-response', (event) => {
+            const aiText = event.detail.text;
+            console.log('AI response received (for speaking):', aiText);
+            this.speak(aiText);
+          });
+        },
+        speak: function (text) {
+          if (this.synth.speaking) {
+            console.log('Speech synthesis already speaking, queuing...');
+            // Optionally, queue utterances or clear existing ones
+            this.synth.cancel(); // Cancel current speech to speak the new one immediately
+          }
+          if (text !== '') {
+            const utterThis = new SpeechSynthesisUtterance(text);
+            utterThis.onend = (event) => {
+              console.log('SpeechSynthesisUtterance.onend');
+            };
+            utterThis.onerror = (event) => {
+              console.error('SpeechSynthesisUtterance.onerror', event);
+            };
+
+            // Optional: Choose a voice if specific ones are desired and available
+            // const voices = this.synth.getVoices();
+            // const englishVoice = voices.find(voice => voice.lang === 'en-US' && voice.name.includes('Google'));
+            // if (englishVoice) {
+            //     utterThis.voice = englishVoice;
+            // }
+
+            this.synth.speak(utterThis);
+          }
+        }
+      });
+
+      // A-Frame component for simple assistant animation
+      AFRAME.registerComponent('assistant-animator', {
+        init: function () {
+          this.isSpeaking = false;
+          this.synth = window.speechSynthesis;
+          this.el.sceneEl.addEventListener('ai-response', (event) => {
+            this.startSpeakingAnimation();
+          });
+
+          // Monitor when speech ends
+          this.checkSpeakingInterval = setInterval(() => {
+              if (this.isSpeaking && !this.synth.speaking) {
+                  this.stopSpeakingAnimation();
+              }
+          }, 100);
+        },
+        remove: function() {
+            clearInterval(this.checkSpeakingInterval); // Clean up interval
+        },
+        startSpeakingAnimation: function () {
+          this.isSpeaking = true;
+          const assistant = this.el;
+          assistant.setAttribute('animation__speaking', {
+            property: 'scale',
+            to: '1 1.2 1', // Make it slightly taller
+            dir: 'alternate',
+            loop: true,
+            dur: 200 // Fast pulse
+          });
+        },
+        stopSpeakingAnimation: function () {
+          this.isSpeaking = false;
+          const assistant = this.el;
+          assistant.removeAttribute('animation__speaking');
+          assistant.setAttribute('scale', '1 1 1'); // Reset scale
+        }
+      });
+    </script>
+  </body>
+</html>
