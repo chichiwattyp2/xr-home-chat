@@ -91,21 +91,22 @@
  
 
 
-          <a-entity id="camera"
-          camera
-          position="0 1.6 0"
-          look-controls
-          movement-controls="controls: checkpoint" 
-           checkpoint-controls="mode: animate"
-           wasd-controls="">  
-           <a-entity cursor="" 
-             geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" 
-             material="shader: flat; color: #ff3300" 
-             raycaster=“objects: .clickable”
-             rayOrigin=“mouse"></a-entity>
-         </a-entity>
+          
       
- 
+  <a-entity
+        id="player"
+        camera
+        spawn-in-circle="radius:3;"
+        position="0 1.8 0"
+        wasd-controls
+        look-controls
+         movement-controls="controls: checkpoint" 
+          checkpoint-controls="mode: animate">
+     <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clickable; showLine: true; far: 10"></a-entity>
+    </a-entity>
+                 
+      
+        
      
 
 
