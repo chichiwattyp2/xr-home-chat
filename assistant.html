@@ -76,22 +76,24 @@
              raycaster=“objects: .clickable”; 
             rayOrigin: “mouse"></a-entity></a-entity></a-entity>
           
-<a-entity id="virtual-assistant"
-          class="clickable"
-          gltf-model="#assistant-gltf"
-          animation-mixer="crossFadeDuration: 0.4"
-          position="0 0 -3"
-          scale="1 1 1"
-          rotation="0 0 0"
-          speech-input
-          speech-output
-          ai-brain></a-entity>
+
 
       
 <a-entity id="status-text"
           position="0 2.5 -2"
           text="value: Press SPACE or click assistant to talk!; color: #FFF; align: center"></a-entity>
 
+      <a-entity id="virtual-assistant"
+          class="clickable"
+          gltf-model="#assistant-gltf"
+          animation-mixer="crossFadeDuration: 0.4"
+          position="2 0 -3"
+          scale="1 1 1"
+          rotation="0 35 0"
+          speech-input
+          speech-output
+          ai-brain="endpoint: https://xr-home.vercel.app/api/vr-assistant">
+</a-entity>
 
 
     </a-scene>
