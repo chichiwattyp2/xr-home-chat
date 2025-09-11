@@ -105,8 +105,14 @@
     <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
 <!-- ai -->
   
- <a-entity position="-0.40038 0 1.17092" rotation="0 45.59827316769144 0">
-<a-entity id="virtual-assistant" class="clickable" gltf-model="assets/character.glb" animation-mixer="clip: Idle; crossFadeDuration: 0.4" position="0 0 -3" speech-input="" speech-output="" ai-brain="" assistant-anim=""></a-entity>
+<a-entity id="virtual-assistant"
+  class="clickable"
+  gltf-model="#assistant-gltf"
+  animation-mixer="crossFadeDuration: 0.4"
+  position="0 0 -3"
+  speech-input speech-output
+  ai-brain="endpoint: https://xr-home.vercel.app/api/vr-assistant">
+</a-entity>
          <!-- Simple UI for status/interaction indication -->
       <a-entity geometry="primitive: plane; height: 0.32; width: 2" material="opacity: 0.65; color: #222" position="0 2.11871 -2.01"></a-entity>
 
