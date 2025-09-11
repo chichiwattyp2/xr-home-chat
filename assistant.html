@@ -68,7 +68,15 @@
 <a-entity id="camera"
           camera
           position="0 1.6 0"
-          look-controls>  <a-entity cursor="" position="0.00705 0.04225 -1.70324" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="shader: flat; color: #ff3300" raycaster=“objects: .clickable”; rayOrigin: “mouse"></a-entity></camera>  <a-entity id="virtual-assistant"
+          look-controls>  
+  <a-entity cursor="" 
+           position="0.00705 0.04225 -1.70324" 
+            geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" 
+            material="shader: flat; color: #ff3300" 
+             raycaster=“objects: .clickable”; 
+            rayOrigin: “mouse"></a-entity></a-entity></a-entity>
+          
+<a-entity id="virtual-assistant"
           class="clickable"
           gltf-model="#assistant-gltf"
           animation-mixer="crossFadeDuration: 0.4"
@@ -78,12 +86,8 @@
           speech-input
           speech-output
           ai-brain></a-entity>
-         <!-- Simple UI for status/interaction indication -->
-      <a-entity geometry="primitive: plane; width: 2.8; height: 0.32"
-          material="color: #222; opacity: 0.65"
-          position="0 2.5 -2.01"></a-entity></a-entity>
-            
 
+      
 <a-entity id="status-text"
           position="0 2.5 -2"
           text="value: Press SPACE or click assistant to talk!; color: #FFF; align: center"></a-entity>
