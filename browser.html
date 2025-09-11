@@ -93,8 +93,10 @@
 
           
       
-  <a-entity id="player" camera="" position="0 1.8 1.62748" wasd-controls="" look-controls="" movement-controls="controls: checkpoint" checkpoint-controls="mode: animate" cursor="fuse: true; rayOrigin: mouse" raycaster="direction: 0.5611098445701427 0.25608751984078393 -0.7871308179129228; far: 10; objects: .clickable; origin: 0 1.8 0; useWorldCoordinates: true" rotation="-1.375098708313976 -0.4583662361046223 0"></a-entity>
-
+  <a-entity id="rig" movement-controls="controls: checkpoint" checkpoint-controls="mode: animate" position="0 2.22085 6.6555" rotation="0 0 0">
+          <a-camera>
+         <a-entity cursor="" position="0.00705 0.04225 -1.70324" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="shader: flat; color: #ff3300" raycaster=""></a-entity></a-camera></a-entity>
+   
 
 <a-assets>  
   <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
