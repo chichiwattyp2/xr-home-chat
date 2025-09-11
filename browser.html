@@ -97,11 +97,11 @@
 
 
 
-<a-assets>  <a-asset-item id="assistant-gltf" src="character.glb"></a-asset-item>
+<a-assets>  <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
      </a-assets>
 
     <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
-
+<--ai-_><a-entity>
 <a-entity id="virtual-assistant"
           class="clickable"
           gltf-model="#assistant-gltf"
@@ -119,7 +119,7 @@
 
 <a-entity id="status-text"
           position="0 2.5 -2"
-          text="value: Press SPACE or click assistant to talk!; color: #FFF; align: center"></a-entity>
+          text="value: Press SPACE or click assistant to talk!; color: #FFF; align: center"></a-entity></a-entity>
 
     <a-entity id="catalog" scale=".2 .2 .2" position="0 1.1 -1.05">
       <a-entity class="container" id="container" position="-3.15 4 0"></a-entity>
