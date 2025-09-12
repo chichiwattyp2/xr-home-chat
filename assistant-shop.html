@@ -14,24 +14,6 @@
 </head>
   
 <body>
-  <!-- MR Overlay UI (stays pinned to view; works in flat & XR) -->
-<div id="mr-overlay" class="mr-ui" aria-live="polite">
-  <header class="mr-topbar">
-    <div class="mr-brand">XR Shop</div>
-    <div class="mr-actions">
-      <button class="mr-btn ghost" id="mrVoice"><span>🎤</span> Talk</button>
-      <button class="mr-btn solid" id="mrCheckout"><span>🛒</span> Checkout</button>
-    </div>
-  </header>
-
-  <section class="mr-grid" id="mrGrid" role="list"></section>
-
-  <aside class="mr-cart" id="mrCart" aria-label="Cart">
-    <h3>Cart</h3>
-    <ul class="mr-cart-list" id="mrCartList"></ul>
-    <div class="mr-cart-total"><span>Total</span><strong id="mrTotal">$0.00</strong></div>
-  </aside>
-</div>
 
   <a-scene renderer="colorManagement: true" 
         environment="preset: default; skyType:none; ground: flat"
