@@ -222,16 +222,9 @@
 
    
    <!-- Assistant -->
-    <a-entity id="ai" position="0 0 1.3" rotation="0 49.85 0">
-      <a-entity id="virtual-assistant"
-                gltf-model="#assistant-gltf"
-                class="clickable"
-                animation-mixer="crossFadeDuration: 0.4"
-                assistant-anim="idle: Idle; speaking: Walking; listening: Idle"
-                speech-input="" 
-                speech-output=""
-                ai-brain="endpoint: js/vr-assistant.js"></a-entity>
-      <a-entity position="0.05926 1.89855 -3.0031" text="align: center; value: Press SPACE or click assistant to talk!; color: #F54927" id="status-text"></a-entity>
+   <a-entity id="ai" position="0 0 1.3" rotation="0 49.85 0">
+      <a-entity id="virtual-assistant" gltf-model="assets/character.glb" class="clickable" animation-mixer="clip: Idle; crossFadeDuration: 0.4" assistant-anim="speaking: Walking; listening: Idle" speech-input="" speech-output="" ai-brain="endpoint: js/assistant.js" position="0.0516 0 -2.83458"></a-entity>
+      <a-entity position="0.05926 1.89855 -3.0031" text="align: center; color: #F54927; value: Press SPACE or click assistant to talk!" id="status-text"></a-entity>
     </a-entity>
 
     <!-- 3D catalog (id changed to avoid clash with UI panel) -->
