@@ -8,56 +8,38 @@
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <script src="https://unpkg.com/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
   <!-- Our reusable components -->
-      <script src="js/mr-overlay.js"></script>
+ 
+<script src="js/product-card.js"></script>
+     
   <script src="js/assistant-shop.js" defer></script>
   <style>html,body{margin:0;height:100%;background:#000}</style>
 </head>
   
 <body>
 
-  <a-scene renderer="colorManagement: true" 
-        environment="preset: default; skyType:none; ground: flat"
-       webxr="optionalFeatures: dom-overlay; overlayElement: #mr-overlay">
+ <!-- includes -->
 
 
-    <a-assets>
-      <!-- Your GLB (re-export to metal/rough if you can) -->
-      <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
-    </a-assets>
+<a-scene renderer="colorManagement: true">
+  <!-- Camera + mouse ray -->
+  <a-entity camera position="0 1.6 0" look-controls
+            cursor="rayOrigin: mouse"
+            raycaster="objects: .ray"></a-entity>
 
-    <!-- Camera with mouse ray + whitelist -->
-    <a-entity id="rig">
-      <a-entity id="camera" camera position="0 1.6 0" look-controls
-                cursor="rayOrigin: mouse"
-                raycaster="objects: .ray"></a-entity>
-    </a-entity>
+  <!-- Cinematic lights -->
+  <a-entity light="type: directional; intensity: 0.6; color: #ffffff" position="0 3 -2"></a-entity>
+  <a-entity light="type: point; intensity: 0.35; color: #7be2ff" position="2 2 1"></a-entity>
+  <a-entity light="type: point; intensity: 0.28; color: #ff6bd6" position="-2 2 -1"></a-entity>
+  <a-entity light="type: ambient; intensity: 0.25; color: #cfcfcf"></a-entity>
 
-    <!-- Assistant (left) -->
-    <a-entity id="assistant"
-              position="-1 0 -2.2"
-              gltf-model="#assistant-gltf"
-              animation-mixer="crossFadeDuration: 0.4"
-              assistant-anim="idle: Idle; speaking: Walking; listening: Idle"
-              speech-input
-              speech-output
-              assistant-brain="endpoint: api/ai-chat; system: You are a helpful VR shop guide. Be concise (<= 2 sentences).">
-    </a-entity>
+  <!-- Two example cards -->
+  <a-entity position="-0.7 1.1 -2.2"
+            product-card="id: awaken-15; src: assets/awaken15.png; name: Awaken Chews (15ct); price: 15; width: 0.54; height: 0.74">
+  </a-entity>
 
-    <!-- Status HUD -->
-    <a-entity id="status-text" position="0 2.2 -2" text="value: Press SPACE or click the assistant to talk.; align: center; color: #FFF"></a-entity>
-
-    <!-- Shop grid (right) -->
-    <a-entity id="shop"
-              position="1 1.2 -2.2"
-              shop-grid="src: assets/catalog.json; columns: 3; spacing: 0.42; width: 0.38; height: 0.38">
-    </a-entity>
-
-    <!-- Cart panel (right, above grid) -->
-    <a-entity id="cart"
-              position="1 2.1 -2.2"
-              shop-cart="width: 1.2; height: 0.55">
-    </a-entity>
-
-  </a-scene>
+  <a-entity position="0.7 1.1 -2.2"
+            product-card="id: awaken-30; src: assets/awaken30.png; name: Awaken Chews (30ct); price: 28; width: 0.54; height: 0.74">
+  </a-entity>
+</a-scene>
 </body>
 </html>
