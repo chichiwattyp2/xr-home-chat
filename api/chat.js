@@ -1,6 +1,6 @@
-// /api/chat.js  (Node serverless function)
+// /api/chat.js  (ESM, Node serverless)
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // CORS (harmless even same-origin)
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
@@ -8,15 +8,15 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST required' });
 
-  // Parse body safely
+  // --- Parse body safely (handles object/string/raw) ---
   let body = {};
   try {
-    if (typeof req.body === 'string') body = JSON.parse(req.body || '{}');
-    else if (req.body && typeof req.body === 'object') body = req.body;
-    else {
-      body = JSON.parse(await new Promise((ok, no) => {
-        let d=''; req.on('data', c => d += c); req.on('end', () => ok(d)); req.on('error', no);
-      }) || '{}');
+    if (req.body && typeof req.body === 'object') {
+      body = req.body;
+    } else if (typeof req.body === 'string') {
+      body = JSON.parse(req.body || '{}');
+    } else {
+      body = JSON.parse(await readRaw(req) || '{}');
     }
   } catch {
     return res.status(400).json({ error: 'Invalid JSON' });
@@ -26,11 +26,11 @@ module.exports = async (req, res) => {
   const system = body?.system || '';
   if (!prompt) return res.status(400).json({ error: 'Missing prompt' });
 
-  // Read env INSIDE the handler
+  // --- Env (read inside the handler) ---
   const OPENAI_KEY =
     process.env.OPENAI_API_KEY ||
     process.env.OPENAI_KEY ||
-    process.envOPENAI_SECRET;
+    process.env.OPENAI_SECRET;
   const MODEL =
     process.env.OPENAI_MODEL_TEXT ||
     process.env.OPENAI_MODEL ||
@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
   const inputString = (system ? `System: ${system}\n\n` : '') + `User: ${prompt}`;
 
   try {
-    // Non-stream first (simpler, JSON-only)
+    // Start non-streaming so it always returns JSON cleanly
     const upstream = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
@@ -50,11 +50,11 @@ module.exports = async (req, res) => {
 
     const text = await upstream.text();
     if (!upstream.ok) {
-      // Pass OpenAI’s JSON error through to the client
-      return res.status(upstream.status).setHeader('Content-Type','application/json').send(text);
+      // Pass OpenAI JSON error through
+      res.setHeader('Content-Type', 'application/json');
+      return res.status(upstream.status).send(text);
     }
 
-    // Normalize to { reply: "..." }
     let data; try { data = JSON.parse(text); } catch { data = {}; }
     const reply =
       data?.output_text ||
@@ -67,4 +67,14 @@ module.exports = async (req, res) => {
     console.error('[chat] Uncaught error:', err);
     return res.status(500).json({ error: 'Internal crash' });
   }
-};
+}
+
+// helper
+function readRaw(req) {
+  return new Promise((resolve, reject) => {
+    let d = '';
+    req.on('data', c => d += c);
+    req.on('end', () => resolve(d));
+    req.on('error', reject);
+  });
+}
