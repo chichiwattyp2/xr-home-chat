@@ -42,7 +42,7 @@
     "category": "Tincture",
     "strength": "CBN:CBD Formula",
     "img": "assets/neuroplus.png",
-    "glb": "assets/models/neuroplus-bottle.gltf"
+    "glb": "assets/neuroplus-bottle.gltf"
   },
   {
     "id": "vape-awaken",
