@@ -1,89 +1,58 @@
-// api/chat.js (Edge Function)
-
-export const config = { runtime: 'edge' };
-
-function corsHeaders(origin) {
-  return {
-    'Access-Control-Allow-Origin': origin || '*',
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  };
-}
-
-// ---- Env fallbacks (use these everywhere) ----
-const OPENAI_KEY =
-  process.env.OPENAI_API_KEY ||
-  process.env.OPENAI_KEY ||            // legacy alias if you used it
-  process.env.OPENAI_SECRET;           // any other legacy name
-
-const TEXT_MODEL =
-  process.env.OPENAI_MODEL_TEXT ||
-  process.env.OPENAI_MODEL ||          // legacy alias if you used it
-  'gpt-4o-mini';
-
-export default async function handler(req) {
-  const origin = req.headers.get('origin') || '*';
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders(origin) });
-  }
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'POST required' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
-    });
-  }
-
-  if (!OPENAI_KEY) {
-    return new Response(JSON.stringify({ error: 'Missing OPENAI_API_KEY' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
-    });
-  }
+// api/chat.js  (Node serverless)
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST required' });
 
   let body = {};
-  try { body = await req.json(); } catch {}
-  const prompt = body?.prompt;
-  const system = body?.system;
-  if (!prompt) {
-    return new Response(JSON.stringify({ error: 'Missing prompt' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
-    });
+  try {
+    body = typeof req.body === 'string' ? JSON.parse(req.body || '{}')
+         : req.body && typeof req.body === 'object' ? req.body
+         : JSON.parse(await new Promise((ok, no) => {
+             let d=''; req.on('data',c=>d+=c); req.on('end',()=>ok(d)); req.on('error',no);
+           }) || '{}');
+  } catch {
+    return res.status(400).json({ error: 'Invalid JSON' });
   }
 
-  // You can also send {instructions: system} to /responses. This simple version
-  // just prefixes the system text.
+  const prompt = body?.prompt || '';
+  const system = body?.system || '';
+  if (!prompt) return res.status(400).json({ error: 'Missing prompt' });
+
+  // ✅ Read env INSIDE the handler (Node has process.env)
+  const OPENAI_KEY =
+    process.env.OPENAI_API_KEY ||
+    process.env.OPENAI_KEY ||
+    process.env.OPENAI_SECRET;
+  const MODEL =
+    process.env.OPENAI_MODEL_TEXT ||
+    process.env.OPENAI_MODEL ||
+    'gpt-4o-mini';
+
+  if (!OPENAI_KEY) return res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
+
   const inputString = (system ? `System: ${system}\n\n` : '') + `User: ${prompt}`;
 
+  // Non-stream first (simpler to verify)
   const upstream = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENAI_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: TEXT_MODEL,
-      input: inputString,
-      stream: true
-    })
+    headers: { 'Authorization': `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, input: inputString, stream: false })
   });
 
-  if (!upstream.ok) {
-    const txt = await upstream.text();
-    return new Response(txt || JSON.stringify({ error: 'Upstream error', status: upstream.status }), {
-      status: upstream.status,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
-    });
-  }
+  const text = await upstream.text();
+  if (!upstream.ok) return res.status(upstream.status).json({ error: 'OpenAI error', detail: text });
 
-  // Forward the stream and preserve the content-type
-  const ct = upstream.headers.get('content-type') || 'text/event-stream; charset=utf-8';
-  return new Response(upstream.body, {
-    status: 200,
-    headers: {
-      'Content-Type': ct,
-      'Cache-Control': 'no-store',
-      ...corsHeaders(origin)
-    }
-  });
-}
+  let data;
+  try { data = JSON.parse(text); } catch { return res.status(502).json({ error: 'Bad upstream JSON' }); }
+
+  // Responses API wraps content; simplify to a text field for clients
+  const reply =
+    data?.output_text ||
+    data?.choices?.[0]?.message?.content ||
+    data?.data?.[0]?.content?.[0]?.text ||
+    'Sorry, I had trouble answering that.';
+  return res.status(200).json({ reply });
+};
