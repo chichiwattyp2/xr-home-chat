@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Keep only Asimovian loaded to guarantee it’s ready for canvases -->
     <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
+<script src="./js/openai-client.js"></script>
 
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -15,10 +16,9 @@
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
   <script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
   <script src="https://unpkg.com/aframe-event-set-component@5.0.1/dist/aframe-event-set-component.min.js"></script>
-  <script src="/js/assistant.js" defer></script>
-  <script src="js/travel-node-component.js"></script>
-  <script src="js/nav.js"></script>
-
+   <script src="/js/assistant.js" defer></script>
+  <script src="./js/travel-node-component.js"></script>
+  <script src="./js/nav.js"></script>
   <script>
   function encodeHtml(str) {
     const buf = [];
@@ -99,7 +99,7 @@
    
 
 <a-assets>  
-    <a-asset-item id="assistant-gltf" src="/assets/character.glb"></a-asset-item>
+    <a-asset-item id="assistant-gltf" src="./assets/character.glb"></a-asset-item>
     </a-assets>
 
     <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
@@ -114,7 +114,7 @@
               rotation="0 0 0"
               speech-input
               speech-output
-              ai-brain="endpoint: /api/vr-assistant"></a-entity>
+              ai-brain="endpoint: /api/vr-assistant.js"></a-entity>
 
     <!-- Status text (put color on text, not material) -->
     <a-entity position="0 2.5 -2"
