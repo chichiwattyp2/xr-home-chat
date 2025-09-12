@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>XR Browser</title>     <!-- Google Fonts: Asimovian -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Keep only Asimovian loaded to guarantee it’s ready for canvases -->
-    <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
-<script src="js/openai-client.js"></script>
+
+<head>
+  <meta charset="utf-8" />
+  <title>XR Browser</title> <!-- Google Fonts: Asimovian -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Keep only Asimovian loaded to guarantee it’s ready for canvases -->
+  <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
+  <script src="js/openai-client.js"></script>
 
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
-  <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
+  <script
+    src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js"
+    defer></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
   <script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
   <script src="https://unpkg.com/aframe-event-set-component@5.0.1/dist/aframe-event-set-component.min.js"></script>
@@ -21,43 +24,43 @@
   <script src="js/nav.js"></script>
 
   <script>
-  function encodeHtml(str) {
-    const buf = [];
-    for (let i = str.length - 1; i >= 0; i--) buf.unshift(["&#", str[i].charCodeAt(), ";"].join(""));
-    return buf.join("");
-  }
-  const isImageUrl = (u) => /\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(u);
+    function encodeHtml(str) {
+      const buf = [];
+      for (let i = str.length - 1; i >= 0; i--) buf.unshift(["&#", str[i].charCodeAt(), ";"].join(""));
+      return buf.join("");
+    }
+    const isImageUrl = (u) => /\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(u);
 
-  $(function () {
-    const SHEET_ID = "1fy-ZztZlhwgfz1wH8YGji2zuiiEfV88XyCRBDzLB1AA";
-    const GID = 9;
-    const gvizUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+    $(function () {
+      const SHEET_ID = "1fy-ZztZlhwgfz1wH8YGji2zuiiEfV88XyCRBDzLB1AA";
+      const GID = 9;
+      const gvizUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
-    $.get(gvizUrl, function (text) {
-      const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf(")")));
-      const rows = json.table.rows || [];
-      const listings = [];
+      $.get(gvizUrl, function (text) {
+        const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf(")")));
+        const rows = json.table.rows || [];
+        const listings = [];
 
-      for (let r = 1; r < rows.length; r++) {
-        const cells = rows[r].c || [];
-        const title = cells[0]?.v ?? "";
-        const image = String(cells[1]?.v ?? "");
-        const link  = String(cells[2]?.v ?? "");
+        for (let r = 1; r < rows.length; r++) {
+          const cells = rows[r].c || [];
+          const title = cells[0]?.v ?? "";
+          const image = String(cells[1]?.v ?? "");
+          const link = String(cells[2]?.v ?? "");
 
-        if ((title || image || link) && isImageUrl(image)) {
-          listings.push({
-            title: encodeHtml(String(title)),
-            image,
-            link
-          });
+          if ((title || image || link) && isImageUrl(image)) {
+            listings.push({
+              title: encodeHtml(String(title)),
+              image,
+              link
+            });
+          }
         }
-      }
 
-      let r = 0, i = 0, p = 0, h = 0, pages = 0;
-      for (const listing of listings) {
-        const x = i * 2;       // cleaner numeric position
-        const y = r * 1.3;
-        $("#container").append(`
+        let r = 0, i = 0, p = 0, h = 0, pages = 0;
+        for (const listing of listings) {
+          const x = i * 2;       // cleaner numeric position
+          const y = r * 1.3;
+          $("#container").append(`
           <a-image crossorigin="anonymous" position="${x} ${y} 0"
                    width="2" height="1"
                    link="href: ${listing.link}"
@@ -74,53 +77,706 @@
           </a-image>
         `);
 
-        i++; h++;
-        if (i === 4) { r--; i = 0; p++; }
-        if (p === 3) { r += 20; p = 0; pages++; console.log(pages); }
-      }
+          i++; h++;
+          if (i === 4) { r--; i = 0; p++; }
+          if (p === 3) { r += 20; p = 0; pages++; console.log(pages); }
+        }
+      });
     });
-  });
-  </script> 
+  </script>
+   <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+      integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css"
+    />
+     <style>
+ html, body {margin:0; height:100%;}
+    .ui {position:fixed; inset:0; pointer-events:none; font-family: system-ui, -apple-system, Segoe UI, Roboto, "DM Sans", Arial, sans-serif; z-index: 9999;}
+    .topbar {position:absolute; left:0; right:0; top:0; height:56px; display:flex; align-items:center; gap:10px; padding:0 12px; color:#fff; pointer-events:auto;}
+    .topbar .glass {backdrop-filter: blur(8px); background: rgba(0,0,0,.35); border-bottom:1px solid rgba(255,255,255,.08);} 
+    .brand {display:flex; align-items:center; gap:10px; font-weight:700}
+    .brand .logo {width:28px; height:28px; border-radius:6px; background:#000; display:inline-flex; align-items:center; justify-content:center; color:#0bd3ff; font-weight:800}
+    .spacer {flex:1}
+    .btn {appearance:none; border:1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.5); color:#fff; padding:8px 12px; border-radius:12px; cursor:pointer; pointer-events:auto}
+    .panel {position:absolute; right:12px; top:68px; width:360px; max-height:70vh; overflow:auto; background: rgba(10,10,10,.9); border:1px solid rgba(255,255,255,.12); border-radius:16px; color:#eee; padding:12px; display:none; box-shadow: 0 10px 30px rgba(0,0,0,.4); pointer-events:auto}
+    .panel.open {display:block}
+    .item {display:flex; gap:10px; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.12); margin-bottom:10px; align-items:center}
+    .item img {width:56px; height:56px; object-fit:cover; border-radius:8px}
+    .muted {opacity:.8; font-size:12px}
+    .row {display:flex; align-items:center; justify-content:space-between; gap:8px}
+    .hint {position:absolute; left:12px; bottom:12px; background: rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.1); color:#ddd; padding:8px 10px; border-radius:10px; font-size:13px}
+    .video {
+        max-width: calc(50% - 100px);
+        margin: 0 50px;
+        box-sizing: border-box;
+        border-radius: 2px;
+        padding: 0;
+        box-shadow:
+          rgba(156, 172, 172, 0.2) 0px 2px 2px,
+          rgba(156, 172, 172, 0.2) 0px 4px 4px,
+          rgba(156, 172, 172, 0.2) 0px 8px 8px,
+          rgba(156, 172, 172, 0.2) 0px 16px 16px,
+          rgba(156, 172, 172, 0.2) 0px 32px 32px,
+          rgba(156, 172, 172, 0.2) 0px 64px 64px;
+      }
+    </style>
 </head>
+
 <body>
 
+<!-- 2D UI overlay -->
+  <div class="ui">
+    <div class="topbar glass">
+      <div class="brand"><div class="logo">i</div> iLabs Dispensary <span style="font-size:11px; opacity:.8; margin-left:6px">Metaverse</span></div>
+      <div class="spacer"></div>
+      <button class="btn" id="btnCatalog">Catalog</button>
+      <button class="btn" id="btnCart">Cart (<span id="cartCount">0</span>)</button>
+      <button class="btn" id="btnVR">Enter VR</button>
+    </div>
 
+    <div id="catalog" class="panel"></div>
+    <div id="cart" class="panel"></div>
+    <div class="hint">Desktop: WASD + mouse to look · Click products to view · VR: use controller to point + trigger</div>
+  </div>
 
   <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121" physics>
-  
+
+
+
+
+
+
+  <a-entity id="camera" 
+  camera="" 
+  position="0 1.6 1.09195" 
+  look-controls=""> 
+  <a-cursor rayOrigin: mouse;
+      raycaster direction: -0.5723301816567373 0.5228156112335062 -0.6317452016559377 
+      objects: .clickable; origin: 0 1.6 1.09195; useWorldCoordinates: true></a-cursor></a-entity>
+
+
+    <a-assets>
+       <a-asset-item id="roboto" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
+     
     
- 
+      <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
+       <audio
+          id="piano_c"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fnote%20c%20piano.mp3?v=1565881186559"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_d"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20d.mp3?v=1565883564721"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_e"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20e.mp3?v=1565883566923"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_f"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20f.mp3?v=1565883568318"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_g"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20g.mp3?v=1565883569859"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_a"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20a.mp3?v=1565883562372"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_b"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b.mp3?v=1565883563277"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_hc"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fhigh%20c%20piano.mp3?v=1565889882364"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_csharp"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fc%20sharp.mp3?v=1565890996511"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_eflat"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fe%20flat.mp3?v=1565890997434"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_fsharp"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Ff%20sharp.mp3?v=1565890998603"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_gsharp"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fg%20sharp.mp3?v=1565890999944"
+          crossorigin="anonymous"
+        ></audio>
+        <audio
+          id="piano_bflat"
+          src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b%20flat.mp3?v=1565891011666"
+          crossorigin="anonymous"
+        ></audio>
+        <!--MIXINS declare attributes just once, for reuse - like a javascript variable!-->
+        <!--geometry mixins-->
 
+        <!--color mixins-->
+        <a-mixin id="black" material="color:#000000"></a-mixin>
+        <a-mixin id="white" material="color:#e6e6e6"></a-mixin>
+      <a-mixin id="bar"
+          geometry="primitive: box"
+          material="color: rgb(10, 20, 50); shader: flat"
+          scale-y-color="from: 10 20 50; to: 210, 220, 250; maxScale: 15"
+        ></a-mixin>
+        <a-asset-item
+          id="adidas"
+          src="https://cdn.glitch.com/80103382-77c7-436e-ac28-b71dc8e4468c%2Fgazelle.glb"
+        ></a-asset-item>
+        <a-asset-item
+          id="newbalance"
+          src="https://cdn.glitch.com/b2a38be5-8f68-46a7-9578-fcbaeb96f8a1%2Fnb.glb"
+        ></a-asset-item>
+        <a-asset-item
+          id="vizor-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fvizor.obj"
+        ></a-asset-item>
+        <a-asset-item
+          id="frame-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fframe.obj"
+        ></a-asset-item>
+        <a-asset-item
+          id="helmet-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fhelmet.obj"
+        ></a-asset-item>
+        <a-asset-item
+          id="suit-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fsuit.obj"
+        ></a-asset-item>
+        <img
+          id="dawn"
+          crossorigin="anonymous"
+          src="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fdawn.jpeg"
+        />
+        <a-mixin
+          id="board"
+          geometry="depth: .05; height: 1; width: 6"
+          material="shader: flat"
+          pivot="0 0.5 0"
+          position="0 -1 0"
+        ></a-mixin>
+        <a-mixin
+          id="unhinge"
+          attribute="rotation"
+          to="0 0 0"
+          dur="1000"
+          fill="both"
+        ></a-mixin>
+        <a-mixin id="checkpoint"></a-mixin>
+        <a-mixin id="checkpoint-hovered" color="#141414"></a-mixin>
+        <video id="1" autoplay loop="true" src="assets/1.mp4"></video>
+        <video id="2" autoplay loop="true" src="assets/2.mp4"></video>
+        <video id="3" autoplay loop="true" src="assets/3.mp4"></video>
+        <video id="4" autoplay loop="true" src="assets/4.mp4"></video>
+        <video id="5" autoplay loop="true" src="assets/5.mp4"></video>
+        <a-asset-item
+          id="picframe.obj"
+          src="assets/picframe.obj"
+          preload="auto"
+        ></a-asset-item>
+        <a-asset-item
+          id="las_vegas_obj"
+          src="assets/Las_Vegas.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="las_vegas_diffuse"
+          src="assets/Las_vegas_Diffuse_01.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="las_vegas_normal"
+          src="assets/Las_vegas_Normal_01.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="damas_pillier_obj"
+          src="assets/Damas.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="Damas_Pillier_diffuse"
+          src="assets/Damas_02_diffuse_03.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="damas_sortie_obj"
+          src="assets/panneau_sortie.obj"
+          preload="auto"
+        ></a-asset-item>
+        <a-asset-item
+          id="damas_station_obj"
+          src="assets/panneau_station.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="Damas_panneaux_diffuse"
+          src="assets/Panneau_metro_Diffuse.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="bust"
+          src="assets/Statue.glb"
+          preload="auto"
+        ></a-asset-item>
+        
+        <a-asset-item
+          id="console"
+          src="assets/walnut.glb"
+          preload="auto"
+        ></a-asset-item>
+        <a-asset-item
+          id="lamp_obj"
+          src="assets/Lamp.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="lamp_diffuse"
+          src="assets/echelle_diffuse_01.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="cimaise_billet_obj"
+          src="assets/Cimese_Echelle_Billet_01.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="cimaise_billet_diffuse"
+          src="assets/Cimese_Echelle_Billet_Diffuse_02.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="cimaise_poster_obj"
+          src="assets/Cimaise_02.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="cimaise_posters_diffuse"
+          src="assets/Cimaise_02_Diffuse_05_4096.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="pic1"
+          src="assets/pic1.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="pic2"
+          src="assets/pic2.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="floor"
+          src="assets/floor2.png"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <img
+          id="pic3"
+          src="assets/pic3.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="toit_obj"
+          src="assets/Toit_01.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="toit_diffuse"
+          src="assets/ToitOcclusion_ambiante.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="mur_obj"
+          src="assets/Mur_Scene_03.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="mur_diffuse"
+          src="assets/5-Mur_Diffuse_01_15.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+         <img
+          id="vidcards"
+          src="assets/cards-01.png"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+        <a-asset-item
+          id="sol_obj"
+          src="assets/Sol.obj"
+          preload="auto"
+        ></a-asset-item>
+        <img
+          id="sol_diffuse"
+          src="assets/Sol_diffuse_08.jpg"
+          crossorigin="anonymous"
+          preload="auto"
+        />
+                <a-mixin id="all-interactions"
+                 hoverable grabbable stretchable draggable
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+                 dynamic-body
+        ></a-mixin>
 
-          
- <a-entity id="camera" camera="" position="0 1.6 1.09195" look-controls="" cursor="rayOrigin: mouse" raycaster="direction: -0.5723301816567373 0.5228156112335062 -0.6317452016559377; objects: .clickable; origin: 0 1.6 1.09195; useWorldCoordinates: true"></a-entity>
+        <a-mixin id="grab-move"
+                 hoverable grabbable draggable
+                 event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                 event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+                 dynamic-body
+        ></a-mixin>
 
+        <   </a-assets>
+ <!-- Shelves + Products (procedural via component) -->
+    <a-entity id="store"
+    scale="0.5 0.5 0.5" 
+    store-builder></a-entity>
 
-<a-assets>  
-    <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
-    </a-assets>
+ 
+    <!-- ai -->
+    <a-entity id="ai" rotation="0 49.8507659231524 0" position="0.78219 0 1.3841">
+      <a-entity id="virtual-assistant" class="clickable" gltf-model="/assets/character.glb"
+        animation-mixer="clip: Idle; crossFadeDuration: 0.4" position="0 0 -3" speech-input="" speech-output=""
+        ai-brain="endpoint: api/vr-assistant.js" assistant-anim=""></a-entity>
 
-    <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
-<!-- ai -->
-<a-entity id="ai" rotation="0 49.8507659231524 0" position="0.78219 0 1.3841">
-  <a-entity id="virtual-assistant" class="clickable" gltf-model="/assets/character.glb" animation-mixer="clip: Idle; crossFadeDuration: 0.4" position="0 0 -3" speech-input="" speech-output="" ai-brain="endpoint: api/vr-assistant.js" assistant-anim=""></a-entity>
+      <!-- Status text (put color on text, not material) -->
+      <a-entity position="0.05926 1.89855 -3.0031"
+        text="align: center; value: Press SPACE or click assistant to talk!; color: #F54927"
+        id="status-text"></a-entity></a-entity>
 
-    <!-- Status text (put color on text, not material) -->
-    <a-entity position="0.05926 1.89855 -3.0031" text="align: center; value: Press SPACE or click assistant to talk!; color: #666" id="status-text"></a-entity></a-entity>
-    
     <a-entity id="catalog" scale=".2 .2 .2" position="0 1.1 -1.05">
       <a-entity class="container" id="container" position="-3.15 4 0"></a-entity>
       <a-entity id="arrows" position="0 .3 .2">
-        <a-image id="mainLogo"
-                 src="https://cdn.glitch.com/a0f896a4-4e28-47a9-b792-0307f9c0c167%2Fchris-menu.png"
-                 position="0 5.8 0" width="4" height="2"></a-image>
+        <!--<a-image id="mainLogo" src="https://cdn.glitch.com/a0f896a4-4e28-47a9-b792-0307f9c0c167%2Fchris-menu.png"
+          position="0 5.8 0" width="4" height="2"></a-image>-->
       </a-entity>
 
       <a-entity id="menu" position="-3.06 4.98 0" scale=".35 .35 .35">
         <!-- menu items unchanged -->
       </a-entity>
     </a-entity>
+ <a-entity id="astronaut" scale="0.25 0.25 0.25" position="5.49845 2.56973 -8.70685">
+        <a-obj-model
+          id="#helmet-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fhelmet.obj"
+          material="side: double; color: #f9f7b3;  metalness: 0.5"
+          scale="10 10 10"
+          position="0 0 10"
+          animation="property: position; to: 0 -10 -5; dur: 5500"
+        ></a-obj-model>
 
+        <a-obj-model
+          id="#vizor-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fvizor.obj"
+          material="side: double; color: #eaf2f9; transparent: true; opacity: 0.5"
+          scale="10 10 10"
+          position="0 -10 20"
+          animation="property: position; to: 0 -10 -5; dur: 6000"
+        ></a-obj-model>
+
+        <a-obj-model
+          id="#frame-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fframe.obj"
+          material="side: double; color: #182838; metalness: 0.25"
+          scale="10 10 10"
+          position="-3.71 -1 0"
+          animation="property: position; to: 0 -10 -5; dur: 5000"
+        ></a-obj-model>
+
+        <a-obj-model
+          id="#suit-obj"
+          src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fsuit.obj"
+          scale="10 10 10"
+          position="0 -10 -5"
+          rotation="0 0 0"
+          material="side: double; color: #f9f7b3;  metalness: 0"
+        ></a-obj-model>
+      </a-entity>
+      
+       <a-entity id="video">
+      <a-video
+        src="#1"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="13.563 2.256 -6.933"
+        rotation="0 -90 0"
+        scale="2.19 2.16 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-video
+        src="#2"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="6.155 2.244 0.189"
+        rotation="0 130.05 0"
+        scale="2.19 2.16 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-video
+        src="#3"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="-7.157 2.019 6.079"
+        rotation="0 -180 0"
+        scale="2.19 2.16 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-video
+        src="#4"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="13.563 2.256 1.839"
+        rotation="0 -90 0"
+        scale="2.19 2.16 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-video
+        src="#5"
+        video-controls=""
+        width="1.6"
+        height="0.9"
+        position="-14.48 2.229 -1.681"
+        rotation="0 90 0"
+        scale="2.22 2.21 1"
+        material=""
+        geometry=""
+      ></a-video>
+      <a-obj-model
+        id="frame"
+        src="#toit_obj"
+        position="3.719 0 -7.826"
+        scale="1.06 1 1.02"
+        material="src: #toit_diffuse; side: double; transparency: true; opacity: 0.3;"
+      ></a-obj-model>
+</a-entity>
+<a-entity id="building">
+      <a-obj-model
+        id="Mur_Global"
+        src="#mur_obj"
+        position="3.719 0 -7.873"
+        scale="1 1 1"
+        material="src :#mur_diffuse;"
+      ></a-obj-model>
+      <a-obj-model
+        id="Cimaise_Billet"
+        src="#cimaise_billet_obj"
+        position="3.719 0 -7.873"
+        scale="1 1 1"
+        material="src: #cimaise_billet_diffuse;"
+      ></a-obj-model>
+      <a-obj-model
+        id="Cimaise_poster"
+        src="#cimaise_poster_obj"
+        position="3.719 0 -7.873"
+        scale="1 1 1"
+        material="src: #cimaise_posters_diffuse;"
+      ></a-obj-model>
+     
+      <a-obj-model
+        id="frame1"
+        src="#picframe.obj"
+        position="6.695683250457223 0.002 3.378"
+        rotation="0 -140 0"
+        scale="1 1 1"
+        material="src: #pic1;"
+      ></a-obj-model>
+      <a-gltf-model
+        src="#bust"
+        position="-12.47268 0.22641 -6.40102"
+        scale="0.6 0.6 0.6"
+        rotation="0 90 0"
+        gltf-model="assets/Statue.glb"
+        shadow=""
+        animation-mixer=""
+      ></a-gltf-model>
+   
+   <a-gltf-model src="#console" position="14.65241 0.13496 -2.89366" scale="0.0015 0.0015 0.0015" rotation="0 265.12 0" gltf-model="assets/walnut.glb" shadow="" animation-mixer=""></a-gltf-model>
+      <a-gltf-model
+        src="#adidas"
+        position="12.83067 1.67233 -2.2927"
+        scale="0.08 0.08 0.08"
+        rotation="-29.999999999999996 90 0"
+        shadow=""
+        animation-mixer=""
+        gltf-model="https://cdn.glitch.com/80103382-77c7-436e-ac28-b71dc8e4468c%2Fgazelle.glb"
+      ></a-gltf-model>
+      <a-gltf-model
+        src="#newbalance"
+        position="12.95206 1.55805 -1.79917"
+        scale="3 3 3"
+        rotation="0 0 29.999999999999996"
+        shadow=""
+        animation-mixer=""
+        gltf-model="https://cdn.glitch.com/b2a38be5-8f68-46a7-9578-fcbaeb96f8a1%2Fnb.glb"
+      ></a-gltf-model>
+      
+      <a-obj-model
+        id="frame2"
+        src="#picframe.obj"
+        position="5.295 0.002 1.655"
+        rotation="0 -140 0"
+        scale="1 1 1"
+        material="src: #pic2;"
+      ></a-obj-model>
+      <a-obj-model
+        id="frame3"
+        src="#picframe.obj"
+        position="8.133 0.002 5.07"
+        rotation="0 -140 0"
+        scale="1 1 1"
+        material="src: #pic3;"
+      ></a-obj-model>
+      <a-entity material="src: #floor" static-body geometry="depth: 17.56; width: 30"
+position="0 -0.5 -1.5517035038049425"></a-entity>
+<a-plane position="0.47382 2.37922 -9.06616" rotation="" height="0.66" width="0.438" material="src: #vidcards; shader: flat" geometry="height: 0.438; width: 0.66" scale="3.3 3.3 0.00001"></a-plane>
+</a-entity>      
+<a-entity id="teleport">
+<a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="5.83164 0 3.09267"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_01"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="4.61411 0 0.79671"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_09"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="7.67384 0 4.4626"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_10"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="-5.56655 0 1.46361"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_03"
+      ></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="-2.43195 0 -0.53906" color="#141414" material="" geometry="" id="check_08"></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null"
+        radius="0.8"
+        height="0.1"
+        position="-7.98664 0 2.87739"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_11"
+      ></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="-0.20941 0 -6.67811" color="#141414" material="" geometry="" id="check_12"></a-cylinder>
+
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="-11.28 0 0.332"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_04"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="-9.841 0 -5.713"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_02"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="8.035 0 -5.71"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_05"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="10.05 0 -2.585"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_06"
+      ></a-cylinder>
+      <a-cylinder
+        travel-node="transition: move"
+        radius="0.8"
+        height="0.1"
+        position="9.784 0 1.002"
+        color="#141414"
+        material=""
+        geometry=""
+        id="check_07"
+      ></a-cylinder></a-entity>
     <!--<a-image id="how-to"
              src="https://cdn.glitch.com/22ec690f-3d8c-49a9-b10a-903a96c741e5%2Fpng.png"
              position="-1.26232 1.6 0.02932"
@@ -132,7 +788,395 @@
               typer="message: Click on a item to get in touch.\n\n; on: click;"
               text="value: Looking forward to hearing from you.; font: roboto; align: center; color: white; width: 2.8; zOffset: 0.01; letterSpacing: -1; tabSize: 1; side: double;"
               position="0 1.4 -2" rotation="-15 0 0"></a-entity> -->
-  </a-scene>
 
+<!--audio-->
+
+   <a-entity id="cntrCntrl"  position="9.16546 0.56545 2.4014" scale="0.25 0.25 0.25" rotation="29.999999999999996 -230 0"
+         event-set__enter="_event: mouseenter; _target: #Text; visible: true"
+                  event-set__leave="_event: mouseleave; _target: #Text; visible: false">
+       
+        
+      <a-text id="Text" value="Play this keyboard" align="center" color="#FFF" visible="false" position="0 3.74283 -1.92847" geometry="primitive: plane; width: 2" material="color: #000; opacity: 1" text=""></a-text>
+        <!--mouse over box to see color change-->
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="-3.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fnote%20c%20piano.mp3; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -3.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -3.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="-2.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20d.mp3?v=1565883564721; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -2.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -2.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="-1.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20e.mp3?v=1565883566923; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -1.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -1.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="-0.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20f.mp3?v=1565883568318; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="0.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20g.mp3?v=1565883569859; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 0.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 0.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="1.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20a.mp3?v=1565883562372; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 1.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 1.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="2.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b.mp3?v=1565883563277; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 2.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 2.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="depth: 2"
+          material="color: #e6e6e6"
+          position="3.5 0.5 -3"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fhigh%20c%20piano.mp3?v=1565889882364; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: #e6e6e6"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 3.5 0.25 -3"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 3.5 0.5 -3"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="2 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b%20flat.mp3?v=1565891011666; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 2 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 2 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="1 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fg%20sharp.mp3?v=1565890999944; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 1 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 1 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="0 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Ff%20sharp.mp3?v=1565890998603; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: 0 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: 0 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="-3 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fc%20sharp.mp3?v=1565890996511; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -3 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -3 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+
+        <a-entity
+          geometry="width: 0.5; depth: 1.5"
+          material="color: black"
+          position="-2 0.75 -3.25"
+          sound__up="src: https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fe%20flat.mp3?v=1565890997434; on: mousedown"
+          event-set__mouseenter="_event: mouseenter; material.color: red"
+          event-set__leavecolor="_event: mouseleave; material.color: black"
+          event-set__down="_event: mousedown; scale: 1 .5 1; position: -2 0.65 -3.25"
+          event-set__up="_event: mouseup; scale: 1 1 1; position: -2 0.75 -3.25"
+          event-set__leavesize="_event: mouseleave; scale: 1 1 1"
+        ></a-entity>
+        
+      </a-entity>
+      
+      <a-sky src="#dawn"></a-sky>
+
+
+      <a-entity light="color: #EEE; intensity: 0.5" position="-1.5379 5.13754 8.19083"></a-entity>
+      <a-entity
+        light="type: directional; color: #fff; intensity: 0.25"
+        position="-1 1 0"
+      ></a-entity>
+      <a-entity
+        light="type: directional; color: #EEE; intensity: 0.5"
+        position="-6 5 0"
+      ></a-entity
+      ><a-entity
+        light="color: #EEE; intensity: 0.5"
+        position="0.31022 5 0"
+      ></a-entity>
+    <a-entity light="color: #EEE; intensity: 0.5" position="0.31022 7.23722 7.51975"></a-entity>
+      <a-light
+        type="directional"
+        position="12.95206 5.55805 -1.79917"
+        rotation="0 0 0"
+        target="#directionaltarget"
+      ></a-light>
+      <a-entity id="directionaltarget" position="0 0 -1"></a-entity>
+  </a-scene>
+  <!-- Start videos on first user gesture to satisfy autoplay policies and prevent WebGL texture errors -->
+    <script>
+      (function () {
+        const vids = Array.from(document.querySelectorAll('video'));
+        const tryPlayAll = () => {
+          vids.forEach(v => v.play().catch(() => {}));
+        };
+        // Play on first pointer or key interaction
+        window.addEventListener('pointerdown', tryPlayAll, { once: true });
+        window.addEventListener('keydown', tryPlayAll, { once: true });
+      })();
+    </script>
+    <script>
+  // ---- Product data (replace with live API later) ----
+   const PRODUCTS = [
+    { id:'awaken-15', name:'Awaken (15ml)', price: 399, category:'Tincture', strength:'1:1 THC:CBD', img:'https://images.unsplash.com/photo-1585386959984-a41552231605?q=80&w=400&auto=format&fit=crop' },
+    { id:'awaken-30', name:'Awaken (30ml)', price: 699, category:'Tincture', strength:'1:1 THC:CBD', img:'https://images.unsplash.com/photo-1611077543631-b002bc36fdae?q=80&w=400&auto=format&fit=crop' },
+    { id:'traveler-gummy', name:'Traveler Gummies (10pc)', price: 349, category:'Edible', strength:'10mg/pc', img:'https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=400&auto=format&fit=crop' },
+    { id:'big-cookie', name:'Blom Big Cookie (60mg)', price: 129, category:'Edible', strength:'60mg', img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' },
+    { id:'neuroplus', name:'NeuroPlus (30ml)', price: 799, category:'Tincture', strength:'CBN:CBD Formula', img:'https://images.unsplash.com/photo-1585238342028-79336f1266c9?q=80&w=400&auto=format&fit=crop' },
+    { id:'vape-awaken', name:'Awaken Vape (1g)', price: 599, category:'Vape', strength:'Broad Spec', img:'https://images.unsplash.com/photo-1601972602229-98bfd02f40a1?q=80&w=400&auto=format&fit=crop' }
+  ];
+
+  // ---- Cart state ----
+  let CART = [];
+  const catalogEl = document.getElementById('catalog');
+  const cartEl = document.getElementById('cart');
+  const cartCount = document.getElementById('cartCount');
+
+  function renderCatalog(){
+    catalogEl.innerHTML = '<h3>Catalog</h3>' + PRODUCTS.map(p=>`
+      <div class="item">
+        <img src="${p.img}" alt="${p.name}"/>
+        <div style="flex:1">
+          <div style="font-weight:600">${p.name}</div>
+          <div class="muted">${p.category} · ${p.strength || ''}</div>
+        </div>
+        <div class="row">
+          <div style="font-weight:700">R ${p.price}</div>
+          <button class="btn" data-id="${p.id}">View</button>
+        </div>
+      </div>`).join('');
+    catalogEl.querySelectorAll('button[data-id]').forEach(btn=>btn.addEventListener('click', ()=>{
+      const p = PRODUCTS.find(x=>x.id===btn.dataset.id); if(p) openProduct(p);
+    }));
+  }
+
+  function renderCart(){
+    const total = CART.reduce((s,i)=> s + i.price * i.qty, 0);
+    cartEl.innerHTML = `<h3>Your Cart</h3>` + (CART.length? CART.map(i=>`
+      <div class="item">
+        <img src="${i.img}" alt="${i.name}"/>
+        <div style="flex:1">
+          <div style="font-weight:600">${i.name}</div>
+          <div class="muted">Qty: ${i.qty}</div>
+        </div>
+        <div class="row">
+          <div style="font-weight:700">R ${i.price * i.qty}</div>
+          <button class="btn" data-remove="${i.id}">Remove</button>
+        </div>
+      </div>`).join('') : '<div class="muted">Your cart is empty.</div>') +
+      `<div class="row" style="margin-top:8px; justify-content:space-between">
+        <div style="font-weight:700">Total</div>
+        <div style="font-weight:700">R ${total}</div>
+      </div>
+      <button id="checkout" class="btn" style="width:100%; margin-top:8px">Checkout</button>`;
+    cartEl.querySelectorAll('button[data-remove]').forEach(btn=>btn.addEventListener('click', ()=>{
+      CART = CART.filter(i=>i.id!==btn.dataset.remove); updateCart();
+    }));
+    const checkoutBtn = cartEl.querySelector('#checkout');
+    if(checkoutBtn) checkoutBtn.addEventListener('click', ()=>{
+      alert('Checkout clicked – connect to payment gateway / API.');
+    });
+  }
+
+  function updateCart(){ cartCount.textContent = CART.reduce((s,i)=> s+i.qty, 0); renderCart(); }
+  function addToCart(p){ const ex = CART.find(i=>i.id===p.id); if(ex) ex.qty+=1; else CART.push({...p, qty:1}); updateCart(); }
+
+  // Simple product modal using window.alert for brevity (swap to a nicer modal if you like)
+  function openProduct(p){
+    const ok = confirm(`${p.name}\n${p.category} • ${p.strength || ''}\nPrice: R ${p.price}\n\nAdd to cart?`);
+    if(ok) addToCart(p);
+  }
+
+  // Toggle panels
+  document.getElementById('btnCatalog').onclick = ()=> catalogEl.classList.toggle('open');
+  document.getElementById('btnCart').onclick = ()=> cartEl.classList.toggle('open');
+  document.getElementById('btnVR').onclick = ()=> { document.querySelector('a-scene').enterVR(); };
+
+  renderCatalog(); renderCart();
+
+  // ---- A‑Frame custom component to build shelves + products ----
+  AFRAME.registerComponent('store-builder', {
+    init(){
+      const el = this.el;
+      // Create three shelves across the back
+      const positions = [ -6, 0, 6 ];
+      positions.forEach((x)=>{
+        const shelf = document.createElement('a-entity');
+        shelf.setAttribute('position', `${x} 0 -6`);
+        shelf.setAttribute('shelf', 'rows:3; cols:6');
+        el.appendChild(shelf);
+      });
+
+      // Place products onto shelves
+      const shelves = el.querySelectorAll('[shelf]');
+      let idx = 0;
+      shelves.forEach((shelf)=>{
+        for(let i=0;i<12 && idx<PRODUCTS.length;i++){
+          const p = PRODUCTS[idx++];
+          const product = document.createElement('a-entity');
+          product.setAttribute('product-box', `id:${p.id}`);
+          product.classList.add('pickable');
+          // Grid position on shelf (cols:6, rows:2 effectively since 12 max here)
+          const col = i % 6; const row = Math.floor(i/6);
+          product.setAttribute('position', `${-2.2 + col*0.88} ${0.7 + row*0.8} 0`);
+          // Store product data for click handler
+          product.dataset.pid = p.id;
+          shelf.appendChild(product);
+        }
+      });
+
+      // Global click handler for 3D picks
+      this.clickHandler = (evt)=>{
+        const target = evt.detail && evt.detail.intersectedEl ? evt.detail.intersectedEl : evt.target;
+        if(!target) return;
+        const pid = target.dataset && target.dataset.pid;
+        if(!pid) return;
+        const p = PRODUCTS.find(x=>x.id===pid);
+        if(p) openProduct(p);
+      };
+      el.sceneEl.addEventListener('click', this.clickHandler);
+    },
+    remove(){ this.el.sceneEl.removeEventListener('click', this.clickHandler); }
+  });
+
+  // Simple shelf primitive (uprights + planks)
+  AFRAME.registerComponent('shelf', {
+    schema: { rows:{type:'int', default:3}, cols:{type:'int', default:6} },
+    init(){
+      const group = document.createElement('a-entity');
+      const rows = this.data.rows;
+      for(let r=0;r<rows;r++){
+        const plank = document.createElement('a-box');
+        plank.setAttribute('width', 5.4);
+        plank.setAttribute('height', 0.08);
+        plank.setAttribute('depth', 0.6);
+        plank.setAttribute('color', '#2a2a2a');
+        plank.setAttribute('metalness', 0.2);
+        plank.setAttribute('roughness', 0.6);
+        plank.setAttribute('position', `0 ${0.6 + r*0.8} 0`);
+        plank.setAttribute('shadow', 'cast: true; receive: true');
+        group.appendChild(plank);
+      }
+      const high = rows*0.8 + 0.6;
+      const mkUp = (x)=>{ const up = document.createElement('a-box'); up.setAttribute('width', 0.08); up.setAttribute('height', high); up.setAttribute('depth', 0.6); up.setAttribute('color', '#2a2a2a'); up.setAttribute('position', `${x} ${high/2} 0`); return up; };
+      group.appendChild(mkUp(-2.7));
+      group.appendChild(mkUp( 2.7));
+      this.el.appendChild(group);
+    }
+  });
+
+  // Product box with floating label
+  AFRAME.registerComponent('product-box', {
+    schema: { id: {type:'string'} },
+    init(){
+      const data = PRODUCTS.find(x=>x.id===this.data.id);
+      if(!data){ console.warn('Unknown product id', this.data.id); return; }
+      // Box
+      const box = document.createElement('a-box');
+      box.setAttribute('width', 0.22);
+      box.setAttribute('height', 0.32);
+      box.setAttribute('depth', 0.12);
+      box.setAttribute('color', '#3aa0ff');
+      box.setAttribute('metalness', 0.1);
+      box.setAttribute('roughness', 0.6);
+      box.setAttribute('shadow', 'cast: true');
+      this.el.appendChild(box);
+      // Label (a-text)
+      const label = document.createElement('a-entity');
+      label.setAttribute('position', '0 0.35 0');
+      const text = document.createElement('a-text');
+      text.setAttribute('value', `${data.name}\n${data.strength || data.category}\nR ${data.price}`);
+      text.setAttribute('align', 'center');
+      text.setAttribute('width', 1.2);
+      text.setAttribute('color', '#fff');
+      text.setAttribute('anchor', 'center');
+      text.setAttribute('font', '#roboto');
+      label.appendChild(text);
+      this.el.appendChild(label);
+      // Save product id for click
+      this.el.dataset.pid = data.id;
+    }
+  });
+ 
+ </script>
 </body>
+
 </html>
