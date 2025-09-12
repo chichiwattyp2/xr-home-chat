@@ -1,0 +1,56 @@
+[
+  {
+    "id": "awaken-15",
+    "name": "Awaken (15ml)",
+    "price": 399,
+    "category": "Tincture",
+    "strength": "1:1 THC:CBD",
+    "img": "assets/img/awaken15.png",
+    "glb": "assets/models/awaken-bottle.gltf"
+  },
+  {
+    "id": "awaken-30",
+    "name": "Awaken (30ml)",
+    "price": 699,
+    "category": "Tincture",
+    "strength": "1:1 THC:CBD",
+    "img": "assets/img/awaken30.png",
+    "glb": "assets/models/awaken-bottle.gltf"
+  },
+  {
+    "id": "traveler-gummy",
+    "name": "Traveler Gummies (10pc)",
+    "price": 349,
+    "category": "Edible",
+    "strength": "10mg/pc",
+    "img": "assets/img/traveler-gummy.png",
+    "glb": "assets/models/gummies.gltf"
+  },
+  {
+    "id": "big-cookie",
+    "name": "Blom Big Cookie (60mg)",
+    "price": 129,
+    "category": "Edible",
+    "strength": "60mg",
+    "img": "assets/img/big-cookie.png",
+    "glb": "assets/models/cookie.gltf"
+  },
+  {
+    "id": "neuroplus",
+    "name": "NeuroPlus (30ml)",
+    "price": 799,
+    "category": "Tincture",
+    "strength": "CBN:CBD Formula",
+    "img": "assets/img/neuroplus.png",
+    "glb": "assets/models/neuroplus-bottle.gltf"
+  },
+  {
+    "id": "vape-awaken",
+    "name": "Awaken Vape (1g)",
+    "price": 599,
+    "category": "Vape",
+    "strength": "Broad Spectrum",
+    "img": "assets/img/vape-awaken.png",
+    "glb": "assets/models/vape.gltf"
+  }
+]
