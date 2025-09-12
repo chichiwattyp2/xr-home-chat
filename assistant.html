@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <title>XR Labs</title>
   <!-- Google Fonts: Asimovian -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Keep only Asimovian loaded to guarantee it’s ready for canvases -->
   <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
 
   <script src="js/openai-client.js"></script>
@@ -47,17 +45,13 @@
           const link = String(cells[2]?.v ?? "");
 
           if ((title || image || link) && isImageUrl(image)) {
-            listings.push({
-              title: encodeHtml(String(title)),
-              image,
-              link
-            });
+            listings.push({ title: encodeHtml(String(title)), image, link });
           }
         }
 
         let r = 0, i = 0, p = 0, h = 0, pages = 0;
         for (const listing of listings) {
-          const x = i * 2;       // cleaner numeric position
+          const x = i * 2;
           const y = r * 1.3;
           $("#container").append(`
           <a-image crossorigin="anonymous" position="${x} ${y} 0"
@@ -73,27 +67,17 @@
             <a-plane id="highlight-${h}" width="2.05" height="1.25"
                      material="shader: flat; color: white;"
                      position="0 -0.1 -0.01" visible="false"></a-plane>
-          </a-image>
-        `);
-
+          </a-image>`);
           i++; h++;
           if (i === 4) { r--; i = 0; p++; }
-          if (p === 3) { r += 20; p = 0; pages++; console.log(pages); }
+          if (p === 3) { r += 20; p = 0; pages++; }
         }
       });
     });
   </script>
 
-  <link
-    rel="stylesheet"
-    href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
-    integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
-    crossorigin="anonymous"
-  />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css"
-  />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css"/>
 
   <style>
     html, body {margin:0; height:100%;}
@@ -146,14 +130,13 @@
   </div>
 
   <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121" physics>
+    <!-- Log exact failing asset URLs -->
+    <script>
+      THREE.DefaultLoadingManager.onError = (url)=>console.warn('[Asset load error]', url);
+    </script>
 
-    <a-entity id="camera"
-      camera
-      position="0 1.6 1.09195"
-      look-controls>
-      <a-cursor rayOrigin="mouse"
-                raycaster="objects: .clickable"
-                material="color: white"></a-cursor>
+    <a-entity id="camera" camera position="0 1.6 1.09195" look-controls>
+      <a-cursor rayOrigin="mouse" raycaster="objects: .clickable" material="color: white"></a-cursor>
     </a-entity>
 
     <a-assets>
@@ -176,7 +159,6 @@
       <audio id="piano_gsharp" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fg%20sharp.mp3?v=1565890999944" crossorigin="anonymous"></audio>
       <audio id="piano_bflat" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20b%20flat.mp3?v=1565891011666" crossorigin="anonymous"></audio>
 
-      <!-- Mixins & assets -->
       <a-mixin id="black" material="color:#000000"></a-mixin>
       <a-mixin id="white" material="color:#e6e6e6"></a-mixin>
       <a-mixin id="bar" geometry="primitive: box" material="color: rgb(10, 20, 50); shader: flat" scale-y-color="from: 10 20 50; to: 210, 220, 250; maxScale: 15"></a-mixin>
@@ -262,7 +244,7 @@
 
     <!-- ai -->
     <a-entity id="ai" rotation="0 49.8507659231524 0" position="0.78219 0 1.3841">
-      <a-entity id="virtual-assistant" class="clickable" gltf-model="/assets/character.glb"
+      <a-entity id="virtual-assistant" class="clickable" gltf-model="#assistant-gltf"
         animation-mixer="clip: Idle; crossFadeDuration: 0.4" position="0 0 -3" speech-input="" speech-output=""
         ai-brain="endpoint: api/vr-assistant.js" assistant-anim=""></a-entity>
 
@@ -271,7 +253,8 @@
         id="status-text"></a-entity>
     </a-entity>
 
-    <a-entity id="catalog" scale=".2 .2 .2" position="0 1.1 -1.05">
+    <!-- RENAMED to avoid ID clash with the 2D panel -->
+    <a-entity id="catalog3d" scale=".2 .2 .2" position="0 1.1 -1.05">
       <a-entity class="container" id="container" position="-3.15 4 0"></a-entity>
       <a-entity id="arrows" position="0 .3 .2"></a-entity>
       <a-entity id="menu" position="-3.06 4.98 0" scale=".35 .35 .35"></a-entity>
@@ -307,11 +290,15 @@
       <a-obj-model id="Cimaise_poster" src="#cimaise_poster_obj" position="3.719 0 -7.873" scale="1 1 1" material="src: #cimaise_posters_diffuse;"></a-obj-model>
 
       <a-obj-model id="frame1" src="#picframe.obj" position="6.695683250457223 0.002 3.378" rotation="0 -140 0" scale="1 1 1" material="src: #pic1;"></a-obj-model>
-      <a-gltf-model src="#bust" position="-12.47268 0.22641 -6.40102" scale="0.6 0.6 0.6" rotation="0 90 0" gltf-model="assets/Statue.glb" shadow animation-mixer></a-gltf-model>
 
-      <a-gltf-model src="#console" position="14.65241 0.13496 -2.89366" scale="0.0015 0.0015 0.0015" rotation="0 265.12 0" gltf-model="assets/walnut.glb" shadow animation-mixer></a-gltf-model>
-      <a-gltf-model src="#adidas" position="12.83067 1.67233 -2.2927" scale="0.08 0.08 0.08" rotation="-30 90 0" shadow animation-mixer gltf-model="https://cdn.glitch.com/80103382-77c7-436e-ac28-b71dc8e4468c%2Fgazelle.glb"></a-gltf-model>
-      <a-gltf-model src="#newbalance" position="12.95206 1.55805 -1.79917" scale="3 3 3" rotation="0 0 30" shadow animation-mixer gltf-model="https://cdn.glitch.com/b2a38be5-8f68-46a7-9578-fcbaeb96f8a1%2Fnb.glb"></a-gltf-model>
+      <!-- Keep only ONE binding (src or gltf-model). Using src to reference preloaded assets -->
+      <a-gltf-model src="#bust" position="-12.47268 0.22641 -6.40102" scale="0.6 0.6 0.6" rotation="0 90 0" shadow animation-mixer></a-gltf-model>
+
+      <a-gltf-model src="#console" position="14.65241 0.13496 -2.89366" scale="0.0015 0.0015 0.0015" rotation="0 265.12 0" shadow animation-mixer></a-gltf-model>
+
+      <a-gltf-model src="#adidas" position="12.83067 1.67233 -2.2927" scale="0.08 0.08 0.08" rotation="-30 90 0" shadow animation-mixer></a-gltf-model>
+
+      <a-gltf-model src="#newbalance" position="12.95206 1.55805 -1.79917" scale="3 3 3" rotation="0 0 30" shadow animation-mixer></a-gltf-model>
 
       <a-obj-model id="frame2" src="#picframe.obj" position="5.295 0.002 1.655" rotation="0 -140 0" scale="1 1 1" material="src: #pic2;"></a-obj-model>
       <a-obj-model id="frame3" src="#picframe.obj" position="8.133 0.002 5.07" rotation="0 -140 0" scale="1 1 1" material="src: #pic3;"></a-obj-model>
@@ -362,13 +349,11 @@
 
   </a-scene>
 
-  <!-- Start videos on first user gesture to satisfy autoplay policies and prevent WebGL texture errors -->
+  <!-- Start videos on first user gesture -->
   <script>
     (function () {
       const vids = Array.from(document.querySelectorAll('video'));
-      const tryPlayAll = () => {
-        vids.forEach(v => v.play().catch(() => {}));
-      };
+      const tryPlayAll = () => { vids.forEach(v => v.play().catch(() => {})); };
       window.addEventListener('pointerdown', tryPlayAll, { once: true });
       window.addEventListener('keydown', tryPlayAll, { once: true });
     })();
@@ -376,7 +361,7 @@
 
   <!-- ===== Dispensary scripts ===== -->
   <script>
-    // Wait helpers to avoid races
+    // Wait helpers
     function whenSceneLoaded(cb){
       const scene = document.querySelector('a-scene');
       if (!scene) return console.warn('No <a-scene> found.');
@@ -397,7 +382,7 @@
 
   <script>
   /* ---------- Live product feed ---------- */
-  const PRODUCTS_ENDPOINT = 'assets/products.json'; // same-origin avoids CORS issues
+  const PRODUCTS_ENDPOINT = '/assets/products.json?v=' + Date.now(); // root-absolute + cache-bust
   let PRODUCTS = []; // filled after fetch
 
   // Fallback demo data if fetch fails:
@@ -543,15 +528,13 @@
       if(!data){ console.warn('Unknown product id', this.data.id); return; }
 
       if (data.glb) {
-        // Use GLB/GLTF model
         const model = document.createElement('a-entity');
         model.setAttribute('gltf-model', data.glb);
-        model.setAttribute('scale', '0.2 0.2 0.2');   // tweak per asset
-        model.setAttribute('rotation', '0 30 0');     // shelf appeal
+        model.setAttribute('scale', '0.2 0.2 0.2');
+        model.setAttribute('rotation', '0 30 0');
         model.setAttribute('shadow', 'cast: true; receive: false');
         this.el.appendChild(model);
       } else {
-        // Fallback simple box
         const box = document.createElement('a-box');
         box.setAttribute('width', 0.22);
         box.setAttribute('height', 0.32);
@@ -563,7 +546,6 @@
         this.el.appendChild(box);
       }
 
-      // Floating label
       const label = document.createElement('a-entity');
       label.setAttribute('position', '0 0.35 0');
 
@@ -573,7 +555,7 @@
       text.setAttribute('width', 1.2);
       text.setAttribute('color', '#fff');
       text.setAttribute('anchor', 'center');
-      text.setAttribute('font', '#roboto');  // use loaded MSDF font
+      text.setAttribute('font', '#roboto');
 
       label.appendChild(text);
       this.el.appendChild(label);
@@ -587,7 +569,6 @@
     buildOnce(){
       if (this._built) return;
       this._built = true;
-      // three shelves along local Z=0
       [-6, 0, 6].forEach((x)=>{
         const shelf = document.createElement('a-entity');
         shelf.setAttribute('position', `${x} 0 0`);
@@ -619,7 +600,6 @@
     init(){
       this.buildOnce();
       this.populate();
-      // click handler for cursor/laser hits
       this.onClick = (evt)=>{
         const t = evt && evt.detail && evt.detail.intersectedEl ? evt.detail.intersectedEl : evt.target;
         if(!t) return;
