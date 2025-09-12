@@ -1009,163 +1009,188 @@ position="0 -0.5 -1.5517035038049425"></a-entity>
         window.addEventListener('keydown', tryPlayAll, { once: true });
       })();
     </script>
-    <script>
-  // ---- Product data (replace with live API later) ----
-   const PRODUCTS = [
-    { id:'awaken-15', name:'Awaken (15ml)', price: 399, category:'Tincture', strength:'1:1 THC:CBD', img:'https://images.unsplash.com/photo-1585386959984-a41552231605?q=80&w=400&auto=format&fit=crop' },
-    { id:'awaken-30', name:'Awaken (30ml)', price: 699, category:'Tincture', strength:'1:1 THC:CBD', img:'https://images.unsplash.com/photo-1611077543631-b002bc36fdae?q=80&w=400&auto=format&fit=crop' },
-    { id:'traveler-gummy', name:'Traveler Gummies (10pc)', price: 349, category:'Edible', strength:'10mg/pc', img:'https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=400&auto=format&fit=crop' },
-    { id:'big-cookie', name:'Blom Big Cookie (60mg)', price: 129, category:'Edible', strength:'60mg', img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' },
-    { id:'neuroplus', name:'NeuroPlus (30ml)', price: 799, category:'Tincture', strength:'CBN:CBD Formula', img:'https://images.unsplash.com/photo-1585238342028-79336f1266c9?q=80&w=400&auto=format&fit=crop' },
-    { id:'vape-awaken', name:'Awaken Vape (1g)', price: 599, category:'Vape', strength:'Broad Spec', img:'https://images.unsplash.com/photo-1601972602229-98bfd02f40a1?q=80&w=400&auto=format&fit=crop' }
-  ];
+   <script>
+/* ---------- Live product feed ---------- */
+/* Host a JSON like:
+[
+  {"id":"awaken-15","name":"Awaken (15ml)","price":399,"category":"Tincture","strength":"1:1 THC:CBD",
+   "img":"https://.../awaken15.jpg","glb":"https://.../awaken-bottle.glb"},
+  ...
+]
+*/
+const PRODUCTS_ENDPOINT = 'assets/products.json'; // change to your API/URL (same-origin is easiest for CORS)
 
-  // ---- Cart state ----
-  let CART = [];
-  const catalogEl = document.getElementById('catalog');
-  const cartEl = document.getElementById('cart');
-  const cartCount = document.getElementById('cartCount');
+let PRODUCTS = []; // will fill after fetch
 
-  function renderCatalog(){
-    catalogEl.innerHTML = '<h3>Catalog</h3>' + PRODUCTS.map(p=>`
-      <div class="item">
-        <img src="${p.img}" alt="${p.name}"/>
-        <div style="flex:1">
-          <div style="font-weight:600">${p.name}</div>
-          <div class="muted">${p.category} · ${p.strength || ''}</div>
-        </div>
-        <div class="row">
-          <div style="font-weight:700">R ${p.price}</div>
-          <button class="btn" data-id="${p.id}">View</button>
-        </div>
-      </div>`).join('');
-    catalogEl.querySelectorAll('button[data-id]').forEach(btn=>btn.addEventListener('click', ()=>{
-      const p = PRODUCTS.find(x=>x.id===btn.dataset.id); if(p) openProduct(p);
-    }));
+// Fallback demo data if fetch fails:
+const FALLBACK_PRODUCTS = [
+  { id:'awaken-15', name:'Awaken (15ml)', price:399, category:'Tincture', strength:'1:1 THC:CBD', img:'https://images.unsplash.com/photo-1585386959984-a41552231605?q=80&w=400&auto=format&fit=crop', glb:'' },
+  { id:'awaken-30', name:'Awaken (30ml)', price:699, category:'Tincture', strength:'1:1 THC:CBD', img:'https://images.unsplash.com/photo-1611077543631-b002bc36fdae?q=80&w=400&auto=format&fit=crop', glb:'' },
+  { id:'traveler-gummy', name:'Traveler Gummies (10pc)', price:349, category:'Edible', strength:'10mg/pc', img:'https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=400&auto=format&fit=crop', glb:'' },
+  { id:'big-cookie', name:'Blom Big Cookie (60mg)', price:129, category:'Edible', strength:'60mg', img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop', glb:'' },
+  { id:'neuroplus', name:'NeuroPlus (30ml)', price:799, category:'Tincture', strength:'CBN:CBD', img:'https://images.unsplash.com/photo-1585238342028-79336f1266c9?q=80&w=400&auto=format&fit=crop', glb:'' },
+  { id:'vape-awaken', name:'Awaken Vape (1g)', price:599, category:'Vape', strength:'Broad Spec', img:'https://images.unsplash.com/photo-1601972602229-98bfd02f40a1?q=80&w=400&auto=format&fit=crop', glb:'' }
+];
+
+async function loadProducts() {
+  try {
+    const res = await fetch(PRODUCTS_ENDPOINT, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    // Minimal validation + mapping
+    PRODUCTS = (Array.isArray(data) ? data : []).map(p => ({
+      id: String(p.id || ''),
+      name: String(p.name || ''),
+      price: Number(p.price || 0),
+      category: String(p.category || ''),
+      strength: String(p.strength || ''),
+      img: String(p.img || ''),
+      glb: String(p.glb || '')
+    })).filter(p => p.id && p.name);
+  } catch (e) {
+    console.warn('Product fetch failed, using fallback.', e);
+    PRODUCTS = FALLBACK_PRODUCTS;
   }
+}
 
-  function renderCart(){
-    const total = CART.reduce((s,i)=> s + i.price * i.qty, 0);
-    cartEl.innerHTML = `<h3>Your Cart</h3>` + (CART.length? CART.map(i=>`
-      <div class="item">
-        <img src="${i.img}" alt="${i.name}"/>
-        <div style="flex:1">
-          <div style="font-weight:600">${i.name}</div>
-          <div class="muted">Qty: ${i.qty}</div>
-        </div>
-        <div class="row">
-          <div style="font-weight:700">R ${i.price * i.qty}</div>
-          <button class="btn" data-remove="${i.id}">Remove</button>
-        </div>
-      </div>`).join('') : '<div class="muted">Your cart is empty.</div>') +
-      `<div class="row" style="margin-top:8px; justify-content:space-between">
-        <div style="font-weight:700">Total</div>
-        <div style="font-weight:700">R ${total}</div>
+/* Cart + UI keep the same as before */
+let CART = [];
+const catalogEl = document.getElementById('catalog');
+const cartEl    = document.getElementById('cart');
+const cartCount = document.getElementById('cartCount');
+
+function renderCatalog(){
+  catalogEl.innerHTML = '<h3>Catalog</h3>' + PRODUCTS.map(p=>`
+    <div class="item">
+      <img src="${p.img}" alt="${p.name}"/>
+      <div style="flex:1">
+        <div style="font-weight:600">${p.name}</div>
+        <div class="muted">${p.category} · ${p.strength || ''}</div>
       </div>
-      <button id="checkout" class="btn" style="width:100%; margin-top:8px">Checkout</button>`;
-    cartEl.querySelectorAll('button[data-remove]').forEach(btn=>btn.addEventListener('click', ()=>{
-      CART = CART.filter(i=>i.id!==btn.dataset.remove); updateCart();
-    }));
-    const checkoutBtn = cartEl.querySelector('#checkout');
-    if(checkoutBtn) checkoutBtn.addEventListener('click', ()=>{
-      alert('Checkout clicked – connect to payment gateway / API.');
+      <div class="row">
+        <div style="font-weight:700">R ${p.price}</div>
+        <button class="btn" data-id="${p.id}">View</button>
+      </div>
+    </div>`).join('');
+  catalogEl.querySelectorAll('button[data-id]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p = PRODUCTS.find(x=>x.id===btn.dataset.id);
+      if(p) openProduct(p);
     });
-  }
+  });
+}
+function renderCart(){
+  const total = CART.reduce((s,i)=> s + i.price * i.qty, 0);
+  cartEl.innerHTML = `<h3>Your Cart</h3>` + (CART.length? CART.map(i=>`
+    <div class="item">
+      <img src="${i.img}" alt="${i.name}"/>
+      <div style="flex:1">
+        <div style="font-weight:600">${i.name}</div>
+        <div class="muted">Qty: ${i.qty}</div>
+      </div>
+      <div class="row">
+        <div style="font-weight:700">R ${i.price * i.qty}</div>
+        <button class="btn" data-remove="${i.id}">Remove</button>
+      </div>
+    </div>`).join('') : '<div class="muted">Your cart is empty.</div>') +
+    `<div class="row" style="margin-top:8px; justify-content:space-between">
+      <div style="font-weight:700">Total</div>
+      <div style="font-weight:700">R ${total}</div>
+    </div>
+    <button id="checkout" class="btn" style="width:100%; margin-top:8px">Checkout</button>`;
 
-  function updateCart(){ cartCount.textContent = CART.reduce((s,i)=> s+i.qty, 0); renderCart(); }
-  function addToCart(p){ const ex = CART.find(i=>i.id===p.id); if(ex) ex.qty+=1; else CART.push({...p, qty:1}); updateCart(); }
+  cartEl.querySelectorAll('button[data-remove]').forEach(btn=>btn.addEventListener('click', ()=>{
+    CART = CART.filter(i=>i.id!==btn.dataset.remove); updateCart();
+  }));
+  const checkoutBtn = cartEl.querySelector('#checkout');
+  if(checkoutBtn) checkoutBtn.addEventListener('click', ()=> alert('Checkout clicked – connect to your gateway/API'));
+}
+function updateCart(){ cartCount.textContent = CART.reduce((s,i)=> s+i.qty, 0); renderCart(); }
+function addToCart(p){ const ex = CART.find(i=>i.id===p.id); if(ex) ex.qty+=1; else CART.push({...p, qty:1}); updateCart(); }
+function openProduct(p){
+  const ok = confirm(`${p.name}\n${p.category} • ${p.strength || ''}\nPrice: R ${p.price}\n\nAdd to cart?`);
+  if(ok) addToCart(p);
+}
 
-  // Simple product modal using window.alert for brevity (swap to a nicer modal if you like)
-  function openProduct(p){
-    const ok = confirm(`${p.name}\n${p.category} • ${p.strength || ''}\nPrice: R ${p.price}\n\nAdd to cart?`);
-    if(ok) addToCart(p);
-  }
+/* Overlay buttons (unchanged) */
+document.getElementById('btnCatalog').onclick = ()=> catalogEl.classList.toggle('open');
+document.getElementById('btnCart').onclick    = ()=> cartEl.classList.toggle('open');
+document.getElementById('btnVR').onclick      = ()=> { document.querySelector('a-scene').enterVR(); };
 
-  // Toggle panels
-  document.getElementById('btnCatalog').onclick = ()=> catalogEl.classList.toggle('open');
-  document.getElementById('btnCart').onclick = ()=> cartEl.classList.toggle('open');
-  document.getElementById('btnVR').onclick = ()=> { document.querySelector('a-scene').enterVR(); };
-
+/* Load products, then render UI and build store entities */
+(async () => {
+  await loadProducts();
   renderCatalog(); renderCart();
+  // Build/refresh the store after products are available:
+  const el = document.querySelector('#dispensary');
+  if (el && el.components['store-builder']) {
+    el.components['store-builder'].rebuild && el.components['store-builder'].rebuild();
+  }
+})();
 
-  // ---- A‑Frame custom component to build shelves + products ----
-  AFRAME.registerComponent('store-builder', {
-    init(){
-      const el = this.el;
-      // Create three shelves across the back
-      const positions = [ -6, 0, 6 ];
-      positions.forEach((x)=>{
-        const shelf = document.createElement('a-entity');
-        shelf.setAttribute('position', `${x} 0 -6`);
-        shelf.setAttribute('shelf', 'rows:3; cols:6');
-        el.appendChild(shelf);
-      });
+AFRAME.registerComponent('store-builder', {
+  buildOnce(){
+    // three shelves along local Z=0
+    [-6, 0, 6].forEach((x)=>{
+      const shelf = document.createElement('a-entity');
+      shelf.setAttribute('position', `${x} 0 0`);
+      shelf.setAttribute('shelf', 'rows:3; cols:6');
+      this.el.appendChild(shelf);
+    });
+  },
+  populate(){
+    // remove any previous product entities to avoid duplicates
+    this.el.querySelectorAll('[product-box]').forEach(n=>n.parentNode && n.parentNode.removeChild(n));
 
-      // Place products onto shelves
-      const shelves = el.querySelectorAll('[shelf]');
-      let idx = 0;
-      shelves.forEach((shelf)=>{
-        for(let i=0;i<12 && idx<PRODUCTS.length;i++){
-          const p = PRODUCTS[idx++];
-          const product = document.createElement('a-entity');
-          product.setAttribute('product-box', `id:${p.id}`);
-          product.classList.add('pickable');
-          // Grid position on shelf (cols:6, rows:2 effectively since 12 max here)
-          const col = i % 6; const row = Math.floor(i/6);
-          product.setAttribute('position', `${-2.2 + col*0.88} ${0.7 + row*0.8} 0`);
-          // Store product data for click handler
-          product.dataset.pid = p.id;
-          shelf.appendChild(product);
-        }
-      });
-
-      // Global click handler for 3D picks
-      this.clickHandler = (evt)=>{
-        const target = evt.detail && evt.detail.intersectedEl ? evt.detail.intersectedEl : evt.target;
-        if(!target) return;
-        const pid = target.dataset && target.dataset.pid;
-        if(!pid) return;
-        const p = PRODUCTS.find(x=>x.id===pid);
-        if(p) openProduct(p);
-      };
-      el.sceneEl.addEventListener('click', this.clickHandler);
-    },
-    remove(){ this.el.sceneEl.removeEventListener('click', this.clickHandler); }
-  });
-
-  // Simple shelf primitive (uprights + planks)
-  AFRAME.registerComponent('shelf', {
-    schema: { rows:{type:'int', default:3}, cols:{type:'int', default:6} },
-    init(){
-      const group = document.createElement('a-entity');
-      const rows = this.data.rows;
-      for(let r=0;r<rows;r++){
-        const plank = document.createElement('a-box');
-        plank.setAttribute('width', 5.4);
-        plank.setAttribute('height', 0.08);
-        plank.setAttribute('depth', 0.6);
-        plank.setAttribute('color', '#2a2a2a');
-        plank.setAttribute('metalness', 0.2);
-        plank.setAttribute('roughness', 0.6);
-        plank.setAttribute('position', `0 ${0.6 + r*0.8} 0`);
-        plank.setAttribute('shadow', 'cast: true; receive: true');
-        group.appendChild(plank);
+    const shelves = this.el.querySelectorAll('[shelf]');
+    let idx = 0;
+    shelves.forEach((shelf)=>{
+      for(let i=0;i<12 && idx<PRODUCTS.length;i++){
+        const p = PRODUCTS[idx++];
+        const prod = document.createElement('a-entity');
+        prod.setAttribute('product-box', `id:${p.id}`);
+        const col = i % 6; const row = Math.floor(i/6);
+        prod.setAttribute('position', `${-2.2 + col*0.88} ${0.7 + row*0.8} 0`);
+        prod.dataset.pid = p.id;
+        shelf.appendChild(prod);
       }
-      const high = rows*0.8 + 0.6;
-      const mkUp = (x)=>{ const up = document.createElement('a-box'); up.setAttribute('width', 0.08); up.setAttribute('height', high); up.setAttribute('depth', 0.6); up.setAttribute('color', '#2a2a2a'); up.setAttribute('position', `${x} ${high/2} 0`); return up; };
-      group.appendChild(mkUp(-2.7));
-      group.appendChild(mkUp( 2.7));
-      this.el.appendChild(group);
-    }
-  });
+    });
+  },
+  rebuild(){ this.populate(); },
+  init(){
+    this.buildOnce();
+    this.populate();
 
-  // Product box with floating label
-  AFRAME.registerComponent('product-box', {
-    schema: { id: {type:'string'} },
-    init(){
-      const data = PRODUCTS.find(x=>x.id===this.data.id);
-      if(!data){ console.warn('Unknown product id', this.data.id); return; }
-      // Box
+    // click handler for cursor/laser hits
+    this.onClick = (evt)=>{
+      const t = evt && evt.detail && evt.detail.intersectedEl ? evt.detail.intersectedEl : evt.target;
+      if(!t) return;
+      const pid = (t.dataset && t.dataset.pid) || (t.parentEl && t.parentEl.dataset && t.parentEl.dataset.pid);
+      if(!pid) return;
+      const p = PRODUCTS.find(x=>x.id===pid);
+      if(p) openProduct(p);
+    };
+    this.el.sceneEl.addEventListener('click', this.onClick);
+  },
+  remove(){ this.el.sceneEl.removeEventListener('click', this.onClick); }
+});
+
+AFRAME.registerComponent('product-box', {
+  schema: { id: {type:'string'} },
+  init(){
+    const data = PRODUCTS.find(x=>x.id===this.data.id);
+    if(!data){ console.warn('Unknown product id', this.data.id); return; }
+
+    if (data.glb) {
+      // Use GLB model
+      const model = document.createElement('a-entity');
+      model.setAttribute('gltf-model', data.glb);
+      model.setAttribute('scale', '0.2 0.2 0.2');   // tweak per asset
+      model.setAttribute('rotation', '0 30 0');     // a little turn for shelf appeal
+      model.setAttribute('shadow', 'cast: true; receive: false');
+      this.el.appendChild(model);
+    } else {
+      // Fallback simple box
       const box = document.createElement('a-box');
       box.setAttribute('width', 0.22);
       box.setAttribute('height', 0.32);
@@ -1175,24 +1200,32 @@ position="0 -0.5 -1.5517035038049425"></a-entity>
       box.setAttribute('roughness', 0.6);
       box.setAttribute('shadow', 'cast: true');
       this.el.appendChild(box);
-      // Label (a-text)
-      const label = document.createElement('a-entity');
-      label.setAttribute('position', '0 0.35 0');
-      const text = document.createElement('a-text');
-      text.setAttribute('value', `${data.name}\n${data.strength || data.category}\nR ${data.price}`);
-      text.setAttribute('align', 'center');
-      text.setAttribute('width', 1.2);
-      text.setAttribute('color', '#fff');
-      text.setAttribute('anchor', 'center');
-      text.setAttribute('font', '#roboto');
-      label.appendChild(text);
-      this.el.appendChild(label);
-      // Save product id for click
-      this.el.dataset.pid = data.id;
     }
-  });
- 
- </script>
+
+    // Floating label
+    const label = document.createElement('a-entity');
+    label.setAttribute('position', '0 0.35 0');
+
+    const text = document.createElement('a-text');
+    text.setAttribute('value', `${data.name}\n${data.strength || data.category}\nR ${data.price}`);
+    text.setAttribute('align', 'center');
+    text.setAttribute('width', 1.2);
+    text.setAttribute('color', '#fff');
+    text.setAttribute('anchor', 'center');
+    text.setAttribute('font', '#msdfFont');
+    text.setAttribute('font-image', '#msdfFontImg');
+
+    label.appendChild(text);
+    this.el.appendChild(label);
+
+    this.el.classList.add('pickable');
+    this.el.dataset.pid = data.id;
+  }
+});
+
+
+</script>
+
 </body>
 
 </html>
