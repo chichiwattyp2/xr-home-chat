@@ -5,8 +5,8 @@
     "price": 399,
     "category": "Tincture",
     "strength": "1:1 THC:CBD",
-    "img": "assets/img/awaken15.png",
-    "glb": "assets/models/awaken-bottle.gltf"
+    "img": "assets/awaken15.png",
+    "glb": "assets/awaken-bottle.gltf"
   },
   {
     "id": "awaken-30",
@@ -14,8 +14,8 @@
     "price": 699,
     "category": "Tincture",
     "strength": "1:1 THC:CBD",
-    "img": "assets/img/awaken30.png",
-    "glb": "assets/models/awaken-bottle.gltf"
+    "img": "assets/awaken30.png",
+    "glb": "assets/awaken-bottle.gltf"
   },
   {
     "id": "traveler-gummy",
@@ -23,8 +23,8 @@
     "price": 349,
     "category": "Edible",
     "strength": "10mg/pc",
-    "img": "assets/img/traveler-gummy.png",
-    "glb": "assets/models/gummies.gltf"
+    "img": "assets/traveler-gummy.png",
+    "glb": "assets/gummies.gltf"
   },
   {
     "id": "big-cookie",
@@ -32,8 +32,8 @@
     "price": 129,
     "category": "Edible",
     "strength": "60mg",
-    "img": "assets/img/big-cookie.png",
-    "glb": "assets/models/cookie.gltf"
+    "img": "assets/big-cookie.png",
+    "glb": "assets/cookie.gltf"
   },
   {
     "id": "neuroplus",
@@ -41,7 +41,7 @@
     "price": 799,
     "category": "Tincture",
     "strength": "CBN:CBD Formula",
-    "img": "assets/img/neuroplus.png",
+    "img": "assets/neuroplus.png",
     "glb": "assets/models/neuroplus-bottle.gltf"
   },
   {
@@ -50,7 +50,7 @@
     "price": 599,
     "category": "Vape",
     "strength": "Broad Spectrum",
-    "img": "assets/img/vape-awaken.png",
-    "glb": "assets/models/vape.gltf"
+    "img": "assets/vape-awaken.png",
+    "glb": "assets/vape.gltf"
   }
 ]
