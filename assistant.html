@@ -122,7 +122,11 @@
 
     <!-- Camera + cursor -->
   
-<a-entity id="camera" camera position="0 1.6 1" look-controls>
+<a-entity id="camera" 
+  camera 
+  position="0 1.6 1" 
+  look-controls
+  wasd-controls>
   <a-cursor rayOrigin="mouse"
             raycaster="objects: .clickable"
             material="color: white"></a-cursor>
