@@ -1,274 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Assistant</title>
+<head>
+  <meta charset="utf-8" />
+  <title>Animated AI Virtual Assistant in A-Frame</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://unpkg.com/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
+  <script src="/js/assistant.js" defer></script>
+  <style> html,body{margin:0;height:100%;} </style>
+</head>
+<body>
+  <a-scene environment="preset: forest; dressingAmount: 500">
+    <a-assets>
+      <a-asset-item id="assistant-gltf" src="/assets/character.glb"></a-asset-item>
+    </a-assets>
 
- 
+    <!-- Camera + mouse-ray cursor -->
+    <a-entity id="camera" camera position="0 1.6 0" look-controls
+              cursor="rayOrigin: mouse"
+              raycaster="objects: .clickable"></a-entity>
 
-    <!-- Google Fonts: Asimovian -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Keep only Asimovian loaded to guarantee it’s ready for canvases -->
-    <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
+    <!-- Assistant -->
+    <a-entity id="virtual-assistant"
+              class="clickable"
+              gltf-model="#assistant-gltf"
+              animation-mixer="crossFadeDuration: 0.4"
+              position="0 0 -3"
+              scale="1 1 1"
+              rotation="0 0 0"
+              speech-input
+              speech-output
+              ai-brain></a-entity>
 
-    <!-- A-Frame + components (v1.0.4 to match your current console) -->
-    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
-    <script src="https://unpkg.com/aframe-event-set-component@4.2.1/dist/aframe-event-set-component.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.2.0/dist/aframe-extras.min.js"></script>
-  
-<script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
-    <!-- Your scripts -->
-    <script src="sheets.js" defer></script>
-    <!— <script type="module" src="client.js"></script> —>
-
-    <style>
-      body { margin:0; font-family: Asimovian, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-      #ui {
-        position: fixed; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 8px;
-        z-index: 10; background: rgba(0,0,0,.35); padding: 8px; border-radius: 10px; backdrop-filter: blur(6px);
-      }
-      #prompt { flex: 1; padding: 10px 12px; font-size: 16px; border-radius: 8px; border: 1px solid #333; background:#111; color:#fff; }
-      #send, #voice { padding: 10px 12px; border-radius: 8px; border: 1px solid #333; background:#1b1b1b; color:#fff; cursor:pointer; }
-    </style>
-  </head>
-  <body>
-    <!-- UI overlay -->
-    <div id="ui">
-      <input id="prompt" placeholder="Ask something…" />
-      <button id="send">Send</button>
-      <button id="voice"> Voice</button>
-    </div>
-
- 
-    <a-scene renderer="colorManagement: true">
-    
-
-
-  <!-- Root where sheet tiles / panels get spawned -->
-      <a-entity id="csv-root"></a-entity>
-
-
-
-<a-assets>  <a-asset-item id="assistant-gltf" src="assets/character.glb">
-  
-</a-asset-item>
-     <canvas id="chatTextCanvas" width="1024" height="256" style="display:none"></canvas>
-    <canvas id="chatHintCanvas" width="1024" height="128" style="display:none"></canvas>
-</a-assets>
-
-
-      <a-entity environment="preset: starry; shadow: on; shadowSize: 10; skyType: gradient; skyColor: #cfe2f3; ground: Orography style; groundColor: #f4cccc; grid: none"></a-entity>
-  
-
-
-          <a-entity id="rig" movement-controls="controls: checkpoint" checkpoint-controls="mode: animate" position="0 2.22085 6.6555" rotation="0 0 0">
-      <!-- Camera -->
-<a-entity id="camera"
-          camera
-          position="0 1.6 0"
-          look-controls>  
-  <a-entity cursor="" 
-           position="0.00705 0.04225 -1.70324" 
-            geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" 
-            material="shader: flat; color: #ff3300" 
-             raycaster=“objects: .clickable”; 
-            rayOrigin: “mouse"></a-entity></a-entity></a-entity>
-          
-
-
-      
-<a-entity id="status-text"
-          position="0 2.5 -2"
-          text="value: Press SPACE or click assistant to talk!; color: #FFF; align: center"></a-entity>
-
-     <a-entity id="virtual-assistant" 
-       class="clickable" 
-       gltf-model="assets/character.glb" 
-       animation-mixer="clip: Idle; crossFadeDuration: 0.4" 
-       position="-5.50003 0 1.04271" 
-       rotation="0 35 0" 
-       speech-input="" 
-       speech-output="" 
-       ai-brain="" 
-       assistant-anim="">
-</a-entity>
-
-
-    </a-scene>
-<script>
-AFRAME.registerComponent('speech-input', {
-  init() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const statusText = document.getElementById('status-text');
-
-    if (!SR) { statusText.setAttribute('text','value: SpeechRecognition not supported.'); return; }
-
-    this.recognition = new SR();
-    this.recognition.continuous = false;
-    this.recognition.lang = 'en-US';
-    this.recognition.interimResults = true;   // show live text, but only act on finals
-    this.recognition.maxAlternatives = 1;
-
-    this._running = false;
-    this._handledThisTurn = false;
-
-    const begin = () => {
-      if (this._running) return;
-      try {
-        // abort any zombie session before starting
-        try { this.recognition.abort(); } catch(e) {}
-        this._running = true;
-        this._handledThisTurn = false;
-        statusText.setAttribute('text','value: Listening...');
-        this.el.emit('listening-started');
-        this.recognition.start();
-      } catch (e) {
-        this._running = false;
-        statusText.setAttribute('text','value: Could not start mic. Check permissions.');
-        this.el.emit('listening-stopped');
-      }
-    };
-
-    window.addEventListener('keydown', e => { if (e.key === ' ') begin(); });
-    this.el.addEventListener('click', begin);
-
-    // --- KEY PART: handle interim vs final ---
-    this.recognition.onresult = (ev) => {
-      let interim = '';
-      let final = '';
-      for (let i = ev.resultIndex; i < ev.results.length; i++) {
-        const chunk = ev.results[i][0].transcript;
-        if (ev.results[i].isFinal) final += chunk;
-        else interim += chunk;
-      }
-
-      if (final && !this._handledThisTurn) {
-        this._handledThisTurn = true;          // ensure we only emit once per turn
-        const said = final.trim();
-        statusText.setAttribute('text', `value: You said: ${said}`);
-        this.el.sceneEl.emit('user-speech', { text: said });
-        // end this listening turn; onend will clear UI/flags
-        try { this.recognition.stop(); } catch(e) {}
-      } else if (interim) {
-        // show rolling partial without triggering the AI
-        const preview = interim.trim().slice(0, 80);
-        statusText.setAttribute('text', `value: ${preview}…`);
-      }
-    };
-
-    this.recognition.onerror = (e) => {
-      statusText.setAttribute('text', `value: Speech error: ${e.error}.`);
-      this._running = false;
-      this.el.emit('listening-stopped');
-    };
-
-    this.recognition.onend = () => {
-      this._running = false;
-      this._handledThisTurn = false;
-      statusText.setAttribute('text','value: Press SPACE or click assistant to talk!');
-      this.el.emit('listening-stopped');
-    };
-  }
-});
-
-
-
-// --- ai-brain (same simple rules) ---
-AFRAME.registerComponent('ai-brain', {
-  init() {
-    this.el.sceneEl.addEventListener('user-speech', (e) => {
-      const u = (e.detail.text || '').toLowerCase();
-      let r = "I'm not sure how to respond to that.";
-      if (u.includes('hello') || u.includes('hi') || u.startsWith('hey')) {
-        r = 'Hey! How are you doing? What can I help with?';
-      } else if (u.includes('how are you') || u.includes('how you do')) {
-        r = "I'm running smoothly and ready to help!";
-      } else if (u.includes('what is this place')) {
-        r = 'This is a serene forest environment. Feel free to explore!';
-      } else if (u.includes('thank')) {
-        r = "You’re welcome! Anything else I can do?";
-      }
-      setTimeout(() => this.el.sceneEl.emit('ai-response', { text: r }), 150);
-    });
-  }
-});
-
-// --- speech-output (queued) ---
-AFRAME.registerComponent('speech-output', {
-  init() {
-    this.synth = window.speechSynthesis;
-    this.queue = [];
-    this.busy = false;
-
-    const pump = () => {
-      if (this.busy || !this.queue.length) return;
-      const text = this.queue.shift();
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.onstart = () => { this.busy = true; this.el.emit('speech-started'); };
-      utt.onend   = () => { this.busy = false; this.el.emit('speech-ended'); pump(); };
-      utt.onerror = () => { this.busy = false; this.el.emit('speech-ended'); pump(); };
-      this.synth.speak(utt);
-    };
-
-    this.el.sceneEl.addEventListener('ai-response', (e) => { this.queue.push(e.detail.text); pump(); });
-
-    if (this.synth && 'onvoiceschanged' in this.synth) {
-      this.synth.onvoiceschanged = () => console.log('Voices loaded.');
-    }
-  }
-});
-</script>
-<script>
-AFRAME.registerComponent('assistant-anim', {
-  schema: { idle: {default:'Idle'}, speaking:{default:'Talking'}, listening:{default:'Listening'} },
-  init() {
-    this.ready=false; this.clips=[]; this.current=null; this.map={};
-    const setClip = (name) => {
-      if (!this.ready || !name || !this.clips.includes(name) || this.current===name) return;
-      this.current = name;
-      this.el.setAttribute('animation-mixer', `clip: ${name}; crossFadeDuration: 0.4`);
-    };
-    const pick = (pref, fb=[]) => [pref, ...fb].find(n=>this.clips.includes(n));
-
-    this.el.addEventListener('model-loaded',(e)=>{
-      const m = (e.detail&&e.detail.model) || this.el.getObject3D('mesh');
-      const names = [];
-      if (Array.isArray(m?.animations)) names.push(...m.animations.map(c=>c.name));
-      if (Array.isArray(m?.userData?.gltfAnimations)) names.push(...m.userData.gltfAnimations.map(c=>c.name));
-      this.clips = [...new Set(names)];
-      console.log('[assistant-anim] available clips:', this.clips);
-
-      this.map = {
-        idle:      pick(this.data.idle,      ['Idle','Breathing','Stand','Standing']),
-        speaking:  pick(this.data.speaking,  ['Talking','Gestures','Walking','Walk','Idle']),
-        listening: pick(this.data.listening, ['Listening','Thinking','Idle'])
-      };
-      if (!this.map.idle) this.map.idle = this.clips[0];
-
-      this.ready = true;
-      setClip(this.map.idle);
-
-      this.el.sceneEl.addEventListener('listening-started', ()=> setClip(this.map.listening || this.map.idle));
-      this.el.sceneEl.addEventListener('listening-stopped', ()=> setClip(this.map.idle));
-      this.el.sceneEl.addEventListener('speech-started',     ()=> setClip(this.map.speaking || this.map.idle));
-      this.el.sceneEl.addEventListener('speech-ended',       ()=> setClip(this.map.idle));
-    });
-  }
-});
-
-// Attach automatically (keeps HTML tidy)
-AFRAME.registerSystem('assistant-attach', {
-  init() {
-    this.el.addEventListener('loaded', ()=>{
-      const npc = this.el.querySelector('#virtual-assistant');
-      if (npc && !npc.hasAttribute('assistant-anim')) npc.setAttribute('assistant-anim','');
-    });
-  }
-});
-</script>
-
-
-  </body>
+    <!-- Status text (put color on text, not material) -->
+    <a-entity position="0 2.5 -2"
+              text="value: Press SPACE or click assistant to talk!; color: #FFF; align: center"
+              id="status-text"></a-entity>
+  </a-scene>
+</body>
 </html>
