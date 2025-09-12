@@ -8,7 +8,7 @@
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
   <script src="https://unpkg.com/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
   <!-- Our reusable components -->
-  <script src="/js/assistant-shop.js" defer></script>
+  <script src="js/assistant-shop.js" defer></script>
   <style>html,body{margin:0;height:100%;background:#000}</style>
 </head>
 <body>
@@ -16,7 +16,7 @@
 
     <a-assets>
       <!-- Your GLB (re-export to metal/rough if you can) -->
-      <a-asset-item id="assistant-gltf" src="/assets/character.glb"></a-asset-item>
+      <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
     </a-assets>
 
     <!-- Camera with mouse ray + whitelist -->
@@ -43,7 +43,7 @@
     <!-- Shop grid (right) -->
     <a-entity id="shop"
               position="1 1.2 -2.2"
-              shop-grid="src: /assets/catalog.json; columns: 3; spacing: 0.42; width: 0.38; height: 0.38">
+              shop-grid="src: assets/catalog.json; columns: 3; spacing: 0.42; width: 0.38; height: 0.38">
     </a-entity>
 
     <!-- Cart panel (right, above grid) -->
