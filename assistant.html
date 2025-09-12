@@ -278,7 +278,7 @@
       <a-entity id="arrows" position="0 .3 .2"></a-entity>
       <a-entity id="menu" position="-3.06 4.98 0" scale=".35 .35 .35"></a-entity>
     </a-entity>
-
+<a-entity id="structure">
     <a-entity id="astronaut" scale="0.25 0.25 0.25" position="5.49845 2.56973 -8.70685">
       <a-obj-model id="#helmet-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fhelmet.obj"
         material="side: double; color: #f9f7b3;  metalness: 0.5"
@@ -354,7 +354,7 @@
       <a-cylinder class="clickable teleport" travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="9.784 0 1.002" color="#141414" id="check_07" visible="false"></a-cylinder>
     </a-entity>
 
-    <a-sky src="#dawn"></a-sky>
+   
 
     <a-entity light="color: #EEE; intensity: 0.5" position="-1.5379 5.13754 8.19083"></a-entity>
     <a-entity light="type: directional; color: #fff; intensity: 0.25" position="-1 1 0"></a-entity>
@@ -363,7 +363,8 @@
     <a-entity light="color: #EEE; intensity: 0.5" position="0.31022 7.23722 7.51975"></a-entity>
     <a-light type="directional" position="12.95206 5.55805 -1.79917" rotation="0 0 0" target="#directionaltarget"></a-light>
     <a-entity id="directionaltarget" position="0 0 -1"></a-entity>
-
+      </a-entity>
+ <a-sky src="#dawn"></a-sky>
   </a-scene>
 
   <!-- Start videos on first user gesture to satisfy autoplay policies and prevent WebGL texture errors -->
