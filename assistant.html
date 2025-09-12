@@ -243,3 +243,396 @@
       <a-mixin id="all-interactions"
                hoverable grabbable stretchable draggable
                event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+               event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+               dynamic-body></a-mixin>
+
+      <a-mixin id="grab-move"
+               hoverable grabbable draggable
+               event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+               event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+               dynamic-body></a-mixin>
+    </a-assets>
+
+    <!-- 🛒 Shelves + Products (procedural via component) -->
+    <a-entity id="store"
+      scale="0.5 0.5 0.5"
+      position="0 0 -2.5"
+      rotation="0 0 0"
+      store-builder></a-entity>
+
+    <!-- ai -->
+    <a-entity id="ai" rotation="0 49.8507659231524 0" position="0.78219 0 1.3841">
+      <a-entity id="virtual-assistant" class="clickable" gltf-model="/assets/character.glb"
+        animation-mixer="clip: Idle; crossFadeDuration: 0.4" position="0 0 -3" speech-input="" speech-output=""
+        ai-brain="endpoint: api/vr-assistant.js" assistant-anim=""></a-entity>
+
+      <a-entity position="0.05926 1.89855 -3.0031"
+        text="align: center; value: Press SPACE or click assistant to talk!; color: #F54927"
+        id="status-text"></a-entity>
+    </a-entity>
+
+    <a-entity id="catalog" scale=".2 .2 .2" position="0 1.1 -1.05">
+      <a-entity class="container" id="container" position="-3.15 4 0"></a-entity>
+      <a-entity id="arrows" position="0 .3 .2"></a-entity>
+      <a-entity id="menu" position="-3.06 4.98 0" scale=".35 .35 .35"></a-entity>
+    </a-entity>
+
+    <a-entity id="astronaut" scale="0.25 0.25 0.25" position="5.49845 2.56973 -8.70685">
+      <a-obj-model id="#helmet-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fhelmet.obj"
+        material="side: double; color: #f9f7b3;  metalness: 0.5"
+        scale="10 10 10" position="0 0 10" animation="property: position; to: 0 -10 -5; dur: 5500"></a-obj-model>
+      <a-obj-model id="#vizor-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fvizor.obj"
+        material="side: double; color: #eaf2f9; transparent: true; opacity: 0.5"
+        scale="10 10 10" position="0 -10 20" animation="property: position; to: 0 -10 -5; dur: 6000"></a-obj-model>
+      <a-obj-model id="#frame-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fframe.obj"
+        material="side: double; color: #182838; metalness: 0.25"
+        scale="10 10 10" position="-3.71 -1 0" animation="property: position; to: 0 -10 -5; dur: 5000"></a-obj-model>
+      <a-obj-model id="#suit-obj" src="https://cdn.glitch.com/95b833fa-57f9-4d7f-8d26-094de79b4d3a%2Fsuit.obj"
+        scale="10 10 10" position="0 -10 -5" rotation="0 0 0"
+        material="side: double; color: #f9f7b3;  metalness: 0"></a-obj-model>
+    </a-entity>
+
+    <a-entity id="video">
+      <a-video src="#1" video-controls width="1.6" height="0.9" position="13.563 2.256 -6.933" rotation="0 -90 0" scale="2.19 2.16 1"></a-video>
+      <a-video src="#2" video-controls width="1.6" height="0.9" position="6.155 2.244 0.189" rotation="0 130.05 0" scale="2.19 2.16 1"></a-video>
+      <a-video src="#3" video-controls width="1.6" height="0.9" position="-7.157 2.019 6.079" rotation="0 -180 0" scale="2.19 2.16 1"></a-video>
+      <a-video src="#4" video-controls width="1.6" height="0.9" position="13.563 2.256 1.839" rotation="0 -90 0" scale="2.19 2.16 1"></a-video>
+      <a-video src="#5" video-controls width="1.6" height="0.9" position="-14.48 2.229 -1.681" rotation="0 90 0" scale="2.22 2.21 1"></a-video>
+      <a-obj-model id="frame" src="#toit_obj" position="3.719 0 -7.826" scale="1.06 1 1.02" material="src: #toit_diffuse; side: double; transparency: true; opacity: 0.3;"></a-obj-model>
+    </a-entity>
+
+    <a-entity id="building">
+      <a-obj-model id="Mur_Global" src="#mur_obj" position="3.719 0 -7.873" scale="1 1 1" material="src :#mur_diffuse;"></a-obj-model>
+      <a-obj-model id="Cimaise_Billet" src="#cimaise_billet_obj" position="3.719 0 -7.873" scale="1 1 1" material="src: #cimaise_billet_diffuse;"></a-obj-model>
+      <a-obj-model id="Cimaise_poster" src="#cimaise_poster_obj" position="3.719 0 -7.873" scale="1 1 1" material="src: #cimaise_posters_diffuse;"></a-obj-model>
+
+      <a-obj-model id="frame1" src="#picframe.obj" position="6.695683250457223 0.002 3.378" rotation="0 -140 0" scale="1 1 1" material="src: #pic1;"></a-obj-model>
+      <a-gltf-model src="#bust" position="-12.47268 0.22641 -6.40102" scale="0.6 0.6 0.6" rotation="0 90 0" gltf-model="assets/Statue.glb" shadow animation-mixer></a-gltf-model>
+
+      <a-gltf-model src="#console" position="14.65241 0.13496 -2.89366" scale="0.0015 0.0015 0.0015" rotation="0 265.12 0" gltf-model="assets/walnut.glb" shadow animation-mixer></a-gltf-model>
+      <a-gltf-model src="#adidas" position="12.83067 1.67233 -2.2927" scale="0.08 0.08 0.08" rotation="-30 90 0" shadow animation-mixer gltf-model="https://cdn.glitch.com/80103382-77c7-436e-ac28-b71dc8e4468c%2Fgazelle.glb"></a-gltf-model>
+      <a-gltf-model src="#newbalance" position="12.95206 1.55805 -1.79917" scale="3 3 3" rotation="0 0 30" shadow animation-mixer gltf-model="https://cdn.glitch.com/b2a38be5-8f68-46a7-9578-fcbaeb96f8a1%2Fnb.glb"></a-gltf-model>
+
+      <a-obj-model id="frame2" src="#picframe.obj" position="5.295 0.002 1.655" rotation="0 -140 0" scale="1 1 1" material="src: #pic2;"></a-obj-model>
+      <a-obj-model id="frame3" src="#picframe.obj" position="8.133 0.002 5.07" rotation="0 -140 0" scale="1 1 1" material="src: #pic3;"></a-obj-model>
+
+      <a-entity material="src: #floor" static-body geometry="depth: 17.56; width: 30" position="0 -0.5 -1.5517035038049425"></a-entity>
+      <a-plane position="0.47382 2.37922 -9.06616" height="0.66" width="0.438" material="src: #vidcards; shader: flat" geometry="height: 0.438; width: 0.66" scale="3.3 3.3 0.00001"></a-plane>
+    </a-entity>
+
+    <a-entity id="teleport">
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="5.83164 0 3.09267" color="#141414" id="check_01"></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="4.61411 0 0.79671" color="#141414" id="check_09"></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="7.67384 0 4.4626" color="#141414" id="check_10"></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="-5.56655 0 1.46361" color="#141414" id="check_03"></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="-2.43195 0 -0.53906" color="#141414" id="check_08"></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="-7.98664 0 2.87739" color="#141414" id="check_11"></a-cylinder>
+      <a-cylinder travel-node="transition: move; axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; animationDur: 100; animationEasing: linear; travelTarget: #null" radius="0.8" height="0.1" position="-0.20941 0 -6.67811" color="#141414" id="check_12"></a-cylinder>
+      <a-cylinder travel-node="transition: move" radius="0.8" height="0.1" position="-11.28 0 0.332" color="#141414" id="check_04"></a-cylinder>
+      <a-cylinder travel-node="transition: move" radius="0.8" height="0.1" position="-9.841 0 -5.713" color="#141414" id="check_02"></a-cylinder>
+      <a-cylinder travel-node="transition: move" radius="0.8" height="0.1" position="8.035 0 -5.71" color="#141414" id="check_05"></a-cylinder>
+      <a-cylinder travel-node="transition: move" radius="0.8" height="0.1" position="10.05 0 -2.585" color="#141414" id="check_06"></a-cylinder>
+      <a-cylinder travel-node="transition: move" radius="0.8" height="0.1" position="9.784 0 1.002" color="#141414" id="check_07"></a-cylinder>
+    </a-entity>
+
+    <a-entity id="teleport2" position="0 0 2.59995">
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="5.83164 0 3.09267" color="#141414" id="check_01" visible="false"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="2.60998 0 0.95921" color="#141414" id="check_09"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="7.67384 0 4.4626" color="#141414" id="check_10" visible="false"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="-2.9666 0 0.97612" color="#141414" id="check_03"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="0.05967 0 0.92341" color="#141414" id="check_08"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="-7.98664 0 2.87739" color="#141414" id="check_11" visible="false"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="-5.5718 0 -9.22389" color="#141414" id="check_12"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="-13.0133 0 0.332" color="#141414" id="check_04"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="-9.841 0 -5.713" color="#141414" id="check_02"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="3.37676 0 -7.17247" color="#141414" id="check_05"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="7.66671 0 -3.66831" color="#141414" id="check_06"></a-cylinder>
+      <a-cylinder travel-node="axis: x,z; offsetX: 0; offsetY: 0; offsetZ: 0; transition: move; animationDur: 100; animationEasing: linear; travelTarget: #camera" radius="0.8" height="0.1" position="9.784 0 1.002" color="#141414" id="check_07" visible="false"></a-cylinder>
+    </a-entity>
+
+    <a-sky src="#dawn"></a-sky>
+
+    <a-entity light="color: #EEE; intensity: 0.5" position="-1.5379 5.13754 8.19083"></a-entity>
+    <a-entity light="type: directional; color: #fff; intensity: 0.25" position="-1 1 0"></a-entity>
+    <a-entity light="type: directional; color: #EEE; intensity: 0.5" position="-6 5 0"></a-entity>
+    <a-entity light="color: #EEE; intensity: 0.5" position="0.31022 5 0"></a-entity>
+    <a-entity light="color: #EEE; intensity: 0.5" position="0.31022 7.23722 7.51975"></a-entity>
+    <a-light type="directional" position="12.95206 5.55805 -1.79917" rotation="0 0 0" target="#directionaltarget"></a-light>
+    <a-entity id="directionaltarget" position="0 0 -1"></a-entity>
+
+  </a-scene>
+
+  <!-- Start videos on first user gesture to satisfy autoplay policies and prevent WebGL texture errors -->
+  <script>
+    (function () {
+      const vids = Array.from(document.querySelectorAll('video'));
+      const tryPlayAll = () => {
+        vids.forEach(v => v.play().catch(() => {}));
+      };
+      window.addEventListener('pointerdown', tryPlayAll, { once: true });
+      window.addEventListener('keydown', tryPlayAll, { once: true });
+    })();
+  </script>
+
+  <!-- ===== Dispensary scripts ===== -->
+  <script>
+    // Wait helpers to avoid races
+    function whenSceneLoaded(cb){
+      const scene = document.querySelector('a-scene');
+      if (!scene) return console.warn('No <a-scene> found.');
+      if (scene.hasLoaded) return cb(scene);
+      scene.addEventListener('loaded', () => cb(scene), { once:true });
+    }
+    function whenStoreReady(cb){
+      whenSceneLoaded(() => {
+        const el = document.querySelector('#store');
+        if (!el) return console.warn('#store not found');
+        if (el.components && el.components['store-builder']) return cb(el);
+        el.addEventListener('componentinitialized', (e)=>{
+          if (e.detail && e.detail.name === 'store-builder') cb(el);
+        }, { once:true });
+      });
+    }
+  </script>
+
+  <script>
+  /* ---------- Live product feed ---------- */
+  const PRODUCTS_ENDPOINT = 'assets/products.json'; // same-origin avoids CORS issues
+  let PRODUCTS = []; // filled after fetch
+
+  // Fallback demo data if fetch fails:
+  const FALLBACK_PRODUCTS = [
+    { id:'awaken-15', name:'Awaken (15ml)', price:399, category:'Tincture', strength:'1:1 THC:CBD', img:'https://images.unsplash.com/photo-1585386959984-a41552231605?q=80&w=400&auto=format&fit=crop', glb:'' },
+    { id:'awaken-30', name:'Awaken (30ml)', price:699, category:'Tincture', strength:'1:1 THC:CBD', img:'https://images.unsplash.com/photo-1611077543631-b002bc36fdae?q=80&w=400&auto=format&fit=crop', glb:'' },
+    { id:'traveler-gummy', name:'Traveler Gummies (10pc)', price:349, category:'Edible', strength:'10mg/pc', img:'https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=400&auto=format&fit=crop', glb:'' },
+    { id:'big-cookie', name:'Blom Big Cookie (60mg)', price:129, category:'Edible', strength:'60mg', img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop', glb:'' },
+    { id:'neuroplus', name:'NeuroPlus (30ml)', price:799, category:'Tincture', strength:'CBN:CBD', img:'https://images.unsplash.com/photo-1585238342028-79336f1266c9?q=80&w=400&auto=format&fit=crop', glb:'' },
+    { id:'vape-awaken', name:'Awaken Vape (1g)', price:599, category:'Vape', strength:'Broad Spec', img:'https://images.unsplash.com/photo-1601972602229-98bfd02f40a1?q=80&w=400&auto=format&fit=crop', glb:'' }
+  ];
+
+  async function loadProducts() {
+    try {
+      const res = await fetch(PRODUCTS_ENDPOINT, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      PRODUCTS = (Array.isArray(data) ? data : []).map(p => ({
+        id: String(p.id || ''),
+        name: String(p.name || ''),
+        price: Number(p.price || 0),
+        category: String(p.category || ''),
+        strength: String(p.strength || ''),
+        img: String(p.img || ''),
+        glb: String(p.glb || '')
+      })).filter(p => p.id && p.name);
+    } catch (e) {
+      console.warn('Product fetch failed, using fallback.', e);
+      PRODUCTS = FALLBACK_PRODUCTS;
+    }
+  }
+
+  /* -------- Cart + overlay UI -------- */
+  let CART = [];
+  const catalogEl = document.getElementById('catalog');
+  const cartEl    = document.getElementById('cart');
+  const cartCount = document.getElementById('cartCount');
+
+  function renderCatalog(){
+    catalogEl.innerHTML = '<h3>Catalog</h3>' + PRODUCTS.map(p=>`
+      <div class="item">
+        <img src="${p.img}" alt="${p.name}"/>
+        <div style="flex:1">
+          <div style="font-weight:600">${p.name}</div>
+          <div class="muted">${p.category} · ${p.strength || ''}</div>
+        </div>
+        <div class="row">
+          <div style="font-weight:700">R ${p.price}</div>
+          <button class="btn" data-id="${p.id}">View</button>
+        </div>
+      </div>`).join('');
+    catalogEl.querySelectorAll('button[data-id]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const p = PRODUCTS.find(x=>x.id===btn.dataset.id);
+        if(p) openProduct(p);
+      });
+    });
+  }
+  function renderCart(){
+    const total = CART.reduce((s,i)=> s + i.price * i.qty, 0);
+    cartEl.innerHTML = `<h3>Your Cart</h3>` + (CART.length? CART.map(i=>`
+      <div class="item">
+        <img src="${i.img}" alt="${i.name}"/>
+        <div style="flex:1">
+          <div style="font-weight:600">${i.name}</div>
+          <div class="muted">Qty: ${i.qty}</div>
+        </div>
+        <div class="row">
+          <div style="font-weight:700">R ${i.price * i.qty}</div>
+          <button class="btn" data-remove="${i.id}">Remove</button>
+        </div>
+      </div>`).join('') : '<div class="muted">Your cart is empty.</div>') +
+      `<div class="row" style="margin-top:8px; justify-content:space-between">
+        <div style="font-weight:700">Total</div>
+        <div style="font-weight:700">R ${total}</div>
+      </div>
+      <button id="checkout" class="btn" style="width:100%; margin-top:8px">Checkout</button>`;
+
+    cartEl.querySelectorAll('button[data-remove]').forEach(btn=>btn.addEventListener('click', ()=>{
+      CART = CART.filter(i=>i.id!==btn.dataset.remove); updateCart();
+    }));
+    const checkoutBtn = cartEl.querySelector('#checkout');
+    if(checkoutBtn) checkoutBtn.addEventListener('click', ()=> alert('Checkout clicked – connect to your gateway/API'));
+  }
+  function updateCart(){ cartCount.textContent = CART.reduce((s,i)=> s+i.qty, 0); renderCart(); }
+  function addToCart(p){ const ex = CART.find(i=>i.id===p.id); if(ex) ex.qty+=1; else CART.push({...p, qty:1}); updateCart(); }
+  function openProduct(p){
+    const ok = confirm(`${p.name}\n${p.category} • ${p.strength || ''}\nPrice: R ${p.price}\n\nAdd to cart?`);
+    if(ok) addToCart(p);
+  }
+
+  document.getElementById('btnCatalog').onclick = ()=> catalogEl.classList.toggle('open');
+  document.getElementById('btnCart').onclick    = ()=> cartEl.classList.toggle('open');
+  document.getElementById('btnVR').onclick      = ()=> { document.querySelector('a-scene').enterVR(); };
+
+  // Load products, then render UI and build store entities
+  (async () => {
+    await loadProducts();
+    renderCatalog(); renderCart();
+    whenStoreReady((el)=>{
+      if (el.components['store-builder'] && typeof el.components['store-builder'].rebuild === 'function') {
+        el.components['store-builder'].rebuild();
+      }
+    });
+  })();
+
+  /* -------- A-Frame components: shelves + product boxes + store -------- */
+  AFRAME.registerComponent('shelf', {
+    schema: { rows:{type:'int', default:3}, cols:{type:'int', default:6} },
+    init(){
+      const el = this.el;
+      for(let r=0;r<this.data.rows;r++){
+        const plank = document.createElement('a-box');
+        plank.setAttribute('width', 5.4);
+        plank.setAttribute('height', 0.08);
+        plank.setAttribute('depth', 0.6);
+        plank.setAttribute('color', '#2a2a2a');
+        plank.setAttribute('metalness', 0.2);
+        plank.setAttribute('roughness', 0.6);
+        plank.setAttribute('position', `0 ${0.6 + r*0.8} 0`);
+        plank.setAttribute('shadow', 'cast: true; receive: true');
+        el.appendChild(plank);
+      }
+      const high = this.data.rows*0.8 + 0.6;
+      const mkUp = (x)=>{
+        const up = document.createElement('a-box');
+        up.setAttribute('width', 0.08);
+        up.setAttribute('height', high);
+        up.setAttribute('depth', 0.6);
+        up.setAttribute('color', '#2a2a2a');
+        up.setAttribute('position', `${x} ${high/2} 0`);
+        return up;
+      };
+      el.appendChild(mkUp(-2.7));
+      el.appendChild(mkUp( 2.7));
+    }
+  });
+
+  AFRAME.registerComponent('product-box', {
+    schema: { id: {type:'string'} },
+    init(){
+      const data = PRODUCTS.find(x=>x.id===this.data.id);
+      if(!data){ console.warn('Unknown product id', this.data.id); return; }
+
+      if (data.glb) {
+        // Use GLB/GLTF model
+        const model = document.createElement('a-entity');
+        model.setAttribute('gltf-model', data.glb);
+        model.setAttribute('scale', '0.2 0.2 0.2');   // tweak per asset
+        model.setAttribute('rotation', '0 30 0');     // shelf appeal
+        model.setAttribute('shadow', 'cast: true; receive: false');
+        this.el.appendChild(model);
+      } else {
+        // Fallback simple box
+        const box = document.createElement('a-box');
+        box.setAttribute('width', 0.22);
+        box.setAttribute('height', 0.32);
+        box.setAttribute('depth', 0.12);
+        box.setAttribute('color', '#3aa0ff');
+        box.setAttribute('metalness', 0.1);
+        box.setAttribute('roughness', 0.6);
+        box.setAttribute('shadow', 'cast: true');
+        this.el.appendChild(box);
+      }
+
+      // Floating label
+      const label = document.createElement('a-entity');
+      label.setAttribute('position', '0 0.35 0');
+
+      const text = document.createElement('a-text');
+      text.setAttribute('value', `${data.name}\n${data.strength || data.category}\nR ${data.price}`);
+      text.setAttribute('align', 'center');
+      text.setAttribute('width', 1.2);
+      text.setAttribute('color', '#fff');
+      text.setAttribute('anchor', 'center');
+      text.setAttribute('font', '#roboto');  // use loaded MSDF font
+
+      label.appendChild(text);
+      this.el.appendChild(label);
+
+      this.el.classList.add('clickable');
+      this.el.dataset.pid = data.id;
+    }
+  });
+
+  AFRAME.registerComponent('store-builder', {
+    buildOnce(){
+      if (this._built) return;
+      this._built = true;
+      // three shelves along local Z=0
+      [-6, 0, 6].forEach((x)=>{
+        const shelf = document.createElement('a-entity');
+        shelf.setAttribute('position', `${x} 0 0`);
+        shelf.setAttribute('shelf', 'rows:3; cols:6');
+        this.el.appendChild(shelf);
+      });
+    },
+    clearProducts(){
+      this.el.querySelectorAll('[product-box]').forEach(n=>n.parentNode && n.parentNode.removeChild(n));
+    },
+    populate(){
+      this.clearProducts();
+      const shelves = this.el.querySelectorAll('[shelf]');
+      if (!shelves.length) this.buildOnce();
+      let idx = 0;
+      shelves.forEach((shelf)=>{
+        for(let i=0;i<12 && idx<PRODUCTS.length;i++){
+          const p = PRODUCTS[idx++];
+          const prod = document.createElement('a-entity');
+          prod.setAttribute('product-box', `id:${p.id}`);
+          const col = i % 6; const row = Math.floor(i/6);
+          prod.setAttribute('position', `${-2.2 + col*0.88} ${0.7 + row*0.8} 0`);
+          prod.dataset.pid = p.id;
+          shelf.appendChild(prod);
+        }
+      });
+    },
+    rebuild(){ this.buildOnce(); this.populate(); },
+    init(){
+      this.buildOnce();
+      this.populate();
+      // click handler for cursor/laser hits
+      this.onClick = (evt)=>{
+        const t = evt && evt.detail && evt.detail.intersectedEl ? evt.detail.intersectedEl : evt.target;
+        if(!t) return;
+        const pid = (t.dataset && t.dataset.pid) || (t.parentEl && t.parentEl.dataset && t.parentEl.dataset.pid);
+        if(!pid) return;
+        const p = PRODUCTS.find(x=>x.id===pid);
+        if(p) openProduct(p);
+      };
+      this.el.sceneEl.addEventListener('click', this.onClick);
+    },
+    remove(){ this.el.sceneEl.removeEventListener('click', this.onClick); }
+  });
+  </script>
+
+</body>
+</html>
