@@ -1,4 +1,4 @@
-<script>
+
 /**
  * Simple client wrapper that talks to your Vercel functions
  * - `/api/chat`  : for messages[] chat (streaming or non-streaming depending on your route)
@@ -58,4 +58,4 @@ window.AskXR = {
     return reply || '';
   }
 };
-</script>
+
