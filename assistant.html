@@ -121,13 +121,12 @@
   <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121" physics>
 
     <!-- Camera + cursor -->
-    <a-entity id="camera" camera position="0 1.6 1" look-controls>
-      <a-cursor
-        rayOrigin="mouse"
-        material="color: white"
-        raycaster="objects: .clickable, .teleport">
-      </a-cursor>
-    </a-entity>
+  
+<a-entity id="camera" camera position="0 1.6 1" look-controls>
+  <a-cursor rayOrigin="mouse"
+            raycaster="objects: .clickable"
+            material="color: white"></a-cursor>
+</a-entity>
 
     <!-- Assets -->
     <a-assets>
@@ -314,6 +313,26 @@
     <a-light type="directional" position="12.95206 5.55805 -1.79917" rotation="0 0 0" target="#directionaltarget"></a-light>
     <a-entity id="directionaltarget" position="0 0 -1"></a-entity>
   </a-scene>
+<script>
+  // forward clicks from the hitbox to the assistant entity
+  window.addEventListener('DOMContentLoaded', () => {
+    const hitbox = document.getElementById('assistant-hitbox');
+    const assistant =
+      document.getElementById('virtual-assistant') ||
+      document.querySelector('#ai .clickable[gltf-model*="character.glb"]') ||
+      document.querySelector('#ai .clickable');
+
+    if (hitbox && assistant) {
+      hitbox.addEventListener('click', () => {
+        // emit a click so any existing listeners/components react
+        assistant.emit('click');
+        // if you want a visual cue:
+        assistant.emit('mouseenter');
+        setTimeout(() => assistant.emit('mouseleave'), 150);
+      });
+    }
+  });
+</script>
 
   <!-- Start videos on first user gesture -->
   <script>
