@@ -1,8 +1,8 @@
 [
-  { "id": "awaken-15",   "name": "Awaken Chews (15ct)", "price": 15, "image": "/assets/awaken-15.png" },
-  { "id": "awaken-30",   "name": "Awaken Chews (30ct)", "price": 28, "image": "/assets/awaken-30.png" },
-  { "id": "traveler-gummy", "name": "Traveler Gummies", "price": 20, "image": "/assets/traveler-gummy.png" },
-  { "id": "big-cookie",  "name": "Big Cookie",          "price": 6,  "image": "/assets/big-cookie.png" },
-  { "id": "neuroplus",   "name": "Neuro+ Nootropic",    "price": 29, "image": "/assets/neuroplus.png" },
-  { "id": "vape-awaken", "name": "Awaken Inhaler",      "price": 25, "image": "/assets/vape-awaken.png" }
+  { "id": "awaken-15",   "name": "Awaken Chews (15ct)", "price": 15, "image": "assets/awaken15.png" },
+  { "id": "awaken-30",   "name": "Awaken Chews (30ct)", "price": 28, "image": "assets/awaken30.png" },
+  { "id": "traveler-gummy", "name": "Traveler Gummies", "price": 20, "image": "assets/traveler-gummy.png" },
+  { "id": "big-cookie",  "name": "Big Cookie",          "price": 6,  "image": "assets/big-cookie.png" },
+  { "id": "neuroplus",   "name": "Neuro+ Nootropic",    "price": 29, "image": "assets/neuroplus.png" },
+  { "id": "vape-awaken", "name": "Awaken Inhaler",      "price": 25, "image": "assets/vape-awaken.png" }
 ]
