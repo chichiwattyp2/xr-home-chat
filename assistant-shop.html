@@ -32,7 +32,10 @@
   </aside>
 </div>
 
-  <a-scene renderer="colorManagement: true" environment="preset: default; skyType:none; ground: flat">
+  <a-scene renderer="colorManagement: true" 
+        environment="preset: default; skyType:none; ground: flat"
+       webxr="optionalFeatures: dom-overlay; overlayElement: #mr-overlay">
+
 
     <a-assets>
       <!-- Your GLB (re-export to metal/rough if you can) -->
