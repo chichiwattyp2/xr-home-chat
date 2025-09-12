@@ -2,11 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>XR Browser</title>     <!-- Google Fonts: Asimovian -->
+    <title>XR Browser</title>   <!-- Google Fonts: Asimovian -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Keep only Asimovian loaded to guarantee it’s ready for canvases -->
     <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
+<script src="./js/openai-client.js"></script>
 
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -15,10 +16,9 @@
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
   <script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
   <script src="https://unpkg.com/aframe-event-set-component@5.0.1/dist/aframe-event-set-component.min.js"></script>
-  <script src="/js/assistant.js" defer></script>
+   <script src="/js/assistant.js" defer></script>
   <script src="/js/travel-node-component.js"></script>
   <script src="/js/nav.js"></script>
-
   <script>
   function encodeHtml(str) {
     const buf = [];
@@ -79,7 +79,7 @@
       }
     });
   });
-  </script> 
+  </script>
 </head>
 <body>
 
@@ -88,7 +88,7 @@
   <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121" physics>
   
     
- 
+
 
 
           
