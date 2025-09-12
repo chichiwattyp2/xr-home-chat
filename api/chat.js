@@ -1,3 +1,16 @@
+// at the top of each serverless function that calls OpenAI:
+const OPENAI_KEY =
+  process.env.OPENAI_API_KEY ||
+  process.env.OPENAI_KEY ||            // <- legacy alias if you used it
+  process.env.OPENAI_SECRET;           // <- any other legacy name
+
+const TEXT_MODEL =
+  process.env.OPENAI_MODEL_TEXT ||
+  process.env.OPENAI_MODEL ||          // legacy alias if you used it
+  'gpt-4o-mini';
+
+
+
 export const config = { runtime: 'edge' };
 
 function corsHeaders(origin) {
