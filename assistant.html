@@ -475,61 +475,94 @@
       }
     });
 
-    AFRAME.registerComponent('product-box', {
-      schema: { id: {type:'string'} },
-      init(){
-        const data = PRODUCTS.find(x=>x.id===this.data.id);
-        if(!data){ console.warn('Unknown product id', this.data.id); return; }
+    
+AFRAME.registerComponent('product-box', {
+  schema: { id: {type:'string'} },
+  init(){
+    const data = (window.PRODUCTS || []).find(x=>x.id===this.data.id);
+    if(!data){ console.warn('Unknown product id', this.data.id); return; }
 
-        const makeBox = () => {
-          const box = document.createElement('a-box');
-          box.setAttribute('width', 0.22);
-          box.setAttribute('height', 0.32);
-          box.setAttribute('depth', 0.12);
-          box.setAttribute('color', '#3aa0ff');
-          box.setAttribute('metalness', 0.1);
-          box.setAttribute('roughness', 0.6);
-          box.setAttribute('shadow', 'cast: true');
-          this.el.appendChild(box);
-        };
+    const makeBox = () => {
+      // simple visual fallback
+      const box = document.createElement('a-box');
+      box.setAttribute('width', 0.22);
+      box.setAttribute('height', 0.32);
+      box.setAttribute('depth', 0.12);
+      box.setAttribute('color', '#3aa0ff');
+      box.setAttribute('metalness', 0.1);
+      box.setAttribute('roughness', 0.6);
+      box.setAttribute('shadow', 'cast: true');
+      this.el.appendChild(box);
+    };
 
-        if (data.glb) {
-          const model = document.createElement('a-entity');
-          model.setAttribute('gltf-model', data.glb);
-          model.setAttribute('scale', '0.2 0.2 0.2');
-          model.setAttribute('rotation', '0 30 0');
-          model.setAttribute('shadow', 'cast: true; receive: false');
+    let settled = false; // ensure we only settle once (success OR fail)
+    const settleFail = (reason) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      // model might already be gone; guard parentNode
+      if (model.parentNode) model.parentNode.removeChild(model);
+      console.warn('[product-box] model failed:', data.glb || '(none)', reason);
+      makeBox();
+      addLabel(); // still show text/price
+    };
 
-          const fail = (e)=>{ console.warn('[product-box] model failed:', data.glb, e?.detail || e); model.remove(); makeBox(); };
-          model.addEventListener('model-error', fail);
-          model.addEventListener('error', fail);
-          const timer = setTimeout(()=>{ if (!model.getObject3D('mesh')) fail('timeout'); }, 6000);
-          model.addEventListener('model-loaded', ()=> clearTimeout(timer));
+    const addLabel = () => {
+      const label = document.createElement('a-entity');
+      label.setAttribute('position', '0 0.35 0');
+      const text = document.createElement('a-text');
+      text.setAttribute('value', `${data.name}\n${data.strength || data.category}\nR ${data.price}`);
+      text.setAttribute('align', 'center');
+      text.setAttribute('width', 1.2);
+      text.setAttribute('color', '#fff');
+      text.setAttribute('anchor', 'center');
+      text.setAttribute('font', '#roboto');
+      label.appendChild(text);
+      this.el.appendChild(label);
+    };
 
-          this.el.appendChild(model);
-        } else {
-          makeBox();
-        }
+    // If we *do* have a model URL, try it; otherwise go straight to box.
+    let model, timer;
+    if (data.glb) {
+      model = document.createElement('a-entity');
+      model.setAttribute('gltf-model', data.glb);
+      model.setAttribute('scale', '0.2 0.2 0.2');
+      model.setAttribute('rotation', '0 30 0');
+      model.setAttribute('shadow', 'cast: true; receive: false');
 
-        // Floating label
-        const label = document.createElement('a-entity');
-        label.setAttribute('position', '0 0.35 0');
+      // Append first, then wire listeners (safer with A-Frame lifecycle)
+      this.el.appendChild(model);
 
-        const text = document.createElement('a-text');
-        text.setAttribute('value', `${data.name}\n${data.strength || data.category}\nR ${data.price}`);
-        text.setAttribute('align', 'center');
-        text.setAttribute('width', 1.2);
-        text.setAttribute('color', '#fff');
-        text.setAttribute('anchor', 'center');
-        text.setAttribute('font', '#roboto');
+      // Any loader error → fallback once.
+      const onError = (e) => settleFail(e?.detail || e || 'error');
+      model.addEventListener('model-error', onError, { once:true });
+      model.addEventListener('error',       onError, { once:true });
 
-        label.appendChild(text);
-        this.el.appendChild(label);
+      // Timeout if loader never resolves (covers deprecated extensions).
+      timer = setTimeout(()=> settleFail('timeout'), 6000);
 
-        this.el.classList.add('clickable');
-        this.el.dataset.pid = data.id;
-      }
-    });
+      // Success path: clear timer and add label
+      model.addEventListener('model-loaded', () => {
+        if (settled) return; // already failed/settled
+        settled = true;
+        clearTimeout(timer);
+        addLabel();
+      }, { once:true });
+
+    } else {
+      // No model URL: just use the box
+      settled = true;
+      makeBox();
+      addLabel();
+    }
+
+    // Clickable for raycaster
+    this.el.classList.add('clickable');
+    this.el.dataset.pid = data.id;
+  }
+});
+
+
 
     AFRAME.registerComponent('store-builder', {
       buildOnce(){
