@@ -168,30 +168,32 @@
       }
     });
     </script>
+    
   </head>
+  
   <body>
-    <div id="slide2" class="slide">
+  <div id="slide2" class="slide">
     <div id="slide3" class="slide">
     <div id="slide4" class="slide">
-     <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121" physics>
-  
-      <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
-
+    <a-scene fog="type: linear; color: #222222; far: 20;">
+      
+    
       <a-assets>
-      <img id="aframeLogo" src="assets/aframe.png"/>
-      <img id="githubLogo" src="assets/github.png"/>
-      <img id="npmLogo" src="assets/npm.png"/>
+      <img id="aframeLogo" src="assets/aframe.png" />
+      <img id="githubLogo" src="assets/github.png" />
+      <img id="npmLogo" src="assets/npm.png" />
     </a-assets>
      
-      <a-entity id="cameraRig">
+      
+       
+      <a-entity id="cameraRig" position="0 2 0">
         <a-camera id="camera">
         </a-camera>
         <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: .screen"></a-entity>
         <a-entity laser-controls raycaster="objects: .screen;"></a-entity>
       </a-entity>
       
-      
-      <a-entity id="information-hub">
+      <a-entity id="information hub">
       <a-entity id="menu" class="screen menu dark" htmlembed="ppu:256" position="-2.712 2.5 -4.476" rotation="0 45 0">
         <h2>Menu</h2>
         <ul>
@@ -212,7 +214,7 @@
         </div>
         <div id="page2">
           <h1>Cascading Style Sheets (CSS)</h1>
-          <p>HTML Embed allows you to add interactivity by adding standard css interactions such as hover:</p>
+          <p>HTML Embed allows you to add interactivity by adding standard css interactions such as hover:
           <div class="code">
           .button{
 	          color: #000000;
@@ -224,7 +226,7 @@
           <div class="code">
             &lt;a-scene&gt;
 	            &lt;a-entity htmlembed&gt;
-		            &lt;a href="#home" class="button" Home&lt;/a&gt;
+		            &lt;a href="#home" class="button">Home&lt;/a&gt;
 	            &lt;/a-entity&gt;
             &lt;/a-scene&gt;
           </div>
@@ -256,8 +258,8 @@
             <li>All styles and images must be in the same origin or allow access via CORS; this allows the component to embed all of the assets required to render the html properly to the canvas via the foreignObject element. </li>
             <li>transform-style css is limited to flat. This is mainly due to it not being rendered properly to canvas so element bounding for preserve-3d has not yet been implemented. If the rendering is fixed as some point I may go back and get it working as well.</li>
             <li>"a-" tags do not render correctly as XHTML embeded into SVG, so any parent "a-" elements of the embed html will be converted to div tags for rendering. This may mean your css will require modification.</li>
-            <li>Elements that require rendering outside of the DOM such as the iframe and canvas element will not work</li>
-            <li>:before and :after pseudo elements can't be accessed via the DOM so they can't be used in the element to determine the object bounds. As such, use them with caution.</li>
+            <li>Elements that require rendering outside of the DOM such as the iframe and canvas element will not work.</li>
+            <li>:before and :after pseudo elements can't be accessed via the DOM so they can't be used in the element to determine the object bounds. As such, use them with caution. </li>
             <li>Form elements are not consistently rendered to the canvas element so some basic default styles are included for consistency.</li>
             <li>Currently there is no support for css transitions.</li>
           </ul>
@@ -265,7 +267,7 @@
         </div>
       </a-entity>
       <a-entity id="menu" class="screen menu dark" htmlembed="ppu:256" position="2.712 2.5 -4.476" rotation="0 -45 0">
-          <h2>Links</h2>
+        <h2>Links</h2>
         <a class="imgLink" href="https://aframe.io/"><img src="assets/aframe.png" width="80" height="80"><div>A-Frame</div></a>
         <a class="imgLink" href="https://github.com/supereggbert/aframe-htmlembed-component"><img src="assets/github.png" width="80" height="80"><div>Github</div></a>
         <a class="imgLink" href="https://www.npmjs.com/package/aframe-htmlembed-component"><img src="assets/npm.png" width="80" height="80"><div>npm</div></a>
