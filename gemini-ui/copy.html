@@ -209,14 +209,13 @@
  
        
       <a-entity id="cameraRig" position="0 2 0">
-        <a-camera id="camera">
-        </a-camera>
+        <a-camera id="camera"></a-camera>
         <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: .screen"></a-entity>
         <a-entity laser-controls raycaster="objects: .screen;"></a-entity>
       </a-entity>
       
       <a-entity id="information hub" position="0 1.7 0">
-      <a-entity id="menuright" class="screen menu dark" htmlembed="ppu:256" position="-2.712 2.5 -4.476" rotation="0 45 0">
+      <a-entity id="menuleft" class="screen menu dark" htmlembed="ppu:256" position="-2.712 2.5 -4.476" rotation="0 45 0">
         <h2>Menu</h2>
         <ul>
           <li><a href="#" class="button">Home</a></li>
@@ -288,7 +287,7 @@
           <a href="#slide3" class="button prev">Prev Page</a>
         </div>
       </a-entity>
-      <a-entity id="menuleft" class="screen menu dark" htmlembed="ppu:256" position="2.712 2.5 -4.476" rotation="0 -45 0">
+      <a-entity id="menulright" class="screen menu dark" htmlembed="ppu:256" position="2.712 2.5 -4.476" rotation="0 -45 0">
         <h2>Links</h2>
          <a class="imgLink" href="https://aframe.io/"><img src="assets/aframe.png" width="80" height="80"><div>A-Frame</div></a>
         <a class="imgLink" href="https://github.com/supereggbert/aframe-htmlembed-component"><img src="assets/github.png" width="80" height="80"><div>Github</div></a>
