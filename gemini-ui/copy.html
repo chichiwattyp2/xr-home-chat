@@ -1,16 +1,11 @@
-<!DOCTYPE html>
+
 <html>
 <head>
     <meta charset="utf-8">
     <title>WebXR Spatial UI Toolkit</title>
-
-
-	
    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
-	 <script src="build.js"></script>   
-	
      <script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
-      
+      <script src="build.js"></script>    
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
  
 
@@ -182,11 +177,15 @@
     <div id="slide4" class="slide">
   
       
-    <a-scene>
+    <a-scene >
  
-   
-  <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
-      
+     <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
+
+ 
+    <!-- <a-entity
+        environment="dressing: none; ground: flat; fog: .97; skyType: color; skyColor: #FAA18F; groundColor: #FEEBE7; gridColor: #F5A627; grid: 2x2; groundTexture: none"
+      ></a-entity>-->
+       
       <a-entity id="cameraRig" position="0 2 0">
         <a-camera id="camera">
         </a-camera>
