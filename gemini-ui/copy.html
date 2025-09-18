@@ -2,13 +2,11 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>WebXR Spatial UI Toolkit</title>
-   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
-   
-      <script src="build.js"></script>    
+    <title>WebXR Spatial UI</title>
+   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>  
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
   <script src="https://unpkg.com/aframe-environment-component@1.5./dist/aframe-environment-component.min.js"></script>
-  
+   <script src="build.js"></script>  
        
   
 <!--<script>
@@ -178,11 +176,7 @@
     <a-scene>
       
     
-    <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
-      <a-sky color="#6EBAA7"></a-sky>
-		  <a-entity light="type: ambient; color: #888"></a-entity>
-      <a-entity light="type: point; intensity: 1; color: #fff" position="0 2 2"></a-entity>
-      
+       
        
       <a-entity id="cameraRig" position="0 2 0">
         <a-camera id="camera">
@@ -192,7 +186,7 @@
       </a-entity>
       
       <a-entity id="information hub" position="0 1.7 0">
-      <a-entity id="menu" class="screen menu dark" htmlembed="ppu:256" position="-2.712 2.5 -4.476" rotation="0 45 0">
+      <a-entity id="menuright" class="screen menu dark" htmlembed="ppu:256" position="-2.712 2.5 -4.476" rotation="0 45 0">
         <h2>Menu</h2>
         <ul>
           <li><a href="#" class="button">Home</a></li>
@@ -264,7 +258,7 @@
           <a href="#slide3" class="button prev">Prev Page</a>
         </div>
       </a-entity>
-      <a-entity id="menu" class="screen menu dark" htmlembed="ppu:256" position="2.712 2.5 -4.476" rotation="0 -45 0">
+      <a-entity id="menuleft" class="screen menu dark" htmlembed="ppu:256" position="2.712 2.5 -4.476" rotation="0 -45 0">
         <h2>Links</h2>
          <a class="imgLink" href="https://aframe.io/"><img src="assets/aframe.png" width="80" height="80"><div>A-Frame</div></a>
         <a class="imgLink" href="https://github.com/supereggbert/aframe-htmlembed-component"><img src="assets/github.png" width="80" height="80"><div>Github</div></a>
