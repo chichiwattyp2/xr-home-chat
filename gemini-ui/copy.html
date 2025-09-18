@@ -3,16 +3,32 @@
 <head>
     <meta charset="utf-8">
     <title>WebXR Spatial UI Toolkit</title>
-   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-   <script src="htmlcanvas.js"></script>
-        <script src="aframe-htmlembed-component.js"></script>
-         
+   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+   
+      <script src="build.js"></script>    
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
-  <script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
-  <script src="https://unpkg.com/aframe-event-set-component@5.0.1/dist/aframe-event-set-component.min.js"></script>
+  <script src="https://unpkg.com/aframe-environment-component@1.5./dist/aframe-environment-component.min.js"></script>
+  
+       
+  
+<!--<script>
+(function(){
+  const _setValues = THREE.Material.prototype.setValues;
+  THREE.Material.prototype.setValues = function (values) {
+    if (values && 'flatShading' in values) {
+      if ('flatShading' in this) {
+        this.flatShading = !!values.flatShading;
+        this.needsUpdate = true;
+      }
+      delete values.flatShading; // prevent warning
+    }
+    return _setValues.call(this, values);
+  };
+})();
+</script>-->
 
    
-    <script src="build.js"></script>
+
      <style>
     body{
       font-family: 'Roboto', sans-serif;
@@ -157,12 +173,17 @@
     <div id="slide2" class="slide">
     <div id="slide3" class="slide">
     <div id="slide4" class="slide">
-  <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121" physics>
+     <a-scene antialias="true" vr-mode-ui="enabled: true" loading-screen="backgroundColor: #212121" physics>
   
+      <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
+
+      <a-assets>
+      <img id="aframeLogo" src="assets/aframe.png"/>
+      <img id="githubLogo" src="assets/github.png"/>
+      <img id="npmLogo" src="assets/npm.png"/>
+    </a-assets>
      
-          <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
-<!-- cam -->
-      <a-entity id="cameraRig" position="0 2 0">
+      <a-entity id="cameraRig">
         <a-camera id="camera">
         </a-camera>
         <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: .screen"></a-entity>
@@ -170,8 +191,7 @@
       </a-entity>
       
       
-      <!-- HTML EMBED -->
-      <a-entity id="html screens 1" position="0 1.2 0">
+      <a-entity id="information-hub">
       <a-entity id="menu" class="screen menu dark" htmlembed="ppu:256" position="-2.712 2.5 -4.476" rotation="0 45 0">
         <h2>Menu</h2>
         <ul>
@@ -204,7 +224,7 @@
           <div class="code">
             &lt;a-scene&gt;
 	            &lt;a-entity htmlembed&gt;
-		            &lt;a href="#home" class="button">Home&lt;/a&gt;
+		            &lt;a href="#home" class="button" Home&lt;/a&gt;
 	            &lt;/a-entity&gt;
             &lt;/a-scene&gt;
           </div>
@@ -245,12 +265,13 @@
         </div>
       </a-entity>
       <a-entity id="menu" class="screen menu dark" htmlembed="ppu:256" position="2.712 2.5 -4.476" rotation="0 -45 0">
-        <h2>Links</h2>
+          <h2>Links</h2>
         <a class="imgLink" href="https://aframe.io/"><img src="assets/aframe.png" width="80" height="80"><div>A-Frame</div></a>
         <a class="imgLink" href="https://github.com/supereggbert/aframe-htmlembed-component"><img src="assets/github.png" width="80" height="80"><div>Github</div></a>
         <a class="imgLink" href="https://www.npmjs.com/package/aframe-htmlembed-component"><img src="assets/npm.png" width="80" height="80"><div>npm</div></a>
       </a-entity>
-      <a-box material="src:#tex1" scale="0.5 0.5 0.5" position="0 0.5 -4" id="box" visible="false"></a-box></a-entity>
+      <a-box color="#F54927" scale="0.5 0.5 0.5" position="0 0.5 -4" id="box" visible="false"></a-box>
+      </a-entity>
     </a-scene>
     </div>
     </div>
