@@ -1,134 +1,197 @@
-<!doctype html>
 
+<!DOCTYPE html>
 <html>
 <head>
- 
+    <meta charset="utf-8">
     <title>WebXR Spatial UI Toolkit</title>
    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+     <script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
+      <script src="build.js"></script>    
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
  
-      <script src="build.js"></script>    
-
 
        
+  
+<!--<script>
+(function(){
+  const _setValues = THREE.Material.prototype.setValues;
+  THREE.Material.prototype.setValues = function (values) {
+    if (values && 'flatShading' in values) {
+      if ('flatShading' in this) {
+        this.flatShading = !!values.flatShading;
+        this.needsUpdate = true;
+      }
+      delete values.flatShading; // prevent warning
+    }
+    return _setValues.call(this, values);
+  };
+})();
+</script>-->
 
-<style>
-  body{
-      font-family: 'Roboto', sans-serif;
-      text-shadow: 0px 0px 10px #00d2ff;
-      color: #fff;
-      font-size: 32px;
-    }
-    h1{
-      font-size: 52px;
-    }
-    .dark{
-      background-color: rgba(0,0,0,0.2);
-      border-radius:50px;  
-      background-repeat: no-repeat;
-      background-position: bottom right;
-      padding: 40px;
-    }
-    .main{
-      width: 1024px;
-      height: 768px;
-      overflow: hidden;
-    }
-    .menu{
-      width: 256px;
-      height: 768px;
-      text-align: center;
-    }
-    .menu ul{
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-    }
-    a.button{
-      display: inline-block;
-      width: 100%;
-      border-radius: 20px;
-      background-color: #000;
-      color: #fff;
-      text-decoration: none;
-      text-align: center;
-      padding: 10px 0;
-      margin-bottom: 20px;
-    }
-    a.button:hover{
-      background-color: #fff;
-      color: #888;
-    }
-    a.button:active{
-      background-color: #fff;
-      color: #888;
-      box-shadow: 0px 0px 50px #00d2ff;
-    }
-    a.imgLink{
-      width: 100%;
-      border-radius: 20px;
-      color: #fff;
-      text-decoration: none;
-      text-align: center;
-      padding: 10px 0;
-      margin-bottom: 20px;
-      background-color: #444;
-      border: 3px solid #444;
-      text-shadow: none;
-      display: block;
-    }
-    a.imgLink:hover{
-      border: 3px solid #fff;
-      background-color: #444;
-    }
-    .code{
-      white-space: pre;
-      font-size: 0.7em;
-      background-color: #000;
-      margin-bottom: 30px;
-    }
-    .next,.prev{
-      position: absolute;
-      bottom: 0px;
-      right: 30px;
-      display: inline-block;
-      width: auto !important;
-      padding: 20px 30px !important;
-    }
-    .prev{
-      right: auto;
-      left: 30px;
-    }
-    #page1{
-      position: relative;
-      height: 100%;
-    }
-    #page2, #page3, #page4{
-      display: none;
-      position: relative;
-      height: 100%;
-    }
-    .slide{
-      height:100%;
-    }
-    .slide:target #page1{
-      display: none;
-    }
-    #slide2:target #page2{
-      display: block;
-    }
-    #slide3:target #page3{
-      display: block;
-    }
-    #slide4:target #page4{
-      display: block;
-    }
-    #page4 ul{
-      list-style-type: square;
-      font-size: 0.8em;
-    }
-    </style>
+   
 
+   
+  <style>
+  :root {
+    --prussian-blue: #003049ff;
+    --fire-engine-red: #d62828ff;
+    --orange-wheel: #f77f00ff;
+    --xanthous: #fcbf49ff;
+    --vanilla: #eae2b7ff;
+  }
+
+  body {
+    font-family: 'Roboto', sans-serif;
+    text-shadow: 0px 0px 10px var(--orange-wheel);
+    color: var(--vanilla);
+    font-size: 32px;
+    background-color: var(--prussian-blue);
+  }
+
+  h1 {
+    font-size: 52px;
+    color: var(--xanthous);
+  }
+
+  .dark {
+    background-color: rgba(0, 48, 73, 0.6); /* prussian blue tint */
+    border-radius: 50px;
+    background-repeat: no-repeat;
+    background-position: bottom right;
+    padding: 40px;
+    color: var(--vanilla);
+  }
+
+  .main {
+    width: 1024px;
+    height: 768px;
+    overflow: hidden;
+    background-color: var(--prussian-blue);
+  }
+
+  .menu {
+    width: 256px;
+    height: 768px;
+    text-align: center;
+    background-color: var(--fire-engine-red);
+  }
+
+  .menu ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  a.button {
+    display: inline-block;
+    width: 100%;
+    border-radius: 20px;
+    background-color: var(--orange-wheel);
+    color: var(--vanilla);
+    text-decoration: none;
+    text-align: center;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+  }
+
+  a.button:hover {
+    background-color: var(--xanthous);
+    color: var(--prussian-blue);
+  }
+
+  a.button:active {
+    background-color: var(--fire-engine-red);
+    color: var(--vanilla);
+    box-shadow: 0px 0px 50px var(--orange-wheel);
+  }
+
+  a.imgLink {
+    width: 100%;
+    border-radius: 20px;
+    color: var(--vanilla);
+    text-decoration: none;
+    text-align: center;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    background-color: var(--prussian-blue);
+    border: 3px solid var(--orange-wheel);
+    text-shadow: none;
+    display: block;
+    transition: all 0.3s ease;
+  }
+
+  a.imgLink:hover {
+    border: 3px solid var(--xanthous);
+    background-color: var(--fire-engine-red);
+  }
+
+  .code {
+    white-space: pre;
+    font-size: 0.7em;
+    background-color: var(--prussian-blue);
+    color: var(--vanilla);
+    margin-bottom: 30px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .next, .prev {
+    position: absolute;
+    bottom: 0px;
+    right: 30px;
+    display: inline-block;
+    width: auto !important;
+    padding: 20px 30px !important;
+    background-color: var(--fire-engine-red);
+    color: var(--vanilla);
+    border-radius: 15px;
+  }
+
+  .prev {
+    right: auto;
+    left: 30px;
+  }
+
+  #page1, #page2, #page3, #page4 {
+    position: relative;
+    height: 100%;
+  }
+
+  #page2, #page3, #page4 {
+    display: none;
+  }
+
+  .slide {
+    height: 100%;
+  }
+
+  .slide:target #page1 {
+    display: none;
+  }
+
+  #slide2:target #page2 {
+    display: block;
+  }
+
+  #slide3:target #page3 {
+    display: block;
+  }
+
+  #slide4:target #page4 {
+    display: block;
+  }
+
+  #page4 ul {
+    list-style-type: square;
+    font-size: 0.8em;
+    color: var(--vanilla);
+  }
+</style>
+
+  
+    
+    
  
     <script>
     AFRAME.registerComponent('showbutton', {
@@ -159,25 +222,24 @@
     <div id="slide4" class="slide">
   
       
-  
-		
-		
-		
-		
-		<a-scene>
+    <a-scene >
  
-    <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity> 
+     <a-entity environment="dressing: none; ground: flat; fog: 0; skyType: none; groundColor: #111; gridColor: #202020; grid: 2x2; groundTexture: none"></a-entity>
 
  
+    <!-- <a-entity
+        environment="dressing: none; ground: flat; fog: .97; skyType: color; skyColor: #FAA18F; groundColor: #FEEBE7; gridColor: #F5A627; grid: 2x2; groundTexture: none"
+      ></a-entity>-->
        
       <a-entity id="cameraRig" position="0 2 0">
-        <a-camera id="camera"></a-camera>
+        <a-camera id="camera">
+        </a-camera>
         <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: .screen"></a-entity>
         <a-entity laser-controls raycaster="objects: .screen;"></a-entity>
       </a-entity>
       
       <a-entity id="information hub" position="0 1.7 0">
-      <a-entity id="menuleft" class="screen menu dark" htmlembed="ppu:256" position="-2.712 2.5 -4.476" rotation="0 45 0">
+      <a-entity id="menuright" class="screen menu dark" htmlembed="ppu:256" position="-2.712 2.5 -4.476" rotation="0 45 0">
         <h2>Menu</h2>
         <ul>
           <li><a href="#" class="button">Home</a></li>
@@ -206,13 +268,13 @@
 	          color: #ffffff;
           }
           </div>
-         <div class="code">
-  &lt;a-scene&gt;
-  &lt;a-entity htmlembed&gt;
-  &lt;a href="#home" class="button"&gt;Home&lt;/a&gt;
-  &lt;/a-entity&gt;
-  &lt;/a-scene&gt;
-</div>
+          <div class="code">
+            &lt;a-scene&gt;
+	            &lt;a-entity htmlembed&gt;
+		            &lt;a href="#home" class="button" Home&lt;/a&gt;
+	            &lt;/a-entity&gt;
+            &lt;/a-scene&gt;
+          </div>
           <a href="#" class="button prev">Prev Page</a>
           <a href="#slide3" class="button next">Next Page</a>
         </div>
@@ -248,17 +310,16 @@
           </ul>
           <a href="#slide3" class="button prev">Prev Page</a>
         </div>
-   </a-entity>
-      <a-entity id="menulright" class="screen menu dark" htmlembed="ppu:256" position="2.712 2.5 -4.476" rotation="0 -45 0">
+      </a-entity>
+      <a-entity id="menuleft" class="screen menu dark" htmlembed="ppu:256" position="2.712 2.5 -4.476" rotation="0 -45 0">
         <h2>Links</h2>
          <a class="imgLink" href="https://aframe.io/"><img src="assets/aframe.png" width="80" height="80"><div>A-Frame</div></a>
         <a class="imgLink" href="https://github.com/supereggbert/aframe-htmlembed-component"><img src="assets/github.png" width="80" height="80"><div>Github</div></a>
         <a class="imgLink" href="https://www.npmjs.com/package/aframe-htmlembed-component"><img src="assets/npm.png" width="80" height="80"><div>npm</div></a>
-      </a-entity> </a-entity> 
+      </a-entity>
       <a-box color="#F54927" scale="0.5 0.5 0.5" position="0 0.5 -4" id="box" visible="false"></a-box>
-     
+      </a-entity>
     
-		   
     </a-scene>
     </div>
     </div>
