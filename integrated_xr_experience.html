@@ -527,21 +527,22 @@
             </div>
           </div>`).join('') : '<div class="muted">Your cart is empty.</div>') +
         `<div class="row" style="margin-top:8px; justify-content:space-between">
-          <div style="font-weight:700">Total: R ${total}</div>
+          <div style="font-weight:700">Total</div>
+          <div style="font-weight:700">R ${total}</div>
         </div>
         <button id="checkout" class="btn" style="width:100%; margin-top:8px">Checkout</button>`;
-
+      
       cartEl.querySelectorAll('button[data-remove]').forEach(btn => {
         btn.addEventListener('click', () => {
           CART = CART.filter(i => i.id !== btn.dataset.remove);
           updateCart();
         });
       });
-
+      
       const checkoutBtn = cartEl.querySelector('#checkout');
       if (checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
-          alert('Checkout clicked – connect to payment gateway');
+          alert('Checkout - connect to payment gateway');
         });
       }
     }
@@ -553,49 +554,43 @@
 
     function addToCart(p) {
       const existing = CART.find(i => i.id === p.id);
-      if (existing) {
-        existing.qty += 1;
-      } else {
-        CART.push({ ...p, qty: 1 });
-      }
+      if (existing) existing.qty += 1;
+      else CART.push({ ...p, qty: 1 });
       updateCart();
     }
 
     // Scene switching
     function switchScene(sceneName) {
       // Hide all scenes
-      ['main', 'music', 'browser', 'maps', 'menu'].forEach(name => {
-        const scene = document.getElementById(`scene-${name}`);
-        if (scene) scene.setAttribute('visible', 'false');
+      document.querySelectorAll('[id^="scene-"]').forEach(scene => {
+        scene.setAttribute('visible', 'false');
       });
-
-      // Show selected scene
+      
+      // Show target scene
       const targetScene = document.getElementById(`scene-${sceneName}`);
-      if (targetScene) targetScene.setAttribute('visible', 'true');
-
-      // Update tab states
+      if (targetScene) {
+        targetScene.setAttribute('visible', 'true');
+      }
+      
+      // Update nav tabs
       document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.classList.remove('active');
       });
-      document.querySelector(`[data-scene="${sceneName}"]`).classList.add('active');
+      document.querySelector(`[data-scene="${sceneName}"]`)?.classList.add('active');
     }
 
-    // Event listeners
-    document.getElementById('btnCatalog').onclick = () => catalogEl.classList.toggle('open');
-    document.getElementById('btnCart').onclick = () => cartEl.classList.toggle('open');
-    document.getElementById('btnVR').onclick = () => document.querySelector('a-scene').enterVR();
-
-    // Tab navigation
+    // Navigation event listeners
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        const sceneName = tab.dataset.scene;
-        switchScene(sceneName);
+        const scene = tab.getAttribute('data-scene');
+        switchScene(scene);
       });
     });
 
-    // Initialize
-    renderCatalog();
-    renderCart();
+    // UI event listeners
+    document.getElementById('btnCatalog').onclick = () => catalogEl.classList.toggle('open');
+    document.getElementById('btnCart').onclick = () => cartEl.classList.toggle('open');
+    document.getElementById('btnVR').onclick = () => document.querySelector('a-scene').enterVR();
 
     // A-Frame Components
     AFRAME.registerComponent('store-builder', {
@@ -604,21 +599,21 @@
         positions.forEach((x) => {
           const shelf = document.createElement('a-entity');
           shelf.setAttribute('position', `${x} 0 0`);
-          shelf.setAttribute('shelf', 'rows:3; cols:4');
+          shelf.setAttribute('shelf', 'rows: 2; cols: 3');
           this.el.appendChild(shelf);
         });
 
         const shelves = this.el.querySelectorAll('[shelf]');
         let idx = 0;
         shelves.forEach((shelf) => {
-          for (let i = 0; i < 8 && idx < PRODUCTS.length; i++) {
+          for (let i = 0; i < 6 && idx < PRODUCTS.length; i++) {
             const p = PRODUCTS[idx++];
             const product = document.createElement('a-entity');
-            product.setAttribute('product-box', `id:${p.id}`);
+            product.setAttribute('product-box', `id: ${p.id}`);
             product.classList.add('clickable');
-            const col = i % 4;
-            const row = Math.floor(i / 4);
-            product.setAttribute('position', `${-1.5 + col * 1} ${0.7 + row * 0.8} 0`);
+            const col = i % 3;
+            const row = Math.floor(i / 3);
+            product.setAttribute('position', `${-1 + col * 1} ${0.5 + row * 0.6} 0`);
             product.dataset.pid = p.id;
             shelf.appendChild(product);
           }
@@ -626,7 +621,7 @@
 
         this.clickHandler = (evt) => {
           const target = evt.detail?.intersectedEl || evt.target;
-          const pid = target?.dataset?.pid;
+          const pid = target.dataset?.pid;
           if (pid) {
             const p = PRODUCTS.find(x => x.id === pid);
             if (p) {
@@ -637,33 +632,36 @@
         };
         this.el.sceneEl.addEventListener('click', this.clickHandler);
       },
+      
       remove() {
         this.el.sceneEl.removeEventListener('click', this.clickHandler);
       }
     });
 
     AFRAME.registerComponent('shelf', {
-      schema: { rows: { type: 'int', default: 3 }, cols: { type: 'int', default: 4 } },
+      schema: { rows: { type: 'int', default: 2 }, cols: { type: 'int', default: 3 } },
       init() {
         const rows = this.data.rows;
         for (let r = 0; r < rows; r++) {
           const plank = document.createElement('a-box');
-          plank.setAttribute('width', 4);
-          plank.setAttribute('height', 0.08);
-          plank.setAttribute('depth', 0.6);
+          plank.setAttribute('width', 3);
+          plank.setAttribute('height', 0.05);
+          plank.setAttribute('depth', 0.4);
           plank.setAttribute('color', '#444');
-          plank.setAttribute('position', `0 ${0.6 + r * 0.8} 0`);
+          plank.setAttribute('position', `0 ${0.4 + r * 0.6} 0`);
           this.el.appendChild(plank);
         }
-        const height = rows * 0.8 + 0.6;
-        [-2, 2].forEach(x => {
-          const upright = document.createElement('a-box');
-          upright.setAttribute('width', 0.08);
-          upright.setAttribute('height', height);
-          upright.setAttribute('depth', 0.6);
-          upright.setAttribute('color', '#444');
-          upright.setAttribute('position', `${x} ${height / 2} 0`);
-          this.el.appendChild(upright);
+        
+        // Support posts
+        const height = rows * 0.6 + 0.4;
+        [-1.4, 1.4].forEach(x => {
+          const post = document.createElement('a-box');
+          post.setAttribute('width', 0.05);
+          post.setAttribute('height', height);
+          post.setAttribute('depth', 0.4);
+          post.setAttribute('color', '#444');
+          post.setAttribute('position', `${x} ${height / 2} 0`);
+          this.el.appendChild(post);
         });
       }
     });
@@ -673,32 +671,44 @@
       init() {
         const data = PRODUCTS.find(x => x.id === this.data.id);
         if (!data) return;
-
+        
+        // Product box
         const box = document.createElement('a-box');
-        box.setAttribute('width', 0.8);
-        box.setAttribute('height', 0.4);
-        box.setAttribute('depth', 0.2);
-        box.setAttribute('color', '#007bff');
-        box.setAttribute('opacity', 0.8);
+        box.setAttribute('width', 0.15);
+        box.setAttribute('height', 0.2);
+        box.setAttribute('depth', 0.08);
+        box.setAttribute('color', '#0066cc');
+        box.setAttribute('roughness', 0.4);
+        box.setAttribute('metalness', 0.1);
         this.el.appendChild(box);
-
+        
+        // Label
         const label = document.createElement('a-entity');
-        label.setAttribute('position', '0 0.3 0');
-        label.setAttribute('text', `value: ${data.name}\n${data.category}\nR ${data.price}; align: center; color: #fff; width: 4`);
+        label.setAttribute('position', '0 0.15 0');
+        label.setAttribute('text', `
+          value: ${data.name}\n${data.category}\nR ${data.price};
+          align: center;
+          width: 3;
+          color: #fff;
+          font: roboto
+        `);
         this.el.appendChild(label);
-
+        
         this.el.dataset.pid = data.id;
       }
     });
 
-    // Teleport functionality
+    // Teleportation system
     document.addEventListener('click', (evt) => {
       if (evt.target.classList.contains('teleport')) {
         const camera = document.getElementById('camera');
-        const pos = evt.target.getAttribute('position');
-        if (camera && pos) {
-          camera.setAttribute('position', `${pos.x} 1.6 ${pos.z + 1}`);
-        }
+        const targetPos = evt.target.getAttribute('position');
+        camera.setAttribute('animation', `
+          property: position;
+          to: ${targetPos.x} 1.6 ${targetPos.z};
+          dur: 1000;
+          easing: easeInOutQuad
+        `);
       }
     });
 
@@ -710,13 +720,13 @@
         
         switch(target) {
           case 'wellness':
-            message = 'Wellness Products:\n• Tinctures & Drops\n• Capsules\n• Topicals\n• Pain Relief\n• Sleep & Calming';
+            message = 'Wellness Products:\n• Tinctures & Drops\n• Capsules\n• Topicals\n• Specialty Oils\n\nTargeted for: Pain, Sleep, Anxiety, Daily Balance';
             break;
           case 'vapes':
-            message = 'Vapes & Cartridges:\n• 1ml Cartridges\n• Disposable Vapes\n• Live Resin\n• Multiple Strains\n• Compatible Devices';
+            message = 'Vapes & Cartridges:\n• 1ml Cartridges\n• Disposable Vapes\n• 2ml DUO Devices\n• Compatible Hardware\n\nStrains: Sativa, Indica, Hybrid';
             break;
           case 'contact':
-            message = 'Contact & Support:\n• Customer Service\n• Wholesale Enquiries\n• Product Information\n• Delivery Support\n• General Questions';
+            message = 'Contact & Support:\n• Customer Service\n• Wholesale Inquiries\n• Product Information\n• Delivery Support\n\nDelivery available nationwide in South Africa';
             break;
         }
         
@@ -726,48 +736,38 @@
       }
     });
 
-    // Assistant interaction
-    document.addEventListener('click', (evt) => {
-      if (evt.target.id === 'virtual-assistant') {
-        const responses = [
-          "Welcome to XR Labs! I'm here to help you explore our cannabis products.",
-          "Try switching between different experiences using the tabs above!",
-          "You can browse our product catalog, listen to music, or explore 3D maps.",
-          "Would you like to know more about our wellness products or vapes?",
-          "This integrated experience combines multiple VR environments in one space!"
-        ];
-        const response = responses[Math.floor(Math.random() * responses.length)];
-        
-        const statusEl = document.getElementById('assistant-status');
-        if (statusEl) {
-          statusEl.setAttribute('text', `value: ${response}; align: center; color: #00ff88; width: 6`);
-          
-          setTimeout(() => {
-            statusEl.setAttribute('text', 'value: Click to talk with AI Assistant; align: center; color: #00ff88; width: 6');
-          }, 4000);
-        }
-      }
+    // AI Assistant interaction
+    document.getElementById('virtual-assistant')?.addEventListener('click', () => {
+      const responses = [
+        'Hello! Welcome to XR Labs. How can I help you explore our virtual store today?',
+        'I can guide you through our wellness products, vapes, or help you navigate the different experience areas.',
+        'Try switching between the different tabs above - Music Lounge, Web Browser, 3D Maps, and Menu System!',
+        'Would you like me to recommend some products based on your preferences?'
+      ];
+      const response = responses[Math.floor(Math.random() * responses.length)];
+      
+      document.getElementById('assistant-status').setAttribute('text', 
+        `align: center; value: ${response}; color: #00ff88; width: 6`
+      );
+      
+      setTimeout(() => {
+        document.getElementById('assistant-status').setAttribute('text', 
+          'align: center; value: Click to talk with AI Assistant; color: #00ff88; width: 6'
+        );
+      }, 4000);
     });
 
-    // Start videos on user interaction
-    (() => {
-      const vids = Array.from(document.querySelectorAll('video'));
-      const tryPlayAll = () => vids.forEach(v => v.play().catch(() => {}));
-      window.addEventListener('pointerdown', tryPlayAll, { once: true });
-      window.addEventListener('keydown', tryPlayAll, { once: true });
-    })();
+    // Initialize
+    renderCatalog();
+    renderCart();
 
-    // Close panels when clicking outside
-    document.addEventListener('click', (evt) => {
-      if (!evt.target.closest('.panel') && !evt.target.closest('.btn')) {
-        document.querySelectorAll('.panel').forEach(panel => {
-          panel.classList.remove('open');
-        });
-      }
-    });
-
-    console.log('XR Labs Integrated Experience loaded successfully!');
+    // Start videos on first gesture
+    const tryPlayVideos = () => {
+      document.querySelectorAll('video').forEach(v => v.play().catch(() => {}));
+    };
+    window.addEventListener('pointerdown', tryPlayVideos, { once: true });
+    window.addEventListener('keydown', tryPlayVideos, { once: true });
+    
   </script>
-
 </body>
 </html>
