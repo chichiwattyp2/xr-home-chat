@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>XR Labs - Integrated Experience</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Asimovian&display=swap" rel="stylesheet">
+
+  <!-- Core Libraries -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+  
+  <!-- A-Frame Extensions -->
+  <script src="https://unpkg.com/aframe-controller-cursor-component@0.2.7/dist/aframe-controller-cursor-component.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
+  <script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
+  <script src="https://unpkg.com/aframe-event-set-component@5.0.1/dist/aframe-event-set-component.min.js"></script>
+  
+  <!-- Spotify Integration -->
+  <script src="https://unpkg.com/spotify-web-api-js/dist/spotify-web-api.js"></script>
+  
+  <!-- Maps & 3D -->
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://unpkg.com/aframe-orbit-controls@1.2.0/dist/aframe-orbit-controls.min.js"></script>
+
+  <!-- Google Sheets Integration -->
+  <script>
+    function encodeHtml(str) {
+      const buf = [];
+      for (let i = str.length - 1; i >= 0; i--) buf.unshift(["&#", str[i].charCodeAt(), ";"].join(""));
+      return buf.join("");
+    }
+    const isImageUrl = (u) => /\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(u);
+
+    $(function () {
+      const SHEET_ID = "1fy-ZztZlhwgfz1wH8YGji2zuiiEfV88XyCRBDzLB1AA";
+      const GID = 9;
+      const gvizUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+
+      $.get(gvizUrl, function (text) {
+        const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf(")")));
+        const rows = json.table.rows || [];
+        const listings = [];
+
+        for (let r = 1; r < rows.length; r++) {
+          const cells = rows[r].c || [];
+          const title = cells[0]?.v ?? "";
+          const image = String(cells[1]?.v ?? "");
+          const link = String(cells[2]?.v ?? "");
+          if ((title || image || link) && isImageUrl(image)) {
+            listings.push({ title: encodeHtml(String(title)), image, link });
+          }
+        }
+
+        let r = 0, i = 0, p = 0, h = 0;
+        for (const listing of listings) {
+          const x = i * 2;
+          const y = r * 1.3;
+          $("#browser-container").append(`
+            <a-image crossorigin="anonymous" position="${x} ${y} 0"
+                     width="2" height="1"
+                     link="href: ${listing.link}"
+                     src="${listing.image}"
+                     class="clickable"
+                     event-set__enter="_event: mouseenter; _target: #highlight-${h}; visible: true"
+                     event-set__leave="_event: mouseleave; _target: #highlight-${h}; visible: false">
+              <a-entity geometry="primitive: plane; width: 2; height: .2"
+                        material="color: #111"
+                        text="align:center; value: ${listing.title}"
+                        position="0 -.6 0"></a-entity>
+              <a-plane id="highlight-${h}" width="2.05" height="1.25"
+                       material="shader: flat; color: white;"
+                       position="0 -0.1 -0.01" visible="false"></a-plane>
+            </a-image>
+          `);
+          i++; h++;
+          if (i === 4) { r--; i = 0; p++; }
+          if (p === 3) { r += 20; p = 0; }
+        }
+      });
+    });
+  </script>
+
+  <!-- Spotify Player Component -->
+  <script>
+    (function () {
+      'use strict';
+
+      function $(sel, root) { return (root || document).querySelector(sel); }
+      function on(el, ev, fn, opts) { el && el.addEventListener(ev, fn, opts); }
+      function emit(el, name, detail) { el && el.dispatchEvent(new CustomEvent(name, { detail })); }
+
+      AFRAME.registerComponent('spotify-simple', {
+        init: function () {
+          this.audio = new Audio();
+          this.audio.crossOrigin = 'anonymous';
+          this.audio.style.display = 'none';
+          document.body.appendChild(this.audio);
+
+          this.searchAndPlay = async (query) => {
+            try {
+              const qEnc = encodeURIComponent(query);
+              const resp = await fetch(`https://itunes.apple.com/search?term=${qEnc}&media=music&limit=5`);
+              const data = await resp.json();
+              const item = (data.results || []).find(r => r.previewUrl);
+              if (!item || !item.previewUrl) throw new Error('No preview available');
+              
+              this.audio.src = item.previewUrl;
+              await this.audio.play();
+              
+              this.el.emit('track-loaded', {
+                name: item.trackName,
+                artist: item.artistName,
+                artwork: item.artworkUrl100?.replace('100x100', '300x300') || ''
+              });
+            } catch (err) {
+              console.error('Music search failed:', err);
+            }
+          };
+
+          this.stop = () => {
+            this.audio.pause();
+            this.audio.currentTime = 0;
+          };
+        }
+      });
+
+      AFRAME.registerComponent('music-panel', {
+        init: function () {
+          const panel = document.createElement('a-plane');
+          panel.setAttribute('width', '3');
+          panel.setAttribute('height', '1.5');
+          panel.setAttribute('color', '#222');
+          panel.setAttribute('opacity', '0.9');
+          this.el.appendChild(panel);
+
+          const playBtn = document.createElement('a-circle');
+          playBtn.setAttribute('radius', '0.15');
+          playBtn.setAttribute('color', '#1db954');
+          playBtn.setAttribute('position', '-0.8 -0.3 0.01');
+          playBtn.classList.add('clickable');
+          this.el.appendChild(playBtn);
+
+          const playIcon = document.createElement('a-entity');
+          playIcon.setAttribute('text', 'value: ▶; align: center; color: white; width: 8');
+          playIcon.setAttribute('position', '-0.8 -0.3 0.02');
+          this.el.appendChild(playIcon);
+
+          const stopBtn = document.createElement('a-circle');
+          stopBtn.setAttribute('radius', '0.15');
+          stopBtn.setAttribute('color', '#dc143c');
+          stopBtn.setAttribute('position', '-0.4 -0.3 0.01');
+          stopBtn.classList.add('clickable');
+          this.el.appendChild(stopBtn);
+
+          const stopIcon = document.createElement('a-entity');
+          stopIcon.setAttribute('text', 'value: ⏹; align: center; color: white; width: 8');
+          stopIcon.setAttribute('position', '-0.4 -0.3 0.02');
+          this.el.appendChild(stopIcon);
+
+          const titleText = document.createElement('a-entity');
+          titleText.setAttribute('text', 'value: Ready to play music; align: center; color: white; width: 4');
+          titleText.setAttribute('position', '0.5 0.3 0.01');
+          this.el.appendChild(titleText);
+          this.titleText = titleText;
+
+          const player = document.querySelector('#music-player');
+          
+          playBtn.addEventListener('click', () => {
+            if (player?.components?.['spotify-simple']) {
+              const query = prompt('Enter song or artist name:');
+              if (query) player.components['spotify-simple'].searchAndPlay(query);
+            }
+          });
+
+          stopBtn.addEventListener('click', () => {
+            if (player?.components?.['spotify-simple']) {
+              player.components['spotify-simple'].stop();
+            }
+          });
+
+          if (player) {
+            player.addEventListener('track-loaded', (evt) => {
+              const track = evt.detail;
+              this.titleText.setAttribute('text', `value: ${track.name}\nby ${track.artist}; align: center; color: white; width: 4`);
+            });
+          }
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    html, body { margin: 0; height: 100%; }
+    .ui {
+      position: fixed; inset: 0; pointer-events: none; 
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "DM Sans", Arial, sans-serif; 
+      z-index: 9999;
+    }
+    .topbar {
+      position: absolute; left: 0; right: 0; top: 0; height: 56px; 
+      display: flex; align-items: center; gap: 10px; padding: 0 12px; 
+      color: #fff; pointer-events: auto;
+    }
+    .topbar .glass {
+      backdrop-filter: blur(8px); background: rgba(0,0,0,.35); 
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px; font-weight: 700;
+    }
+    .brand .logo {
+      width: 28px; height: 28px; border-radius: 6px; background: #000; 
+      display: inline-flex; align-items: center; justify-content: center; 
+      color: #0bd3ff; font-weight: 800;
+    }
+    .spacer { flex: 1; }
+    .btn {
+      appearance: none; border: 1px solid rgba(255,255,255,.15); 
+      background: rgba(0,0,0,.5); color: #fff; padding: 8px 12px; 
+      border-radius: 12px; cursor: pointer; pointer-events: auto;
+    }
+    .panel {
+      position: absolute; right: 12px; top: 68px; width: 360px; max-height: 70vh; 
+      overflow: auto; background: rgba(10,10,10,.9); 
+      border: 1px solid rgba(255,255,255,.12); border-radius: 16px; 
+      color: #eee; padding: 12px; display: none; 
+      box-shadow: 0 10px 30px rgba(0,0,0,.4); pointer-events: auto;
+    }
+    .panel.open { display: block; }
+    .item {
+      display: flex; gap: 10px; padding: 10px; border-radius: 12px; 
+      border: 1px solid rgba(255,255,255,.12); margin-bottom: 10px; align-items: center;
+    }
+    .item img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; }
+    .muted { opacity: .8; font-size: 12px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .hint {
+      position: absolute; left: 12px; bottom: 12px; 
+      background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.1); 
+      color: #ddd; padding: 8px 10px; border-radius: 10px; font-size: 13px;
+    }
+    .nav-tabs {
+      position: absolute; left: 12px; top: 68px; display: flex; gap: 8px; pointer-events: auto;
+    }
+    .nav-tab {
+      padding: 8px 16px; background: rgba(0,0,0,.7); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; border-radius: 8px; cursor: pointer; font-size: 12px;
+    }
+    .nav-tab.active { background: rgba(0,123,255,.8); border-color: #007bff; }
+  </style>
+</head>
+
+<body>
+  <!-- 2D UI Overlay -->
+  <div class="ui">
+    <div class="topbar glass">
+      <div class="brand">
+        <div class="logo">X</div> 
+        XR Labs - Integrated Experience
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" id="btnCatalog">Catalog</button>
+      <button class="btn" id="btnCart">Cart (<span id="cartCount">0</span>)</button>
+      <button class="btn" id="btnVR">Enter VR</button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-scene="main">Main Gallery</div>
+      <div class="nav-tab" data-scene="music">Music Lounge</div>
+      <div class="nav-tab" data-scene="browser">Web Browser</div>
+      <div class="nav-tab" data-scene="maps">3D Maps</div>
+      <div class="nav-tab" data-scene="menu">Menu System</div>
+    </div>
+
+    <!-- Panels -->
+    <div id="catalog" class="panel"></div>
+    <div id="cart" class="panel"></div>
+    
+    <div class="hint">
+      Desktop: WASD + mouse • Click to interact • VR: point + trigger • 
+      Use tabs to switch between experiences
+    </div>
+  </div>
+
+  <!-- A-Frame Scene -->
+  <a-scene antialias="true" vr-mode-ui="enabled: true" background="color: #0a0a0a" physics>
+    
+    <!-- Assets -->
+    <a-assets>
+      <a-asset-item id="roboto" src="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-asset-item>
+      <a-asset-item id="assistant-gltf" src="assets/character.glb"></a-asset-item>
+      <img id="dawn" crossorigin="anonymous" src="https://cdn.glitch.com/9f5d1b92-a581-4134-8864-9bd98ff8ed97%2Fdawn.jpeg" />
+      
+      <!-- Audio Assets -->
+      <audio id="piano_c" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fnote%20c%20piano.mp3?v=1565881186559" crossorigin="anonymous"></audio>
+      <audio id="piano_d" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20d.mp3?v=1565883564721" crossorigin="anonymous"></audio>
+      <audio id="piano_e" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20e.mp3?v=1565883566923" crossorigin="anonymous"></audio>
+      <audio id="piano_f" src="https://cdn.glitch.com/f787028e-c9fe-4c7e-be02-7c6f07bca314%2Fpiano%20f.mp3?v=1565883568318" crossorigin="anonymous"></audio>
+      
+      <!-- Video Assets -->
+      <video id="vid1" autoplay loop="true" src="assets/1.mp4"></video>
+      <video id="vid2" autoplay loop="true" src="assets/2.mp4"></video>
+    </a-assets>
+
+    <!-- Camera with Cursor -->
+    <a-entity id="camera" camera position="0 1.6 3" look-controls wasd-controls>
+      <a-cursor rayOrigin="mouse" raycaster="objects: .clickable" material="color: white; opacity: 0.8"></a-cursor>
+    </a-entity>
+
+    <!-- MAIN GALLERY SCENE -->
+    <a-entity id="scene-main" visible="true">
+      <!-- Environment -->
+      <a-sky src="#dawn"></a-sky>
+      <a-entity light="type: ambient; intensity: 0.4; color: #ffffff"></a-entity>
+      <a-entity light="type: directional; intensity: 0.6; color: #ffffff" position="0 3 2"></a-entity>
+
+      <!-- AI Assistant -->
+      <a-entity id="ai-assistant" position="0 0 -3">
+        <a-entity id="virtual-assistant" 
+                  class="clickable" 
+                  gltf-model="#assistant-gltf"
+                  animation-mixer="clip: Idle"
+                  position="0 0 0" 
+                  scale="1 1 1">
+        </a-entity>
+        <a-entity position="0 2.2 0"
+                  text="align: center; value: Click to talk with AI Assistant; color: #00ff88; width: 6"
+                  id="assistant-status"></a-entity>
+      </a-entity>
+
+      <!-- Product Store -->
+      <a-entity id="store" store-builder position="0 0 -6"></a-entity>
+
+      <!-- Teleport Navigation Points -->
+      <a-entity id="teleports">
+        <a-cylinder class="clickable teleport" radius="0.3" height="0.05" 
+                    position="-3 0 -2" color="#ff6b35" opacity="0.8"
+                    animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
+        </a-cylinder>
+        <a-cylinder class="clickable teleport" radius="0.3" height="0.05" 
+                    position="3 0 -2" color="#ff6b35" opacity="0.8"
+                    animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
+        </a-cylinder>
+        <a-cylinder class="clickable teleport" radius="0.3" height="0.05" 
+                    position="0 0 -8" color="#ff6b35" opacity="0.8"
+                    animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
+        </a-cylinder>
+      </a-entity>
+    </a-entity>
+
+    <!-- MUSIC LOUNGE SCENE -->
+    <a-entity id="scene-music" visible="false">
+      <a-sky color="#1a0033"></a-sky>
+      <a-entity light="type: ambient; intensity: 0.3; color: #ff00ff"></a-entity>
+      <a-entity light="type: point; intensity: 0.8; color: #00ffff" position="0 3 0"></a-entity>
+
+      <!-- Music Player -->
+      <a-entity id="music-player" spotify-simple position="0 0 0"></a-entity>
+      <a-entity music-panel position="0 2 -4"></a-entity>
+
+      <!-- Virtual Piano -->
+      <a-entity id="piano" position="0 0.5 -3" scale="0.3 0.3 0.3">
+        <!-- White keys -->
+        <a-box class="clickable" position="-3 0 0" width="0.8" height="0.1" depth="3" color="white"
+               sound="src: #piano_c; on: click"></a-box>
+        <a-box class="clickable" position="-2 0 0" width="0.8" height="0.1" depth="3" color="white"
+               sound="src: #piano_d; on: click"></a-box>
+        <a-box class="clickable" position="-1 0 0" width="0.8" height="0.1" depth="3" color="white"
+               sound="src: #piano_e; on: click"></a-box>
+        <a-box class="clickable" position="0 0 0" width="0.8" height="0.1" depth="3" color="white"
+               sound="src: #piano_f; on: click"></a-box>
+        
+        <!-- Black keys -->
+        <a-box class="clickable" position="-2.5 0.1 -0.5" width="0.5" height="0.1" depth="2" color="black"
+               sound="src: #piano_c; on: click"></a-box>
+        <a-box class="clickable" position="-1.5 0.1 -0.5" width="0.5" height="0.1" depth="2" color="black"
+               sound="src: #piano_d; on: click"></a-box>
+      </a-entity>
+
+      <a-entity position="0 1 -6"
+                text="align: center; value: Music Lounge\nClick piano keys or music panel; color: #fff; width: 8"></a-entity>
+    </a-entity>
+
+    <!-- WEB BROWSER SCENE -->
+    <a-entity id="scene-browser" visible="false">
+      <a-entity environment="dressing: none; ground: flat; fog: 0.1; skyType: atmosphere; groundColor: #111; gridColor: #333"></a-entity>
+      
+      <!-- Browser Content Display -->
+      <a-entity id="browser-display" position="0 1.5 -4">
+        <a-entity id="browser-container" position="-3 2 0" scale="0.2 0.2 0.2"></a-entity>
+        <a-entity position="0 3 0"
+                  text="align: center; value: XR Web Browser\nBrowse content in 3D space; color: #00ff00; width: 8"></a-entity>
+      </a-entity>
+    </a-entity>
+
+    <!-- 3D MAPS SCENE -->
+    <a-entity id="scene-maps" visible="false">
+      <a-sky color="#87CEEB"></a-sky>
+      <a-entity light="type: ambient; intensity: 0.6; color: #ffffff"></a-entity>
+      
+      <!-- Terrain placeholder (simplified) -->
+      <a-entity id="terrain-display" position="0 -2 -10">
+        <!-- Create a mountainous landscape using boxes -->
+        <a-box position="0 0 0" width="20" height="4" depth="20" color="#654321"></a-box>
+        <a-box position="-3 2 -3" width="4" height="8" depth="4" color="#8B4513"></a-box>
+        <a-box position="3 1.5 2" width="3" height="7" depth="3" color="#A0522D"></a-box>
+        <a-box position="-5 1 5" width="5" height="6" depth="5" color="#D2691E"></a-box>
+        
+        <!-- Add some trees -->
+        <a-cylinder position="2 3 -8" radius="0.3" height="3" color="#228B22"></a-cylinder>
+        <a-cylinder position="-4 3 -6" radius="0.3" height="3" color="#228B22"></a-cylinder>
+        <a-cylinder position="6 3 -4" radius="0.3" height="3" color="#228B22"></a-cylinder>
+      </a-entity>
+
+      <a-entity position="0 3 -5"
+                text="align: center; value: 3D Terrain Maps\nExplore geographic data in VR; color: #fff; width: 8"></a-entity>
+    </a-entity>
+
+    <!-- MENU SYSTEM SCENE -->
+    <a-entity id="scene-menu" visible="false">
+      <a-sky color="#222222"></a-sky>
+      <a-entity light="type: ambient; intensity: 0.5; color: #ffffff"></a-entity>
+
+      <!-- 3D Menu Panels -->
+      <a-entity id="menu-system" position="0 2 -4">
+        <!-- Main Menu Panel -->
+        <a-plane width="4" height="3" color="#333" position="0 0 0" opacity="0.9">
+          <a-entity text="align: center; value: iLabs Cannabis\nMain Menu; color: #fff; width: 8" 
+                    position="0 0.8 0.01"></a-entity>
+          
+          <!-- Menu Buttons -->
+          <a-box class="clickable menu-btn" width="3" height="0.4" depth="0.1" color="#007bff" 
+                 position="0 0.2 0.01" data-target="wellness">
+            <a-entity text="align: center; value: Wellness Products; color: #fff; width: 12" 
+                      position="0 0 0.01"></a-entity>
+          </a-box>
+          
+          <a-box class="clickable menu-btn" width="3" height="0.4" depth="0.1" color="#28a745" 
+                 position="0 -0.3 0.01" data-target="vapes">
+            <a-entity text="align: center; value: Vapes & Cartridges; color: #fff; width: 12" 
+                      position="0 0 0.01"></a-entity>
+          </a-box>
+          
+          <a-box class="clickable menu-btn" width="3" height="0.4" depth="0.1" color="#ffc107" 
+                 position="0 -0.8 0.01" data-target="contact">
+            <a-entity text="align: center; value: Contact & Support; color: #000; width: 12" 
+                      position="0 0 0.01"></a-entity>
+          </a-box>
+        </a-plane>
+
+        <!-- Side Info Panels -->
+        <a-plane width="2.5" height="3" color="#444" position="-3.5 0 0" opacity="0.8"
+                 text="align: center; value: Categories:\n• Tinctures\n• Edibles\n• Topicals\n• Capsules\n• Specialty Items; color: #fff; width: 6">
+        </a-plane>
+        
+        <a-plane width="2.5" height="3" color="#444" position="3.5 0 0" opacity="0.8"
+                 text="align: center; value: Features:\n• Nationwide Delivery\n• Premium Quality\n• Lab Tested\n• Expert Support\n• Discreet Packaging; color: #fff; width: 6">
+        </a-plane>
+      </a-entity>
+    </a-entity>
+
+    <!-- Ground plane for all scenes -->
+    <a-plane position="0 -0.5 0" rotation="-90 0 0" width="50" height="50" 
+             material="color: #333; transparent: true; opacity: 0.1"></a-plane>
+
+  </a-scene>
+
+  <script>
+    // Product data
+    const PRODUCTS = [
+      { id: 'awaken-15', name: 'Awaken (15ml)', price: 399, category: 'Tincture', 
+        strength: '1:1 THC:CBD', img: 'https://images.unsplash.com/photo-1585386959984-a41552231605?q=80&w=400&auto=format&fit=crop' },
+      { id: 'awaken-30', name: 'Awaken (30ml)', price: 699, category: 'Tincture', 
+        strength: '1:1 THC:CBD', img: 'https://images.unsplash.com/photo-1611077543631-b002bc36fdae?q=80&w=400&auto=format&fit=crop' },
+      { id: 'traveler-gummy', name: 'Traveler Gummies (10pc)', price: 349, category: 'Edible', 
+        strength: '10mg/pc', img: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=400&auto=format&fit=crop' },
+      { id: 'big-cookie', name: 'Blom Big Cookie (60mg)', price: 129, category: 'Edible', 
+        strength: '60mg', img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop' }
+    ];
+
+    // Cart management
+    let CART = [];
+    const catalogEl = document.getElementById('catalog');
+    const cartEl = document.getElementById('cart');
+    const cartCount = document.getElementById('cartCount');
+
+    function renderCatalog() {
+      catalogEl.innerHTML = '<h3>Product Catalog</h3>' + PRODUCTS.map(p => `
+        <div class="item">
+          <img src="${p.img}" alt="${p.name}"/>
+          <div style="flex:1">
+            <div style="font-weight:600">${p.name}</div>
+            <div class="muted">${p.category} · ${p.strength || ''}</div>
+          </div>
+          <div class="row">
+            <div style="font-weight:700">R ${p.price}</div>
+            <button class="btn" data-id="${p.id}">Add to Cart</button>
+          </div>
+        </div>`).join('');
+      
+      catalogEl.querySelectorAll('button[data-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const p = PRODUCTS.find(x => x.id === btn.dataset.id);
+          if (p) addToCart(p);
+        });
+      });
+    }
+
+    function renderCart() {
+      const total = CART.reduce((s, i) => s + i.price * i.qty, 0);
+      cartEl.innerHTML = `<h3>Shopping Cart</h3>` + 
+        (CART.length ? CART.map(i => `
+          <div class="item">
+            <img src="${i.img}" alt="${i.name}"/>
+            <div style="flex:1">
+              <div style="font-weight:600">${i.name}</div>
+              <div class="muted">Qty: ${i.qty}</div>
+            </div>
+            <div class="row">
+              <div style="font-weight:700">R ${i.price * i.qty}</div>
+              <button class="btn" data-remove="${i.id}">Remove</button>
+            </div>
+          </div>`).join('') : '<div class="muted">Your cart is empty.</div>') +
+        `<div class="row" style="margin-top:8px; justify-content:space-between">
+          <div style="font-weight:700">Total: R ${total}</div>
+        </div>
+        <button id="checkout" class="btn" style="width:100%; margin-top:8px">Checkout</button>`;
+
+      cartEl.querySelectorAll('button[data-remove]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          CART = CART.filter(i => i.id !== btn.dataset.remove);
+          updateCart();
+        });
+      });
+
+      const checkoutBtn = cartEl.querySelector('#checkout');
+      if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+          alert('Checkout clicked – connect to payment gateway');
+        });
+      }
+    }
+
+    function updateCart() {
+      cartCount.textContent = CART.reduce((s, i) => s + i.qty, 0);
+      renderCart();
+    }
+
+    function addToCart(p) {
+      const existing = CART.find(i => i.id === p.id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        CART.push({ ...p, qty: 1 });
+      }
+      updateCart();
+    }
+
+    // Scene switching
+    function switchScene(sceneName) {
+      // Hide all scenes
+      ['main', 'music', 'browser', 'maps', 'menu'].forEach(name => {
+        const scene = document.getElementById(`scene-${name}`);
+        if (scene) scene.setAttribute('visible', 'false');
+      });
+
+      // Show selected scene
+      const targetScene = document.getElementById(`scene-${sceneName}`);
+      if (targetScene) targetScene.setAttribute('visible', 'true');
+
+      // Update tab states
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelector(`[data-scene="${sceneName}"]`).classList.add('active');
+    }
+
+    // Event listeners
+    document.getElementById('btnCatalog').onclick = () => catalogEl.classList.toggle('open');
+    document.getElementById('btnCart').onclick = () => cartEl.classList.toggle('open');
+    document.getElementById('btnVR').onclick = () => document.querySelector('a-scene').enterVR();
+
+    // Tab navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const sceneName = tab.dataset.scene;
+        switchScene(sceneName);
+      });
+    });
+
+    // Initialize
+    renderCatalog();
+    renderCart();
+
+    // A-Frame Components
+    AFRAME.registerComponent('store-builder', {
+      init() {
+        const positions = [-4, 0, 4];
+        positions.forEach((x) => {
+          const shelf = document.createElement('a-entity');
+          shelf.setAttribute('position', `${x} 0 0`);
+          shelf.setAttribute('shelf', 'rows:3; cols:4');
+          this.el.appendChild(shelf);
+        });
+
+        const shelves = this.el.querySelectorAll('[shelf]');
+        let idx = 0;
+        shelves.forEach((shelf) => {
+          for (let i = 0; i < 8 && idx < PRODUCTS.length; i++) {
+            const p = PRODUCTS[idx++];
+            const product = document.createElement('a-entity');
+            product.setAttribute('product-box', `id:${p.id}`);
+            product.classList.add('clickable');
+            const col = i % 4;
+            const row = Math.floor(i / 4);
+            product.setAttribute('position', `${-1.5 + col * 1} ${0.7 + row * 0.8} 0`);
+            product.dataset.pid = p.id;
+            shelf.appendChild(product);
+          }
+        });
+
+        this.clickHandler = (evt) => {
+          const target = evt.detail?.intersectedEl || evt.target;
+          const pid = target?.dataset?.pid;
+          if (pid) {
+            const p = PRODUCTS.find(x => x.id === pid);
+            if (p) {
+              const ok = confirm(`${p.name}\n${p.category} • ${p.strength}\nPrice: R ${p.price}\n\nAdd to cart?`);
+              if (ok) addToCart(p);
+            }
+          }
+        };
+        this.el.sceneEl.addEventListener('click', this.clickHandler);
+      },
+      remove() {
+        this.el.sceneEl.removeEventListener('click', this.clickHandler);
+      }
+    });
+
+    AFRAME.registerComponent('shelf', {
+      schema: { rows: { type: 'int', default: 3 }, cols: { type: 'int', default: 4 } },
+      init() {
+        const rows = this.data.rows;
+        for (let r = 0; r < rows; r++) {
+          const plank = document.createElement('a-box');
+          plank.setAttribute('width', 4);
+          plank.setAttribute('height', 0.08);
+          plank.setAttribute('depth', 0.6);
+          plank.setAttribute('color', '#444');
+          plank.setAttribute('position', `0 ${0.6 + r * 0.8} 0`);
+          this.el.appendChild(plank);
+        }
+        const height = rows * 0.8 + 0.6;
+        [-2, 2].forEach(x => {
+          const upright = document.createElement('a-box');
+          upright.setAttribute('width', 0.08);
+          upright.setAttribute('height', height);
+          upright.setAttribute('depth', 0.6);
+          upright.setAttribute('color', '#444');
+          upright.setAttribute('position', `${x} ${height / 2} 0`);
+          this.el.appendChild(upright);
+        });
+      }
+    });
+
+    AFRAME.registerComponent('product-box', {
+      schema: { id: { type: 'string' } },
+      init() {
+        const data = PRODUCTS.find(x => x.id === this.data.id);
+        if (!data) return;
+
+        const box = document.createElement('a-box');
+        box.setAttribute('width', 0.8);
+        box.setAttribute('height', 0.4);
+        box.setAttribute('depth', 0.2);
+        box.setAttribute('color', '#007bff');
+        box.setAttribute('opacity', 0.8);
+        this.el.appendChild(box);
+
+        const label = document.createElement('a-entity');
+        label.setAttribute('position', '0 0.3 0');
+        label.setAttribute('text', `value: ${data.name}\n${data.category}\nR ${data.price}; align: center; color: #fff; width: 4`);
+        this.el.appendChild(label);
+
+        this.el.dataset.pid = data.id;
+      }
+    });
+
+    // Teleport functionality
+    document.addEventListener('click', (evt) => {
+      if (evt.target.classList.contains('teleport')) {
+        const camera = document.getElementById('camera');
+        const pos = evt.target.getAttribute('position');
+        if (camera && pos) {
+          camera.setAttribute('position', `${pos.x} 1.6 ${pos.z + 1}`);
+        }
+      }
+    });
+
+    // Menu system interactions
+    document.addEventListener('click', (evt) => {
+      if (evt.target.classList.contains('menu-btn')) {
+        const target = evt.target.dataset.target;
+        let message = '';
+        
+        switch(target) {
+          case 'wellness':
+            message = 'Wellness Products:\n• Tinctures & Drops\n• Capsules\n• Topicals\n• Pain Relief\n• Sleep & Calming';
+            break;
+          case 'vapes':
+            message = 'Vapes & Cartridges:\n• 1ml Cartridges\n• Disposable Vapes\n• Live Resin\n• Multiple Strains\n• Compatible Devices';
+            break;
+          case 'contact':
+            message = 'Contact & Support:\n• Customer Service\n• Wholesale Enquiries\n• Product Information\n• Delivery Support\n• General Questions';
+            break;
+        }
+        
+        if (message) {
+          alert(message);
+        }
+      }
+    });
+
+    // Assistant interaction
+    document.addEventListener('click', (evt) => {
+      if (evt.target.id === 'virtual-assistant') {
+        const responses = [
+          "Welcome to XR Labs! I'm here to help you explore our cannabis products.",
+          "Try switching between different experiences using the tabs above!",
+          "You can browse our product catalog, listen to music, or explore 3D maps.",
+          "Would you like to know more about our wellness products or vapes?",
+          "This integrated experience combines multiple VR environments in one space!"
+        ];
+        const response = responses[Math.floor(Math.random() * responses.length)];
+        
+        const statusEl = document.getElementById('assistant-status');
+        if (statusEl) {
+          statusEl.setAttribute('text', `value: ${response}; align: center; color: #00ff88; width: 6`);
+          
+          setTimeout(() => {
+            statusEl.setAttribute('text', 'value: Click to talk with AI Assistant; align: center; color: #00ff88; width: 6');
+          }, 4000);
+        }
+      }
+    });
+
+    // Start videos on user interaction
+    (() => {
+      const vids = Array.from(document.querySelectorAll('video'));
+      const tryPlayAll = () => vids.forEach(v => v.play().catch(() => {}));
+      window.addEventListener('pointerdown', tryPlayAll, { once: true });
+      window.addEventListener('keydown', tryPlayAll, { once: true });
+    })();
+
+    // Close panels when clicking outside
+    document.addEventListener('click', (evt) => {
+      if (!evt.target.closest('.panel') && !evt.target.closest('.btn')) {
+        document.querySelectorAll('.panel').forEach(panel => {
+          panel.classList.remove('open');
+        });
+      }
+    });
+
+    console.log('XR Labs Integrated Experience loaded successfully!');
+  </script>
+
+</body>
+</html>
